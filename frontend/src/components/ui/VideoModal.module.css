@@ -1,0 +1,344 @@
+/* src/components/ui/VideoModal.module.css */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    /* CORREÇÃO: Adicionar padding top para compensar o menu */
+    padding: 90px 2rem 2rem 2rem; /* 80px no topo para o menu */
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modalContainer {
+    background: var(--black);
+    border-radius: 16px;
+    /* CORREÇÃO: Reduzir altura máxima */
+    max-width: 90vw;
+    max-height: calc(100vh - 100px); /* Deixar espaço para o menu */
+    height: auto;
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    /* CORREÇÃO: Centralizar verticalmente */
+    margin-top: auto;
+    margin-bottom: auto;
+    /* CORREÇÃO: Garantir que eventos de clique não passem através do container */
+    pointer-events: auto;
+}
+
+/* Cabeçalho */
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    flex-shrink: 0; /* Não deixar encolher */
+}
+
+.headerContent {
+    padding: 1rem 1.5rem;
+}
+
+.modalTitle {
+    font-size: 1rem; /* Reduzido de 1.5rem */
+    font-weight: 600;
+    color: white;
+    margin: 0 0 0.2rem 0;
+    line-height: 1.2;
+}
+
+.modalCategory {
+    font-size: 0.85rem; /* Reduzido de 0.9rem */
+    color: rgba(255, 255, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+    margin: 0;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    width: 36px; /* Reduzido de 40px */
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    transition: all 0.2s ease;
+    position: relative;
+    z-index: 10002;
+    flex-shrink: 0;
+    margin: 1rem 1.5rem; /* Adicionar margem para alinhamento */
+}
+
+.closeButton:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.closeButton svg {
+    width: 20px; /* Reduzido de 24px */
+    height: 20px;
+}
+
+/* Container do vídeo */
+.videoContainer {
+    position: relative;
+    width: 100%;
+    background: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 0;
+    /* CORREÇÃO: Limitar altura */
+    max-height: calc(100vh - 250px); /* Deixar espaço para header e info */
+    /* CORREÇÃO: Garantir que eventos de clique passem para o vídeo */
+    pointer-events: auto;
+}
+
+.video {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    position: relative;
+    /* CORREÇÃO: Garantir que o vídeo e seus controlos recebam eventos de clique */
+    pointer-events: auto;
+    /* CORREÇÃO: Garantir z-index adequado para os controlos */
+    z-index: 1;
+}
+
+/* CORREÇÃO: Estilos específicos para os controlos do vídeo */
+.video::-webkit-media-controls-panel {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+}
+
+.video::-webkit-media-controls-play-button,
+.video::-webkit-media-controls-timeline,
+.video::-webkit-media-controls-volume-slider,
+.video::-webkit-media-controls-mute-button,
+.video::-webkit-media-controls-fullscreen-button {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+}
+
+/* Informações do projeto */
+.projectInfo {
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    flex-shrink: 0; /* Não deixar encolher */
+    max-height: 150px; /* Limitar altura */
+    overflow-y: auto; /* Scroll se necessário */
+}
+
+.infoContent {
+    padding: 1rem 1.5rem;
+}
+
+.description {
+    font-size: 0.95rem; /* Reduzido de 1rem */
+    line-height: 1.5; /* Reduzido de 1.6 */
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 0.75rem 0; /* Reduzido */
+}
+
+.projectInfo .description:last-child {
+    margin-bottom: 0;
+}
+
+.technologies {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Reduzido de 1rem */
+    flex-wrap: wrap;
+}
+
+.techLabel {
+    font-size: 0.8rem; /* Reduzido de 0.85rem */
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+}
+
+.techList {
+    display: flex;
+    gap: 0.4rem; /* Reduzido de 0.5rem */
+    flex-wrap: wrap;
+}
+
+.techTag {
+    font-size: 0.7rem; /* Reduzido de 0.75rem */
+    background: var(--accent);
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 10px; /* Reduzido de 12px */
+    font-weight: 500;
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95); /* Menos movimento */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Scrollbar personalizada para info */
+.projectInfo::-webkit-scrollbar {
+    width: 4px;
+}
+
+.projectInfo::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+}
+
+.projectInfo::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+}
+
+.projectInfo::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .modalOverlay {
+        padding: 60px 1rem 1rem 1rem; /* Menos padding top no mobile */
+    }
+    
+    .modalContainer {
+        max-height: calc(100vh - 80px);
+        max-width: 100%;
+    }
+    
+    .modalHeader {
+        padding: 1rem 1.25rem;
+    }
+    
+    .modalTitle {
+        font-size: 1.15rem;
+    }
+    
+    .videoContainer {
+        max-height: calc(100vh - 220px);
+    }
+    
+    .video {
+        max-height: 100%;
+    }
+    
+    .projectInfo {
+        padding: 0.75rem 1.25rem;
+        max-height: 130px;
+    }
+    
+    .description {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+}
+
+@media (max-width: 480px) {
+    .modalOverlay {
+        padding: 50px 0.5rem 0.5rem 0.5rem;
+    }
+    
+    .modalContainer {
+        max-height: calc(100vh - 60px);
+        border-radius: 12px;
+    }
+    
+    .modalHeader {
+        padding: 0.75rem 1rem;
+    }
+    
+    .modalTitle {
+        font-size: 1rem;
+    }
+    
+    .modalCategory {
+        font-size: 0.75rem;
+    }
+    
+    .closeButton {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .closeButton svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .videoContainer {
+        max-height: calc(100vh - 200px);
+    }
+    
+    .projectInfo {
+        padding: 0.5rem 0.75rem 0.75rem;
+        max-height: 100px;
+    }
+    
+    .description {
+        font-size: 0.8rem;
+        line-height: 1.35;
+        margin-bottom: 0.5rem;
+    }
+    
+    .techTag {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+    }
+}
+
+/* Acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+    .modalOverlay,
+    .modalContainer {
+        animation: none;
+    }
+    
+    .closeButton {
+        transition: none;
+    }
+}
+
+

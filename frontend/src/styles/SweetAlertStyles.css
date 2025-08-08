@@ -1,0 +1,239 @@
+/* src/styles/SweetAlertStyles.css */
+
+/* === ESTILOS PERSONALIZADOS PARA SWEETALERT2 === */
+
+/* Container principal */
+.swal-popup {
+    border-radius: 12px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    border: none !important;
+}
+
+/* Título */
+.swal-title {
+    font-size: 1.5rem !important;
+    font-weight: 600 !important;
+    color: #2d3748 !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Conteúdo/texto */
+.swal-content {
+    font-size: 1rem !important;
+    color: #4a5568 !important;
+    line-height: 1.5 !important;
+}
+
+/* Botões personalizados */
+.swal-confirm-btn {
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 500 !important;
+    margin: 0.25rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.swal-cancel-btn {
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 500 !important;
+    margin: 0.25rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.swal-deny-btn {
+    border-radius: 8px !important;
+    padding: 0.75rem 1.5rem !important;
+    font-weight: 500 !important;
+    margin: 0.25rem !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Hover nos botões */
+.swal-confirm-btn:hover,
+.swal-cancel-btn:hover,
+.swal-deny-btn:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ícones */
+.swal2-icon {
+    border: none !important;
+    margin: 1.5rem auto 1rem !important;
+}
+
+.swal2-icon.swal2-success {
+    color: #28a745 !important;
+}
+
+.swal2-icon.swal2-error {
+    color: #dc3545 !important;
+}
+
+.swal2-icon.swal2-warning {
+    color: #ffc107 !important;
+}
+
+.swal2-icon.swal2-info {
+    color: #17a2b8 !important;
+}
+
+.swal2-icon.swal2-question {
+    color: #6f42c1 !important;
+}
+
+/* Progress bar */
+.swal2-timer-progress-bar {
+    background: rgba(0, 123, 255, 0.8) !important;
+    height: 3px !important;
+}
+
+/* === ESTILOS PARA TOASTS === */
+.swal-toast-popup {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    padding: 1rem 1.5rem !important;
+    min-width: 300px !important;
+    max-width: 450px !important;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.swal-toast-title {
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    color: #2d3748 !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+}
+
+/* Toast específicos por tipo */
+.swal2-toast.swal2-show {
+    animation: swalToastSlideIn 0.3s ease-out !important;
+}
+
+.swal2-toast.swal2-hide {
+    animation: swalToastSlideOut 0.3s ease-in !important;
+}
+
+/* Animações personalizadas */
+@keyframes swalToastSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes swalToastSlideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* === LOADING CUSTOMIZADO === */
+.swal-loading-popup {
+    border-radius: 12px !important;
+    padding: 2rem !important;
+}
+
+.swal2-loader {
+    border-color: #007bff transparent #007bff transparent !important;
+}
+
+/* === INPUTS === */
+.swal2-input {
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    transition: border-color 0.3s ease !important;
+}
+
+.swal2-input:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1) !important;
+    outline: none !important;
+}
+
+/* === RESPONSIVIDADE === */
+@media (max-width: 768px) {
+    .swal-popup {
+        margin: 1rem !important;
+        width: calc(100% - 2rem) !important;
+        max-width: none !important;
+    }
+    
+    .swal-title {
+        font-size: 1.25rem !important;
+    }
+    
+    .swal-content {
+        font-size: 0.9rem !important;
+    }
+    
+    .swal-toast-popup {
+        margin: 0.5rem !important;
+        min-width: calc(100% - 1rem) !important;
+        max-width: calc(100% - 1rem) !important;
+    }
+}
+
+/* === DARK MODE (OPCIONAL) === */
+@media (prefers-color-scheme: dark) {
+    .swal-popup {
+        background: #2d3748 !important;
+        color: #e2e8f0 !important;
+    }
+    
+    .swal-title {
+        color: #f7fafc !important;
+    }
+    
+    .swal-content {
+        color: #cbd5e0 !important;
+    }
+    
+    .swal2-input {
+        background: #4a5568 !important;
+        border-color: #718096 !important;
+        color: #e2e8f0 !important;
+    }
+}
+
+/* === SOBREPOSIÇÃO PERSONALIZADA === */
+.swal2-backdrop-show {
+    background: rgba(0, 0, 0, 0.4) !important;
+    backdrop-filter: blur(2px) !important;
+}
+
+/* === AJUSTES FINAIS === */
+.swal2-popup.swal2-toast .swal2-icon {
+    margin: 0.5rem !important;
+}
+
+.swal2-popup .swal2-content {
+    text-align: center !important;
+}
+
+/* Cores dos ícones nos toasts */
+.swal2-toast .swal2-icon.swal2-success {
+    background: rgba(40, 167, 69, 0.1) !important;
+    color: #28a745 !important;
+}
+
+.swal2-toast .swal2-icon.swal2-error {
+    background: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}

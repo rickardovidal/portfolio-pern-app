@@ -1,0 +1,36 @@
+.border-start {
+    border-left: 0.25rem solid !important;
+}
+
+.border-4 {
+    border-width: 0.25rem !important;
+}
+
+.progress-sm {
+    height: 0.5rem;
+}
+
+.text-xs {
+    font-size: 0.75rem;
+}
+
+.fa-2x {
+    font-size: 2em;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-success:hover,
+.btn-outline-info:hover,
+.btn-outline-warning:hover {
+    transform: translateY(-1px);
+}
+;

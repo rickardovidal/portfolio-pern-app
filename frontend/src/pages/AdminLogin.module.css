@@ -1,0 +1,229 @@
+/* AdminLogin.module.css */
+
+.loginContainer {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.loginBox {
+    background: white;
+    padding: 3rem 2.5rem;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.loginForm {
+    margin-top: 2rem;
+}
+
+.formGroup {
+    margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.formGroup input {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.formGroup input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.formGroup input:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.loginButton {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    border-radius: 8px;
+    padding: 0.875rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.loginButton:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.loginButton:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.3);
+}
+
+.loginButton:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Efeito nos ícones */
+.formGroup i,
+.loginButton i {
+    color: #007bff;
+}
+
+/* Estilos responsivos */
+@media (max-width: 576px) {
+    .loginContainer {
+        padding: 15px;
+    }
+    
+    .loginBox {
+        padding: 2rem 1.5rem;
+        margin: 10px;
+    }
+    
+    .formGroup input {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.95rem;
+    }
+    
+    .loginButton {
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+    }
+}
+
+/* Animação para os alertas */
+.alert {
+    animation: alertSlide 0.3s ease-out;
+}
+
+@keyframes alertSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estilos para links */
+.btn-link {
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+    color: #0056b3 !important;
+}
+
+/* Loading spinner customizado */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Hover effects nos campos */
+.formGroup input:hover:not(:disabled) {
+    border-color: #ced4da;
+}
+
+/* Estilo para informações adicionais */
+hr {
+    margin: 2rem 0;
+    border-color: #e9ecef;
+}
+
+small {
+    line-height: 1.4;
+}
+
+/* Efeito focus nos botões */
+.btn:focus,
+.btn-close:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Melhorias na tipografia */
+h2 {
+    color: #343a40;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+p.text-muted {
+    font-size: 0.95rem;
+    color: #6c757d !important;
+}
+
+/* Estilo para o ícone principal */
+.bi-shield-lock {
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+/* Efeitos de transição suaves */
+* {
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Estilo para o container de alerta */
+.alert {
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.alert .bi {
+    opacity: 0.8;
+}
+
+/* Personalização do botão close */
+.btn-close {
+    background-size: 0.75em;
+    opacity: 0.7;
+}
+
+.btn-close:hover {
+    opacity: 1;
+}

@@ -1,0 +1,220 @@
+/* src/components/ui/WorkCarousel.module.css */
+
+.heroVisual {
+    height: 600px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.workCarousel {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.carouselItem {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+
+
+.carouselItem.active {
+    opacity: 1;
+}
+
+/* Media adaptativo por tipo e aspect ratio */
+.carouselMedia {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.3s ease;
+}
+
+/* Ajustes específicos por aspect ratio */
+.carouselItem[data-ratio="16:9"] .carouselMedia {
+    max-width: 100%;
+    max-height: 85%;
+}
+
+.carouselItem[data-ratio="3:4"] .carouselMedia,
+.carouselItem[data-ratio="9:16"] .carouselMedia {
+    max-width: 60%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+.carouselItem[data-ratio="1:1"] .carouselMedia {
+    max-width: 80%;
+    max-height: 80%;
+}
+
+/* Hover effect */
+.carouselItem:hover .carouselMedia {
+    transform: scale(1.02);
+}
+
+/* Video preview com play button */
+.videoPreview {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playIcon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.playIcon svg {
+    width: 32px;
+    height: 32px;
+    margin-left: 4px; /* Centra visualmente o triângulo */
+}
+
+.carouselItem:hover .playIcon {
+    transform: translate(-50%, -50%) scale(1.1);
+    background: rgba(0, 0, 0, 0.8);
+}
+
+/* Overlay com informações */
+.slideOverlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 3rem 2rem 2rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.carouselItem:hover .slideOverlay {
+    opacity: 1;
+}
+
+.slideInfo {
+    color: white;
+    text-align: center;
+}
+
+.slideCategory {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.8);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.slideTitle {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 0;
+    line-height: 1.3;
+}
+
+/* Indicadores */
+.carouselIndicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 10;
+}
+
+.indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.indicator:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(1.1);
+}
+
+.indicator.active {
+    background: var(--accent, #007bff);
+    transform: scale(1.2);
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .heroVisual {
+        height: 400px;
+    }
+    
+    .carouselItem[data-ratio="3:4"] .carouselMedia,
+    .carouselItem[data-ratio="9:16"] .carouselMedia {
+        max-width: 70%;
+    }
+    
+    .playIcon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .playIcon svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .slideTitle {
+        font-size: 1rem;
+    }
+    
+    .slideOverlay {
+        padding: 2rem 1.5rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .heroVisual {
+        height: 350px;
+    }
+    
+    .indicator {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .carouselIndicators {
+        gap: 8px;
+    }
+}
