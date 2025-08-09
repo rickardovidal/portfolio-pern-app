@@ -13,8 +13,8 @@ const AdminLogin = () => {
         // Verificar se já está autenticado
         const token = localStorage.getItem('adminToken');
         if (token) {
-            // ✅ CORRIGIDO - Usar POST em vez de GET
-            api.post('/auth/verify')
+            // ✅ CORRIGIDO - Verificar token através do middleware (GET qualquer rota protegida)
+            api.get('/clientes')
                 .then(() => {
                     // Token válido, redirecionar para dashboard
                     window.location.href = '/admin-dashboard';
@@ -39,13 +39,14 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            // ✅ ENDPOINT CORRETO
+            // ✅ MANTIDO - Endpoint correto
             const response = await api.post('/auth/login', {
                 username: username.trim(),
                 password: password
             });
 
-            console.log('Resposta do login:', response.data); // Para debug
+            // ✅ DEBUG TEMPORÁRIO - Remove depois de funcionar
+            console.log('Login response:', response.data);
 
             if (response.data.success && response.data.token) {
                 // Guardar token no localStorage
@@ -54,18 +55,14 @@ const AdminLogin = () => {
                 // Feedback ao utilizador
                 setError('');
                 
-                // Pequeno delay para mostrar que o login foi bem-sucedido
-                setTimeout(() => {
-                    window.location.href = '/admin-dashboard';
-                }, 500);
+                // Redirecionar imediatamente
+                window.location.href = '/admin-dashboard';
                 
             } else {
                 setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
             }
         } catch (error) {
-            console.error('Erro completo no login:', error);
-            console.error('Status:', error.response?.status);
-            console.error('Data:', error.response?.data);
+            console.error('Erro no login:', error);
             
             if (error.response?.status === 401) {
                 setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
