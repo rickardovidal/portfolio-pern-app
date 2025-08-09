@@ -4,23 +4,32 @@ import styles from './AdminLogin.module.css';
 import NotificationService from '../services/NotificationService';
 
 const AdminLogin = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('admin'); // ✅ Pre-filled para teste
+    const [password, setPassword] = useState('odracirladiv'); // ✅ Pre-filled para teste
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [debugInfo, setDebugInfo] = useState(''); // ✅ Estado para mostrar debug na tela
 
     useEffect(() => {
+        // ✅ Log persistente da configuração
+        const baseURL = api.defaults.baseURL;
+        console.error('🔧 API Base URL:', baseURL);
+        setDebugInfo(prev => prev + `\n🔧 API Base URL: ${baseURL}`);
+        
         // Verificar se já está autenticado
         const token = localStorage.getItem('adminToken');
         if (token) {
-            // ✅ CORRIGIDO - Verificar token através do middleware (GET qualquer rota protegida)
+            console.error('🔍 Token encontrado, verificando...');
+            setDebugInfo(prev => prev + '\n🔍 Token encontrado, verificando...');
+            
             api.get('/clientes')
                 .then(() => {
-                    // Token válido, redirecionar para dashboard
+                    console.error('✅ Token válido - redirecionando');
                     window.location.href = '/admin-dashboard';
                 })
-                .catch(() => {
-                    // Token inválido, remover do localStorage
+                .catch((err) => {
+                    console.error('❌ Token inválido:', err);
+                    setDebugInfo(prev => prev + `\n❌ Token inválido: ${err.message}`);
                     localStorage.removeItem('adminToken');
                 });
         }
@@ -29,9 +38,18 @@ const AdminLogin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
+        // ✅ Prevenir qualquer refresh automático
+        e.stopPropagation();
+        
+        console.error('🚀 INICIANDO LOGIN...');
+        setDebugInfo(prev => prev + '\n🚀 INICIANDO LOGIN...');
+        
         // Validações básicas
         if (!username || !password) {
-            setError('Por favor, preenche todos os campos');
+            const errorMsg = 'Por favor, preenche todos os campos';
+            console.error('❌ Validação falhou:', errorMsg);
+            setError(errorMsg);
+            setDebugInfo(prev => prev + `\n❌ Validação falhou: ${errorMsg}`);
             return;
         }
 
@@ -39,39 +57,73 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            // ✅ MANTIDO - Endpoint correto
-            const response = await api.post('/auth/login', {
+            const requestData = {
                 username: username.trim(),
                 password: password
-            });
+            };
+            
+            console.error('📤 Enviando request:', requestData);
+            console.error('📤 URL completa:', `${api.defaults.baseURL}/auth/login`);
+            setDebugInfo(prev => prev + `\n📤 Enviando: ${JSON.stringify(requestData)}`);
+            setDebugInfo(prev => prev + `\n📤 URL: ${api.defaults.baseURL}/auth/login`);
 
-            // ✅ DEBUG TEMPORÁRIO - Remove depois de funcionar
-            console.log('Login response:', response.data);
+            const response = await api.post('/auth/login', requestData);
+
+            console.error('✅ RESPOSTA RECEBIDA:', response);
+            console.error('✅ Status:', response.status);
+            console.error('✅ Data:', response.data);
+            
+            setDebugInfo(prev => prev + `\n✅ Status: ${response.status}`);
+            setDebugInfo(prev => prev + `\n✅ Response: ${JSON.stringify(response.data, null, 2)}`);
 
             if (response.data.success && response.data.token) {
+                console.error('🎯 LOGIN SUCESSO! Token:', response.data.token.substring(0, 20) + '...');
+                setDebugInfo(prev => prev + '\n🎯 LOGIN SUCESSO!');
+                
                 // Guardar token no localStorage
                 localStorage.setItem('adminToken', response.data.token);
                 
-                // Feedback ao utilizador
-                setError('');
-                
-                // Redirecionar imediatamente
-                window.location.href = '/admin-dashboard';
+                // ✅ Pausa antes de redirecionar para ver logs
+                setTimeout(() => {
+                    window.location.href = '/admin-dashboard';
+                }, 2000);
                 
             } else {
-                setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
+                const errorMsg = 'Login falhou - resposta inválida';
+                console.error('❌ LOGIN FALHOU:', response.data);
+                setDebugInfo(prev => prev + `\n❌ LOGIN FALHOU: ${JSON.stringify(response.data)}`);
+                setError(errorMsg);
             }
         } catch (error) {
-            console.error('Erro no login:', error);
+            console.error('💥 ERRO COMPLETO:', error);
+            console.error('💥 Error message:', error.message);
+            console.error('💥 Error stack:', error.stack);
             
-            if (error.response?.status === 401) {
-                setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
-            } else if (error.response?.status === 500) {
-                setError('Erro interno do servidor. Tenta novamente.');
-            } else if (error.code === 'NETWORK_ERROR' || !error.response) {
-                setError('Erro de conexão. Verifica se o servidor está a funcionar.');
+            setDebugInfo(prev => prev + `\n💥 ERRO: ${error.message}`);
+            
+            if (error.response) {
+                console.error('💥 Response status:', error.response.status);
+                console.error('💥 Response data:', error.response.data);
+                console.error('💥 Response headers:', error.response.headers);
+                
+                setDebugInfo(prev => prev + `\n💥 Status: ${error.response.status}`);
+                setDebugInfo(prev => prev + `\n💥 Response: ${JSON.stringify(error.response.data, null, 2)}`);
+                
+                if (error.response.status === 401) {
+                    setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
+                } else if (error.response.status === 500) {
+                    setError('Erro interno do servidor. Tenta novamente.');
+                } else {
+                    setError(error.response?.data?.message || 'Erro do servidor');
+                }
+            } else if (error.request) {
+                console.error('💥 Request made but no response:', error.request);
+                setDebugInfo(prev => prev + '\n💥 Sem resposta do servidor');
+                setError('Sem resposta do servidor. Verifica a conexão.');
             } else {
-                setError(error.response?.data?.message || 'Erro desconhecido. Tenta novamente.');
+                console.error('💥 Error config:', error.config);
+                setDebugInfo(prev => prev + `\n💥 Config error: ${error.message}`);
+                setError('Erro de configuração: ' + error.message);
             }
         } finally {
             setLoading(false);
@@ -85,7 +137,16 @@ const AdminLogin = () => {
                     <i className="bi bi-shield-lock" style={{ fontSize: '3rem', color: '#007bff' }}></i>
                     <h2 className="mt-2">Área de Administração</h2>
                     <p className="text-muted">Portfolio - Ricardo Vidal</p>
+                    <div className="badge bg-warning">DEBUG MODE</div>
                 </div>
+                
+                {/* ✅ Painel de Debug Visível */}
+                {debugInfo && (
+                    <div className="alert alert-info" style={{ fontSize: '12px', maxHeight: '200px', overflow: 'auto' }}>
+                        <strong>🔍 Debug Info:</strong>
+                        <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{debugInfo}</pre>
+                    </div>
+                )}
                 
                 <form onSubmit={handleSubmit} className={styles.loginForm}>
                     {error && (
@@ -148,7 +209,7 @@ const AdminLogin = () => {
                         ) : (
                             <>
                                 <i className="bi bi-box-arrow-in-right me-2"></i>
-                                Entrar
+                                Entrar (Debug)
                             </>
                         )}
                     </button>
@@ -161,6 +222,8 @@ const AdminLogin = () => {
                         Instituto Politécnico de Viseu - ESTGV
                         <br />
                         Tecnologias e Design Multimédia
+                        <br />
+                        <span className="badge bg-info mt-1">Modo Debug - Logs Persistentes</span>
                     </small>
                 </div>
                 
