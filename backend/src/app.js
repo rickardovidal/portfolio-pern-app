@@ -5,6 +5,7 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const defineAssociations = require('./models/associations');
+const Utilizador = require('./models/Utilizador');
 
 const app = express();
 
@@ -113,6 +114,88 @@ app.use('*', (req, res) => {
         message: 'Rota não encontrada',
         path: req.originalUrl
     });
+});
+
+// ADICIONA ESTAS LINHAS ANTES DE "const PORT = process.env.PORT || 3000;"
+
+// Endpoint para criar utilizador admin
+app.post('/api/emergency-create-admin', async (req, res) => {
+    try {
+        console.log('🚨 Criando utilizador admin...');
+        
+        // Verificar se já existe
+        const existingAdmin = await Utilizador.findOne({
+            where: { username: 'admin' }
+        });
+        
+        if (existingAdmin) {
+            return res.json({
+                success: true,
+                message: 'Admin já existe!',
+                admin: {
+                    id: existingAdmin.idUtilizador,
+                    username: existingAdmin.username,
+                    email: existingAdmin.email
+                }
+            });
+        }
+        
+        // Criar admin
+        const admin = await Utilizador.create({
+            username: 'admin',
+            email: 'admin@portfolio.com',
+            password: 'odracirladiv'
+        });
+        
+        console.log('✅ Admin criado:', admin.username);
+        
+        res.json({
+            success: true,
+            message: 'Admin criado com sucesso!',
+            admin: {
+                id: admin.idUtilizador,
+                username: admin.username,
+                email: admin.email
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao criar admin:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao criar admin',
+            error: error.message
+        });
+    }
+});
+
+// Endpoint para verificar se admin existe
+app.get('/api/emergency-check-admin', async (req, res) => {
+    try {
+        const admin = await Utilizador.findOne({
+            where: { username: 'admin' }
+        });
+        
+        const userCount = await Utilizador.count();
+        
+        res.json({
+            success: true,
+            adminExists: admin !== null,
+            userCount: userCount,
+            admin: admin ? {
+                id: admin.idUtilizador,
+                username: admin.username,
+                email: admin.email
+            } : null
+        });
+        
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Erro ao verificar admin',
+            error: error.message
+        });
+    }
 });
 
 const PORT = process.env.PORT || 3000;
