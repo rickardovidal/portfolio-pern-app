@@ -532,7 +532,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td>{getClienteNome(projeto.idCliente)}</td>
+                                                <td>{getClienteNome(projeto)}</td>
                                                 <td>
                                                     <span className={`badge ${getEstadoBadgeClass(getEstadoNome(projeto.idEstado_Projeto))}`}>
                                                         {getEstadoNome(projeto.idEstado_Projeto)}
