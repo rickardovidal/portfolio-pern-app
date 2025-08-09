@@ -1,7 +1,7 @@
 // AdminDashboard.jsx - VERSÃO COM RESPONSIVIDADE COMPLETA
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/AdminStyles.css';
 
@@ -47,8 +47,6 @@ const AdminDashboard = () => {
             return;
         }
 
-        // Configurar axios com token
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         
         setIsAuthenticated(true);
         loadDashboardStats();
@@ -59,9 +57,9 @@ const AdminDashboard = () => {
             setLoading(true);
             
             const [clientesRes, projetosRes, servicosRes] = await Promise.all([
-                axios.get('http://localhost:3000/api/clientes'),
-                axios.get('http://localhost:3000/api/projetos'),
-                axios.get('http://localhost:3000/api/servicos')
+                api.get('/clientes'),
+                api.get('/projetos'),
+                api.get('/servicos')
             ]);
 
             const projetos = projetosRes.data.data || [];
@@ -85,7 +83,6 @@ const AdminDashboard = () => {
     const handleLogout = () => {
         if (window.confirm('Tens a certeza que queres sair?')) {
             localStorage.removeItem('adminToken');
-            delete axios.defaults.headers.common['Authorization'];
             window.location.href = '/admin-login';
         }
     };

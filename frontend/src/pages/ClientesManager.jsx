@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
 
 
@@ -35,7 +35,7 @@ const ClientesManager = ({ onStatsUpdate }) => {
         setLoading(true);
         NotificationService.loading('A carregar clientes...');
         
-        const response = await axios.get('http://localhost:3000/api/clientes');
+        const response = await api.get('/clientes');
         if (response.data.success) {
             setClientes(response.data.data || []);
             NotificationService.closeLoading();
@@ -52,7 +52,7 @@ const ClientesManager = ({ onStatsUpdate }) => {
 
     const loadTiposCliente = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/tipos-clientes');
+            const response = await api.get('/tipos-clientes');
             if (response.data.success) {
                 setTiposCliente(response.data.data || []);
             }
@@ -117,12 +117,12 @@ const ClientesManager = ({ onStatsUpdate }) => {
         
         let response;
         if (editingClient) {
-            response = await axios.put(
-                `http://localhost:3000/api/clientes/${editingClient.idCliente}`,
+            response = await api.put(
+                `/clientes/${editingClient.idCliente}`,
                 formData
             );
         } else {
-            response = await axios.post('http://localhost:3000/api/clientes', formData);
+            response = await api.post('/clientes', formData);
         }
 
         if (response.data.success) {
@@ -170,7 +170,7 @@ const ClientesManager = ({ onStatsUpdate }) => {
     
     if (result.isConfirmed) {
         try {
-            const response = await axios.delete(`http://localhost:3000/api/clientes/${cliente.idCliente}`);
+            const response = await api.delete(`/clientes/${cliente.idCliente}`);
             if (response.data.success) {
                 NotificationService.deleteSuccess('Cliente');
                 await loadClientes();

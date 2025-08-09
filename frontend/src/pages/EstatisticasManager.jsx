@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
 
 const EstatisticasManager = () => {
@@ -32,12 +32,12 @@ const EstatisticasManager = () => {
 
             // Carregar dados básicos
             const [clientesRes, projetosRes, servicosRes, tiposClienteRes, estadosProjetoRes, projetosServicosRes] = await Promise.all([
-                axios.get('http://localhost:3000/api/clientes'),
-                axios.get('http://localhost:3000/api/projetos'),
-                axios.get('http://localhost:3000/api/servicos'),
-                axios.get('http://localhost:3000/api/tipos-clientes'),
-                axios.get('http://localhost:3000/api/estados-projeto'),
-                axios.get('http://localhost:3000/api/projetos-servicos')
+                api.get('/clientes'),
+                api.get('/projetos'),
+                api.get('/servicos'),
+                api.get('/tipos-clientes'),
+                api.get('/estados-projeto'),
+                api.get('/projetos-servicos')
             ]);
 
             const clientes = clientesRes.data.data || [];
@@ -158,7 +158,7 @@ const EstatisticasManager = () => {
 
     const calcularServicosPorTipo = async (servicos) => {
         try {
-            const response = await axios.get('http://localhost:3000/api/tipos-servicos');
+            const response = await api.get('/tipos-servicos');
             const tiposServico = response.data.data || [];
 
             return tiposServico.map(tipo => ({

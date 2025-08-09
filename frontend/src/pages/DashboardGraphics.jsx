@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 
 const DashboardGraphics = () => {
     const [stats, setStats] = useState({
@@ -21,12 +21,12 @@ const DashboardGraphics = () => {
             setLoading(true);
             
             const [projetosRes, clientesRes, servicosRes, tiposClientesRes, estadosRes, tiposServicosRes] = await Promise.all([
-                axios.get('http://localhost:3000/api/projetos'),
-                axios.get('http://localhost:3000/api/clientes'),
-                axios.get('http://localhost:3000/api/servicos'),
-                axios.get('http://localhost:3000/api/tipos-clientes'),
-                axios.get('http://localhost:3000/api/estados-projeto'),
-                axios.get('http://localhost:3000/api/tipos-servicos')
+                api.get('/projetos'),
+                api.get('/clientes'),
+                api.get('/servicos'),
+                api.get('/tipos-clientes'),
+                api.get('/estados-projeto'),
+                api.get('/tipos-servicos')
             ]);
 
             const projetos = projetosRes.data.data || [];

@@ -1,7 +1,7 @@
 
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
 
 const ProjetosManager = ({ onStatsUpdate }) => {
@@ -44,7 +44,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const loadProjetos = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('http://localhost:3000/api/projetos');
+            const response = await api.get('/projetos');
             if (response.data.success) {
                 setProjetos(response.data.data || []);
                 NotificationService.successToast('Projetos carregados!');
@@ -60,7 +60,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     // ✅ CORRIGIDO - Carregamento simples com toast
     const loadClientes = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/clientes');
+            const response = api.get('/clientes');
             if (response.data.success) {
                 setClientes(response.data.data || []);
                 NotificationService.successToast('Clientes carregados!');
@@ -74,7 +74,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     // ✅ CORRIGIDO - Carregamento simples com toast
     const loadEstadosProjeto = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/estados-projeto');
+            const response = await api.get('/estados-projeto');
             if (response.data.success) {
                 setEstadosProjeto(response.data.data || []);
                 NotificationService.successToast('Estados carregados!');
@@ -88,7 +88,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     // ✅ CORRIGIDO - Carregamento simples com toast
     const loadServicos = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/servicos');
+            const response = await api.get('/servicos');
             if (response.data.success) {
                 setServicos(response.data.data || []);
                 NotificationService.successToast('Serviços carregados!');
@@ -189,12 +189,12 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
             let response;
             if (editingProject) {
-                response = await axios.put(
-                    `http://localhost:3000/api/projetos/${editingProject.idProjeto}`,
+                response = await api.put(
+                    `/projetos/${editingProject.idProjeto}`,
                     projetoData
                 );
             } else {
-                response = await axios.post('http://localhost:3000/api/projetos', projetoData);
+                response = await api.post('/projetos', projetoData);
             }
 
             if (response.data.success) {
@@ -228,7 +228,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             for (const servicoId of selectedServicos) {
                 const servico = servicos.find(s => s.idServico == servicoId);
                 if (servico) {
-                    await axios.post('http://localhost:3000/api/projetos-servicos', {
+                    await api.post('/projetos-servicos', {
                         idProjeto: projetoId,
                         idServico: servicoId,
                         quantidade: 1,
@@ -259,7 +259,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
         // ✅ CORREÇÃO: Carregar serviços associados ao projeto
         try {
-            const response = await axios.get(`http://localhost:3000/api/projetos-servicos/projeto/${projeto.idProjeto}`);
+            const response = await api.get(`/projetos-servicos/projeto/${projeto.idProjeto}`);
             if (response.data.success) {
                 const servicosAssociados = response.data.data.map(ps => ps.idServico);
                 setSelectedServicos(servicosAssociados);
@@ -298,8 +298,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                     }
                 }
 
-                const response = await axios.put(
-                    `http://localhost:3000/api/projetos/${projeto.idProjeto}`,
+                const response = await api.put(
+                    `/projetos/${projeto.idProjeto}`,
                     {
                         ...projeto,
                         ativo: novoStatus,

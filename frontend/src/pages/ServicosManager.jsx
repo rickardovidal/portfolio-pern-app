@@ -1,7 +1,7 @@
 // ServicosManager.jsx - VERSÃO COMPLETAMENTE CORRIGIDA
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
 
 const ServicosManager = ({ onStatsUpdate }) => {
@@ -42,7 +42,7 @@ const ServicosManager = ({ onStatsUpdate }) => {
     const loadServicos = async () => {
         try {
             setLoading(true);
-            const response = await axios.get('http://localhost:3000/api/servicos');
+            const response = await api.get('/servicos');
             if (response.data.success) {
                 setServicos(response.data.data || []);
                 NotificationService.successToast('Serviços carregados!');
@@ -58,7 +58,7 @@ const ServicosManager = ({ onStatsUpdate }) => {
     // ✅ CORRIGIDO - Carregamento simples com toast
     const loadTiposServico = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/api/tipos-servicos');
+            const response = await api.get('/tipos-servicos');
             if (response.data.success) {
                 setTiposServico(response.data.data || []);
                 NotificationService.successToast('Tipos carregados!');
@@ -184,12 +184,12 @@ const ServicosManager = ({ onStatsUpdate }) => {
             
             let response;
             if (editingItem && activeTab === 'servicos') {
-                response = await axios.put(
-                    `http://localhost:3000/api/servicos/${editingItem.idServico}`,
+                response = await api.put(
+                    `/servicos/${editingItem.idServico}`,
                     servicoFormData
                 );
             } else {
-                response = await axios.post('http://localhost:3000/api/servicos', servicoFormData);
+                response = await api.post('/servicos', servicoFormData);
             }
 
             if (response.data.success) {
@@ -231,12 +231,12 @@ const ServicosManager = ({ onStatsUpdate }) => {
             
             let response;
             if (editingItem && activeTab === 'tipos') {
-                response = await axios.put(
-                    `http://localhost:3000/api/tipos-servicos/${editingItem.idTipo_Servico}`,
+                response = await api.put(
+                    `/tipos-servicos/${editingItem.idTipo_Servico}`,
                     tipoFormData
                 );
             } else {
-                response = await axios.post('http://localhost:3000/api/tipos-servicos', tipoFormData);
+                response = await api.post('/tipos-servicos', tipoFormData);
             }
 
             if (response.data.success) {
@@ -266,8 +266,8 @@ const ServicosManager = ({ onStatsUpdate }) => {
     const handleEditServico = async (servico) => {
         setEditingItem(servico);
 
-        try {
-            const response = await axios.get(`http://localhost:3000/api/servicos/${servico.idServico}`);
+        try { 
+            const response = await api.get(`/servicos/${servico.idServico}`);
             if (response.data.success) {
                 const servicoCompleto = response.data.data;
                 setServicoFormData({
@@ -314,7 +314,7 @@ const ServicosManager = ({ onStatsUpdate }) => {
         
         if (result.isConfirmed) {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/servicos/${servico.idServico}`);
+                const response = await api.delete(`/servicos/${servico.idServico}`);
                 if (response.data.success) {
                     NotificationService.deleteSuccess('Serviço');
                     await loadServicos();
@@ -337,7 +337,7 @@ const ServicosManager = ({ onStatsUpdate }) => {
         
         if (result.isConfirmed) {
             try {
-                const response = await axios.delete(`http://localhost:3000/api/tipos-servicos/${tipo.idTipo_Servico}`);
+                const response = await api.delete(`/tipos-servicos/${tipo.idTipo_Servico}`);
                 if (response.data.success) {
                     NotificationService.deleteSuccess('Tipo');
                     await loadTiposServico();

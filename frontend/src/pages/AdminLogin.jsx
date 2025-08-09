@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../services/api.js';
 import styles from './AdminLogin.module.css';
 import NotificationService from '../services/NotificationService';
 
@@ -15,8 +15,8 @@ const AdminLogin = () => {
         const token = localStorage.getItem('adminToken');
         if (token) {
             // Verificar se o token ainda é válido
-            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-            axios.get('http://localhost:3000/api/auth/verify')
+
+            api.get('/verify')
                 .then(() => {
                     // Token válido, redirecionar para dashboard
                     window.location.href = '/admin-dashboard';
@@ -24,7 +24,6 @@ const AdminLogin = () => {
                 .catch(() => {
                     // Token inválido, remover do localStorage
                     localStorage.removeItem('adminToken');
-                    delete axios.defaults.headers.common['Authorization'];
                 });
         }
     }, []);
@@ -42,7 +41,7 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            const response = await axios.post('http://localhost:3000/api/auth/login', {
+            const response = await api.post('/login', {
                 username: username.trim(),
                 password: password
             });
@@ -50,9 +49,6 @@ const AdminLogin = () => {
             if (response.data.success && response.data.token) {
                 // Guardar token no localStorage
                 localStorage.setItem('adminToken', response.data.token);
-                
-                // Configurar axios para futuras requisições
-                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
                 
                 // Feedback ao utilizador
                 setError('');
