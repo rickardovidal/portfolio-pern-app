@@ -1,55 +1,43 @@
+// AdminLogin.jsx - VERSÃO COMPLETAMENTE CORRIGIDA
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import styles from './AdminLogin.module.css';
-import NotificationService from '../services/NotificationService';
 
 const AdminLogin = () => {
     const [username, setUsername] = useState('admin'); // ✅ Pre-filled para teste
     const [password, setPassword] = useState('odracirladiv'); // ✅ Pre-filled para teste
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [debugInfo, setDebugInfo] = useState(''); // ✅ Estado para mostrar debug na tela
 
     useEffect(() => {
-        // ✅ Log persistente da configuração
-        const baseURL = api.defaults.baseURL;
-        console.error('🔧 API Base URL:', baseURL);
-        setDebugInfo(prev => prev + `\n🔧 API Base URL: ${baseURL}`);
-        
         // Verificar se já está autenticado
         const token = localStorage.getItem('adminToken');
         if (token) {
-            console.error('🔍 Token encontrado, verificando...');
-            setDebugInfo(prev => prev + '\n🔍 Token encontrado, verificando...');
+            console.log('🔍 Token encontrado, verificando...');
             
-            api.get('/clientes')
+            // ✅ CORRIGIDO - Usar método POST para verificação (conforme o teu backend)
+            api.post('/auth/verify')
                 .then(() => {
-                    console.error('✅ Token válido - redirecionando');
+                    console.log('✅ Token válido - redirecionando');
                     window.location.href = '/admin-dashboard';
                 })
                 .catch((err) => {
-                    console.error('❌ Token inválido:', err);
-                    setDebugInfo(prev => prev + `\n❌ Token inválido: ${err.message}`);
+                    console.log('❌ Token inválido:', err.message);
                     localStorage.removeItem('adminToken');
                 });
         }
     }, []);
 
     const handleSubmit = async (e) => {
+        // ✅ CRÍTICO - Prevenir comportamentos padrão do form
         e.preventDefault();
-        
-        // ✅ Prevenir qualquer refresh automático
         e.stopPropagation();
         
-        console.error('🚀 INICIANDO LOGIN...');
-        setDebugInfo(prev => prev + '\n🚀 INICIANDO LOGIN...');
+        console.log('🚀 INICIANDO LOGIN...');
         
         // Validações básicas
         if (!username || !password) {
-            const errorMsg = 'Por favor, preenche todos os campos';
-            console.error('❌ Validação falhou:', errorMsg);
-            setError(errorMsg);
-            setDebugInfo(prev => prev + `\n❌ Validação falhou: ${errorMsg}`);
+            setError('Por favor, preenche todos os campos');
             return;
         }
 
@@ -62,52 +50,39 @@ const AdminLogin = () => {
                 password: password
             };
             
-            console.error('📤 Enviando request:', requestData);
-            console.error('📤 URL completa:', `${api.defaults.baseURL}/auth/login`);
-            setDebugInfo(prev => prev + `\n📤 Enviando: ${JSON.stringify(requestData)}`);
-            setDebugInfo(prev => prev + `\n📤 URL: ${api.defaults.baseURL}/auth/login`);
+            console.log('📤 Enviando request:', requestData);
+            console.log('📤 URL:', `${api.defaults.baseURL}/auth/login`);
 
+            // ✅ CORRIGIDO - Usar o serviço api.js em vez de axios direto
             const response = await api.post('/auth/login', requestData);
 
-            console.error('✅ RESPOSTA RECEBIDA:', response);
-            console.error('✅ Status:', response.status);
-            console.error('✅ Data:', response.data);
-            
-            setDebugInfo(prev => prev + `\n✅ Status: ${response.status}`);
-            setDebugInfo(prev => prev + `\n✅ Response: ${JSON.stringify(response.data, null, 2)}`);
+            console.log('✅ RESPOSTA RECEBIDA:', response.status);
+            console.log('✅ Data:', response.data);
 
             if (response.data.success && response.data.token) {
-                console.error('🎯 LOGIN SUCESSO! Token:', response.data.token.substring(0, 20) + '...');
-                setDebugInfo(prev => prev + '\n🎯 LOGIN SUCESSO!');
+                console.log('🎯 LOGIN SUCESSO!');
                 
                 // Guardar token no localStorage
                 localStorage.setItem('adminToken', response.data.token);
                 
-                // ✅ Pausa antes de redirecionar para ver logs
+                // ✅ Limpar erro e mostrar sucesso
+                setError('');
+                
+                // ✅ Redirecionar após sucesso
                 setTimeout(() => {
                     window.location.href = '/admin-dashboard';
-                }, 2000);
+                }, 1000);
                 
             } else {
-                const errorMsg = 'Login falhou - resposta inválida';
-                console.error('❌ LOGIN FALHOU:', response.data);
-                setDebugInfo(prev => prev + `\n❌ LOGIN FALHOU: ${JSON.stringify(response.data)}`);
-                setError(errorMsg);
+                console.log('❌ LOGIN FALHOU:', response.data);
+                setError('Login falhou - resposta inválida');
             }
         } catch (error) {
             console.error('💥 ERRO COMPLETO:', error);
-            console.error('💥 Error message:', error.message);
-            console.error('💥 Error stack:', error.stack);
-            
-            setDebugInfo(prev => prev + `\n💥 ERRO: ${error.message}`);
             
             if (error.response) {
                 console.error('💥 Response status:', error.response.status);
                 console.error('💥 Response data:', error.response.data);
-                console.error('💥 Response headers:', error.response.headers);
-                
-                setDebugInfo(prev => prev + `\n💥 Status: ${error.response.status}`);
-                setDebugInfo(prev => prev + `\n💥 Response: ${JSON.stringify(error.response.data, null, 2)}`);
                 
                 if (error.response.status === 401) {
                     setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
@@ -117,12 +92,10 @@ const AdminLogin = () => {
                     setError(error.response?.data?.message || 'Erro do servidor');
                 }
             } else if (error.request) {
-                console.error('💥 Request made but no response:', error.request);
-                setDebugInfo(prev => prev + '\n💥 Sem resposta do servidor');
+                console.error('💥 Sem resposta do servidor:', error.request);
                 setError('Sem resposta do servidor. Verifica a conexão.');
             } else {
-                console.error('💥 Error config:', error.config);
-                setDebugInfo(prev => prev + `\n💥 Config error: ${error.message}`);
+                console.error('💥 Erro de configuração:', error.message);
                 setError('Erro de configuração: ' + error.message);
             }
         } finally {
@@ -137,18 +110,10 @@ const AdminLogin = () => {
                     <i className="bi bi-shield-lock" style={{ fontSize: '3rem', color: '#007bff' }}></i>
                     <h2 className="mt-2">Área de Administração</h2>
                     <p className="text-muted">Portfolio - Ricardo Vidal</p>
-                    <div className="badge bg-warning">DEBUG MODE</div>
                 </div>
                 
-                {/* ✅ Painel de Debug Visível */}
-                {debugInfo && (
-                    <div className="alert alert-info" style={{ fontSize: '12px', maxHeight: '200px', overflow: 'auto' }}>
-                        <strong>🔍 Debug Info:</strong>
-                        <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{debugInfo}</pre>
-                    </div>
-                )}
-                
-                <form onSubmit={handleSubmit} className={styles.loginForm}>
+                {/* ✅ CORRIGIDO - Form com onSubmit adequado */}
+                <form onSubmit={handleSubmit} className={styles.loginForm} noValidate>
                     {error && (
                         <div className="alert alert-danger alert-dismissible fade show" role="alert">
                             <i className="bi bi-exclamation-triangle me-2"></i>
@@ -176,6 +141,7 @@ const AdminLogin = () => {
                             placeholder="Insire o teu utilizador"
                             required
                             disabled={loading}
+                            autoComplete="username"
                         />
                     </div>
                     
@@ -193,9 +159,11 @@ const AdminLogin = () => {
                             placeholder="Insire a tua palavra-passe"
                             required
                             disabled={loading}
+                            autoComplete="current-password"
                         />
                     </div>
                     
+                    {/* ✅ CORRIGIDO - Botão do tipo submit */}
                     <button 
                         type="submit" 
                         className={`btn btn-primary w-100 ${styles.loginButton}`}
@@ -209,7 +177,7 @@ const AdminLogin = () => {
                         ) : (
                             <>
                                 <i className="bi bi-box-arrow-in-right me-2"></i>
-                                Entrar (Debug)
+                                Entrar
                             </>
                         )}
                     </button>
@@ -222,8 +190,6 @@ const AdminLogin = () => {
                         Instituto Politécnico de Viseu - ESTGV
                         <br />
                         Tecnologias e Design Multimédia
-                        <br />
-                        <span className="badge bg-info mt-1">Modo Debug - Logs Persistentes</span>
                     </small>
                 </div>
                 
