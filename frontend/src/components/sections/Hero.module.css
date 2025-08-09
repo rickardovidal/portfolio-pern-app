@@ -5,7 +5,8 @@
     display: flex;
     align-items: center;
     padding: 0 3rem;
-    padding-top: 120px; /* Altura do menu + margem de segurança */
+    padding-top: 120px;
+    /* Altura do menu + margem de segurança */
     position: relative;
     background: var(--white);
     /* CORREÇÃO: Garantir que o Hero não interfere com modais */
@@ -111,11 +112,11 @@
         grid-template-columns: 450px 1fr;
         gap: 8rem;
     }
-    
+
     .heroTitle {
         font-size: 3.5rem;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 450px;
@@ -127,20 +128,20 @@
     .hero {
         padding-top: 110px;
     }
-    
+
     .heroContainer {
         grid-template-columns: 420px 1fr;
         gap: 7rem;
     }
-    
+
     .heroText {
         max-width: 420px;
     }
-    
+
     .heroTitle {
         font-size: 3.3rem;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 430px;
@@ -154,26 +155,26 @@
         padding-left: 2.5rem;
         padding-right: 2.5rem;
     }
-    
+
     .heroContainer {
         grid-template-columns: 380px 1fr;
         gap: 5.5rem;
     }
-    
+
     .heroText {
         max-width: 380px;
     }
-    
+
     .heroTitle {
         font-size: 3.1rem;
         margin-bottom: 2.2rem;
     }
-    
+
     .heroSubtitle {
         font-size: 1.05rem;
         margin-bottom: 3.2rem;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 410px;
@@ -187,26 +188,26 @@
         padding-left: 2.5rem;
         padding-right: 2.5rem;
     }
-    
+
     .heroContainer {
         grid-template-columns: 375px 1fr;
         gap: 5.2rem;
     }
-    
+
     .heroText {
         max-width: 375px;
     }
-    
+
     .heroTitle {
         font-size: 3rem;
         margin-bottom: 2.1rem;
     }
-    
+
     .heroSubtitle {
         font-size: 1.04rem;
         margin-bottom: 3.1rem;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 405px;
@@ -220,28 +221,28 @@
         padding-left: 2.5rem;
         padding-right: 2.5rem;
     }
-    
+
     .heroContainer {
         grid-template-columns: 370px 1fr;
         gap: 5rem;
     }
-    
+
     .heroText {
         max-width: 370px;
     }
-    
+
     .heroTitle {
         font-size: 2.9rem;
         margin-bottom: 2rem;
         line-height: 1.1;
     }
-    
+
     .heroSubtitle {
         font-size: 1.02rem;
         margin-bottom: 3rem;
         line-height: 1.65;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 400px;
@@ -256,27 +257,27 @@
         padding-top: 8rem;
         padding-bottom: 4rem;
     }
-    
+
     .heroContainer {
         grid-template-columns: 340px 1fr;
         gap: 4rem;
         align-items: start;
     }
-    
+
     .heroText {
         max-width: 340px;
     }
-    
+
     .heroTitle {
         font-size: 2.7rem;
         margin-bottom: 2rem;
     }
-    
+
     .heroSubtitle {
         font-size: 1rem;
         margin-bottom: 2.8rem;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 380px;
@@ -291,27 +292,27 @@
         padding-top: 8rem;
         padding-bottom: 4rem;
     }
-    
+
     .heroContainer {
         grid-template-columns: 320px 1fr;
         gap: 3rem;
         align-items: start;
     }
-    
+
     .heroText {
         max-width: 320px;
     }
-    
+
     .heroTitle {
         font-size: 2.5rem;
         margin-bottom: 2rem;
     }
-    
+
     .heroSubtitle {
         font-size: 1rem;
         margin-bottom: 2.5rem;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 350px;
@@ -326,25 +327,25 @@
         padding-bottom: 3rem;
         min-height: auto;
     }
-    
+
     .heroContainer {
         grid-template-columns: 1fr;
         gap: 4rem;
         text-align: center;
         align-items: center;
     }
-    
+
     .heroText {
         max-width: 600px;
         margin: 0 auto;
         text-align: center;
     }
-    
+
     .heroTitle {
         font-size: 2.8rem;
         margin-bottom: 2rem;
     }
-    
+
     .heroSubtitle {
         font-size: 1.1rem;
         margin-bottom: 3rem;
@@ -352,7 +353,7 @@
         margin-left: auto;
         margin-right: auto;
     }
-    
+
     .heroMosaicWrapper {
         height: auto;
         min-height: 400px;
@@ -372,27 +373,27 @@
         padding-top: 5rem;
         padding-bottom: 2rem;
     }
-    
+
     .heroContainer {
         gap: 3rem;
     }
-    
+
     .heroText {
         max-width: 500px;
     }
-    
+
     .heroTitle {
         font-size: 2.4rem;
         margin-bottom: 1.5rem;
         line-height: 1.2;
     }
-    
+
     .heroSubtitle {
         font-size: 1rem;
         margin-bottom: 2.5rem;
         line-height: 1.6;
     }
-    
+
     .heroMosaicWrapper {
         min-height: 350px;
         max-height: 500px;
@@ -407,25 +408,25 @@
         padding-top: 4rem;
         padding-bottom: 2rem;
     }
-    
+
     .heroContainer {
         gap: 2.5rem;
     }
-    
+
     .heroText {
         max-width: 100%;
     }
-    
+
     .heroTitle {
         font-size: 2rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .heroSubtitle {
         font-size: 0.95rem;
         margin-bottom: 2rem;
     }
-    
+
     .heroMosaicWrapper {
         min-height: 300px;
         max-height: 400px;
@@ -440,20 +441,20 @@
         padding-top: 3rem;
         padding-bottom: 1.5rem;
     }
-    
+
     .heroContainer {
         gap: 2rem;
     }
-    
+
     .heroTitle {
         font-size: 1.8rem;
     }
-    
+
     .heroSubtitle {
         font-size: 0.9rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .heroMosaicWrapper {
         min-height: 280px;
         max-height: 350px;
@@ -468,24 +469,41 @@
         padding-top: 3rem;
         padding-bottom: 2rem;
     }
-    
+
     .heroContainer {
         gap: 2rem;
     }
-    
+
     .heroTitle {
         font-size: 2rem;
         margin-bottom: 1rem;
     }
-    
+
     .heroSubtitle {
         font-size: 0.9rem;
         margin-bottom: 1.5rem;
     }
-    
+
     .heroMosaicWrapper {
         min-height: 250px;
         max-height: 300px;
     }
 }
 
+/* Media query para dispositivos móveis - adicionar padding top extra */
+@media (max-width: 768px) {
+    .hero {
+        padding-top: 2rem;
+        /* Adiciona espaçamento extra no topo em mobile */
+    }
+
+    /* Se a classe principal tiver outro nome, ajusta conforme necessário */
+    .container {
+        padding-top: 2rem;
+    }
+
+    /* Targeta especificamente o título se tiver uma classe própria */
+    .title {
+        margin-top: 1.5rem;
+    }
+}
