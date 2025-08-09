@@ -32,6 +32,7 @@ const utilizadoresRoutes = require('./routes/utilizadoresRoutes');
 const estadosProjetoRoutes = require('./routes/estadosProjetoRoutes');
 const contactRoutes = require('./routes/contactRoutes');
 const initRoutes = require('./routes/initRoutes');
+const emergencySetup = require('./routes/emergencySetup');
 
 // NOVA ROTA: Rota base para /api
 app.get('/api', (req, res) => {
@@ -79,6 +80,7 @@ app.use('/api/utilizadores', utilizadoresRoutes);
 app.use('/api/estados-projeto', estadosProjetoRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/init', initRoutes);
+app.use('/api/emergency', emergencySetup);
 
 // Rota de teste
 app.get('/api/health', (req, res) => {
