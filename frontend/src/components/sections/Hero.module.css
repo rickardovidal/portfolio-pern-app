@@ -366,11 +366,11 @@
     }
 }
 
-/* Tablet pequeno (768px) */
+/* Tablet pequeno (768px) - CORRIGIDO: Aumentado padding-top */
 @media (max-width: 768px) {
     .hero {
         padding: 0 1.5rem;
-        padding-top: 5rem;
+        padding-top: 7rem; /* ALTERADO: era 5rem, agora 7rem */
         padding-bottom: 2rem;
     }
 
@@ -401,11 +401,11 @@
     }
 }
 
-/* Mobile grande (600px) */
+/* Mobile grande (600px) - CORRIGIDO: Aumentado padding-top */
 @media (max-width: 600px) {
     .hero {
         padding: 0 1rem;
-        padding-top: 4rem;
+        padding-top: 6rem; /* ALTERADO: era 4rem, agora 6rem */
         padding-bottom: 2rem;
     }
 
@@ -434,11 +434,11 @@
     }
 }
 
-/* Mobile pequeno (480px) */
+/* Mobile pequeno (480px) - CORRIGIDO: Aumentado padding-top */
 @media (max-width: 480px) {
     .hero {
         padding: 0 1rem;
-        padding-top: 3rem;
+        padding-top: 5rem; /* ALTERADO: era 3rem, agora 5rem */
         padding-bottom: 1.5rem;
     }
 
@@ -487,23 +487,5 @@
     .heroMosaicWrapper {
         min-height: 250px;
         max-height: 300px;
-    }
-}
-
-/* Media query para dispositivos móveis - adicionar padding top extra */
-@media (max-width: 768px) {
-    .hero {
-        padding-top: 2rem;
-        /* Adiciona espaçamento extra no topo em mobile */
-    }
-
-    /* Se a classe principal tiver outro nome, ajusta conforme necessário */
-    .container {
-        padding-top: 2rem;
-    }
-
-    /* Targeta especificamente o título se tiver uma classe própria */
-    .title {
-        margin-top: 1.5rem;
     }
 }
