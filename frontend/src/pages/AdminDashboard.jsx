@@ -1,4 +1,4 @@
-// AdminDashboard.jsx - VERSÃO COM RESPONSIVIDADE COMPLETA
+// AdminDashboard.jsx - VERSÃO CORRIGIDA
 
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
@@ -40,16 +40,27 @@ const AdminDashboard = () => {
     }, []);
 
     useEffect(() => {
-        // Verificar autenticação
-        const token = localStorage.getItem('adminToken');
-        if (!token) {
-            window.location.href = '/admin-login';
-            return;
-        }
+        // ✅ CORRIGIDO - Verificação de autenticação melhorada
+        const verificarAutenticacao = async () => {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                window.location.href = '/admin-login';
+                return;
+            }
 
-        
-        setIsAuthenticated(true);
-        loadDashboardStats();
+            try {
+                // ✅ CORRIGIDO - Endpoint correto
+                await api.get('/auth/verify');
+                setIsAuthenticated(true);
+                loadDashboardStats();
+            } catch (error) {
+                console.error('Token inválido:', error);
+                localStorage.removeItem('adminToken');
+                window.location.href = '/admin-login';
+            }
+        };
+
+        verificarAutenticacao();
     }, []);
 
     const loadDashboardStats = async () => {

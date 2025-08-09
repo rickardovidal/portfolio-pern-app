@@ -3,7 +3,6 @@ import api from '../services/api.js';
 import styles from './AdminLogin.module.css';
 import NotificationService from '../services/NotificationService';
 
-
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -14,9 +13,8 @@ const AdminLogin = () => {
         // Verificar se já está autenticado
         const token = localStorage.getItem('adminToken');
         if (token) {
-            // Verificar se o token ainda é válido
-
-            api.get('/verify')
+            // ✅ CORRIGIDO - Endpoint correto
+            api.get('/auth/verify')
                 .then(() => {
                     // Token válido, redirecionar para dashboard
                     window.location.href = '/admin-dashboard';
@@ -41,7 +39,8 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            const response = await api.post('/login', {
+            // ✅ CORRIGIDO - Endpoint correto
+            const response = await api.post('/auth/login', {
                 username: username.trim(),
                 password: password
             });
