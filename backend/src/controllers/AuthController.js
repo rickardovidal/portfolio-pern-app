@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize'); // ADICIONADO PARA CORRIGIR O ERRO
 const Utilizador = require('../models/Utilizador');
 
 const authController = {
@@ -156,9 +157,10 @@ const authController = {
             }
 
             // Verificar se já existe utilizador com este username ou email
+            // CORRIGIDO: Usar Op.or em vez de $or
             const existingUser = await Utilizador.findOne({
                 where: {
-                    $or: [
+                    [Op.or]: [
                         { username: username },
                         { email: email }
                     ]
