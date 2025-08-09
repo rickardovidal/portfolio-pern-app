@@ -13,8 +13,8 @@ const AdminLogin = () => {
         // Verificar se já está autenticado
         const token = localStorage.getItem('adminToken');
         if (token) {
-            // ✅ CORRIGIDO - Endpoint correto
-            api.get('/auth/verify')
+            // ✅ CORRIGIDO - Usar POST em vez de GET
+            api.post('/auth/verify')
                 .then(() => {
                     // Token válido, redirecionar para dashboard
                     window.location.href = '/admin-dashboard';
@@ -39,11 +39,13 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            // ✅ CORRIGIDO - Endpoint correto
+            // ✅ ENDPOINT CORRETO
             const response = await api.post('/auth/login', {
                 username: username.trim(),
                 password: password
             });
+
+            console.log('Resposta do login:', response.data); // Para debug
 
             if (response.data.success && response.data.token) {
                 // Guardar token no localStorage
@@ -61,7 +63,9 @@ const AdminLogin = () => {
                 setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
             }
         } catch (error) {
-            console.error('Erro no login:', error);
+            console.error('Erro completo no login:', error);
+            console.error('Status:', error.response?.status);
+            console.error('Data:', error.response?.data);
             
             if (error.response?.status === 401) {
                 setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');

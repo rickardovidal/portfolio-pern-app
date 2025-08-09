@@ -1,4 +1,4 @@
-// AdminDashboard.jsx - VERSÃO CORRIGIDA
+// AdminDashboard.jsx - VERSÃO CORRIGIDA FINAL
 
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
@@ -40,7 +40,7 @@ const AdminDashboard = () => {
     }, []);
 
     useEffect(() => {
-        // ✅ CORRIGIDO - Verificação de autenticação melhorada
+        // ✅ CORRIGIDO - Verificação de autenticação com POST
         const verificarAutenticacao = async () => {
             const token = localStorage.getItem('adminToken');
             if (!token) {
@@ -49,8 +49,8 @@ const AdminDashboard = () => {
             }
 
             try {
-                // ✅ CORRIGIDO - Endpoint correto
-                await api.get('/auth/verify');
+                // ✅ CORRIGIDO - Usar POST em vez de GET
+                await api.post('/auth/verify');
                 setIsAuthenticated(true);
                 loadDashboardStats();
             } catch (error) {
