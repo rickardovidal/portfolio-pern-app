@@ -1,4 +1,4 @@
-// AdminLogin.jsx - VERSÃO DE DEBUG COMPLETA
+// AdminLogin.jsx - VERSÃO PARA PRODUÇÃO (RENDER + VERCEL)
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import styles from './AdminLogin.module.css';
@@ -8,111 +8,100 @@ const AdminLogin = () => {
     const [password, setPassword] = useState('odracirladiv');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [debugLogs, setDebugLogs] = useState([]);
+    const [debugInfo, setDebugInfo] = useState('');
     const [serverStatus, setServerStatus] = useState('checking');
 
-    // Função para adicionar logs de debug
-    const addDebugLog = (message, type = 'info') => {
+    // Função para adicionar informações de debug
+    const addDebugInfo = (message) => {
         const timestamp = new Date().toLocaleTimeString();
-        const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}`;
-        console.log(logEntry);
-        setDebugLogs(prev => [...prev, logEntry]);
+        const logMessage = `[${timestamp}] ${message}`;
+        console.log(logMessage);
+        setDebugInfo(prev => prev + '\n' + logMessage);
     };
 
-    // Verificar status do servidor
+    // Verificar status do servidor backend no Render
     const checkServerStatus = async () => {
         try {
-            addDebugLog('🔍 Verificando se o servidor está online...');
-            const response = await fetch('http://localhost:3000/api', {
+            addDebugInfo('🔍 Verificando status do servidor Render...');
+            const baseURL = api.defaults.baseURL;
+            addDebugInfo(`🌐 Backend URL: ${baseURL}`);
+            
+            // Fazer uma requisição simples para verificar se o servidor responde
+            const response = await fetch(`${baseURL.replace('/api', '')}/api`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                }
+                },
+                // Adicionar timeout para evitar que fique em loading infinito
+                signal: AbortSignal.timeout(10000)
             });
             
             if (response.ok) {
                 const data = await response.json();
-                addDebugLog(`✅ Servidor online! Versão: ${data.version}`, 'success');
+                addDebugInfo(`✅ Servidor Render online! Versão: ${data.version || 'N/A'}`);
                 setServerStatus('online');
                 return true;
             } else {
-                addDebugLog(`❌ Servidor respondeu com status: ${response.status}`, 'error');
+                addDebugInfo(`❌ Servidor respondeu com status: ${response.status}`);
                 setServerStatus('error');
                 return false;
             }
         } catch (error) {
-            addDebugLog(`💥 Erro ao conectar ao servidor: ${error.message}`, 'error');
+            addDebugInfo(`💥 Erro ao conectar ao Render: ${error.message}`);
             setServerStatus('offline');
+            
+            // Se o servidor não responder, pode estar em cold start (comum no Render)
+            if (error.name === 'TimeoutError') {
+                addDebugInfo('⏰ Timeout - servidor pode estar em cold start no Render');
+            }
             return false;
         }
     };
 
-    // Testar endpoint de login diretamente
-    const testLoginEndpoint = async () => {
-        try {
-            addDebugLog('🧪 Testando endpoint /auth/login...');
-            const response = await fetch('http://localhost:3000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: 'teste',
-                    password: 'teste'
-                })
-            });
-            
-            const data = await response.json();
-            addDebugLog(`🧪 Teste endpoint: Status ${response.status}, Response: ${JSON.stringify(data)}`, 'info');
-        } catch (error) {
-            addDebugLog(`💥 Erro no teste do endpoint: ${error.message}`, 'error');
-        }
-    };
-
     useEffect(() => {
-        const initializeDebug = async () => {
-            addDebugLog('🚀 Iniciando diagnóstico completo...');
-            addDebugLog(`📍 API Base URL: ${api.defaults.baseURL}`);
-            
-            const serverOnline = await checkServerStatus();
-            if (serverOnline) {
-                await testLoginEndpoint();
-            }
+        const initializeApp = async () => {
+            addDebugInfo('🚀 Iniciando aplicação em produção (Vercel + Render)');
+            addDebugInfo(`📱 User Agent: ${navigator.userAgent.substring(0, 50)}...`);
+            addDebugInfo(`🌍 Location: ${window.location.href}`);
             
             // Verificar token existente
             const token = localStorage.getItem('adminToken');
             if (token) {
-                addDebugLog('🔑 Token encontrado no localStorage');
-                addDebugLog(`🔑 Token (primeiros 20 chars): ${token.substring(0, 20)}...`);
-                
+                addDebugInfo('🔑 Token encontrado no localStorage');
                 try {
+                    // Tentar verificar token existente
                     const verifyResponse = await api.post('/auth/verify');
-                    addDebugLog('✅ Token válido - redirecionando', 'success');
-                    window.location.href = '/admin-dashboard';
+                    if (verifyResponse.data.success) {
+                        addDebugInfo('✅ Token válido - redirecionando para dashboard');
+                        window.location.href = '/admin-dashboard';
+                        return;
+                    }
                 } catch (err) {
-                    addDebugLog(`❌ Token inválido: ${err.message}`, 'error');
+                    addDebugInfo(`❌ Token inválido: ${err.message}`);
                     localStorage.removeItem('adminToken');
                 }
-            } else {
-                addDebugLog('🔑 Nenhum token encontrado');
             }
+            
+            // Verificar status do servidor
+            await checkServerStatus();
         };
         
-        initializeDebug();
+        initializeApp();
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         e.stopPropagation();
         
-        addDebugLog('🚀 TENTATIVA DE LOGIN INICIADA');
-        addDebugLog(`👤 Username: "${username}"`);
-        addDebugLog(`🔒 Password length: ${password.length} chars`);
+        addDebugInfo('🚀 Tentativa de login iniciada');
+        addDebugInfo(`👤 Username: "${username}"`);
+        addDebugInfo(`🔒 Password length: ${password.length} caracteres`);
         
-        if (!username || !password) {
+        // Validação básica
+        if (!username?.trim() || !password?.trim()) {
             const errorMsg = 'Por favor, preenche todos os campos';
             setError(errorMsg);
-            addDebugLog(`❌ Validação falhou: ${errorMsg}`, 'error');
+            addDebugInfo(`❌ Validação falhou: ${errorMsg}`);
             return;
         }
 
@@ -122,116 +111,116 @@ const AdminLogin = () => {
         try {
             const requestData = {
                 username: username.trim(),
-                password: password
+                password: password.trim()
             };
             
-            addDebugLog(`📤 Enviando dados: ${JSON.stringify({...requestData, password: '***'})}`);
-            addDebugLog(`🌐 URL completa: ${api.defaults.baseURL}/auth/login`);
+            addDebugInfo(`📤 Enviando request para: ${api.defaults.baseURL}/auth/login`);
+            addDebugInfo(`📤 Dados: ${JSON.stringify({...requestData, password: '*'.repeat(requestData.password.length)})}`);
 
-            // Fazer o request usando fetch diretamente para melhor debug
+            // Fazer request com timeout mais longo para produção
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
+
             const response = await fetch(`${api.defaults.baseURL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestData),
+                signal: controller.signal
             });
 
-            addDebugLog(`📥 Response status: ${response.status}`);
-            addDebugLog(`📥 Response headers: ${JSON.stringify(Object.fromEntries(response.headers))}`);
+            clearTimeout(timeoutId);
 
+            addDebugInfo(`📥 Response status: ${response.status}`);
+            addDebugInfo(`📥 Response ok: ${response.ok}`);
+            
+            // Ler resposta como texto primeiro para debug
             const responseText = await response.text();
-            addDebugLog(`📥 Response body (raw): ${responseText}`);
+            addDebugInfo(`📥 Response body (${responseText.length} chars): ${responseText.substring(0, 200)}${responseText.length > 200 ? '...' : ''}`);
 
+            // Tentar fazer parse do JSON
             let data;
             try {
                 data = JSON.parse(responseText);
-                addDebugLog(`📥 Response body (parsed): ${JSON.stringify(data, null, 2)}`);
+                addDebugInfo(`📥 JSON parsed successfully`);
             } catch (parseError) {
-                addDebugLog(`💥 Erro ao fazer parse da resposta: ${parseError.message}`, 'error');
-                throw new Error('Resposta do servidor não é JSON válido');
+                addDebugInfo(`💥 Erro ao fazer parse do JSON: ${parseError.message}`);
+                throw new Error(`Resposta inválida do servidor: ${responseText.substring(0, 100)}...`);
             }
 
             if (response.ok && data.success && data.token) {
-                addDebugLog('🎯 LOGIN SUCESSO!', 'success');
-                addDebugLog(`🔑 Token recebido: ${data.token.substring(0, 20)}...`);
+                addDebugInfo('🎯 LOGIN SUCESSO!');
+                addDebugInfo(`🔑 Token recebido (primeiros 20 chars): ${data.token.substring(0, 20)}...`);
                 
+                // Guardar token
                 localStorage.setItem('adminToken', data.token);
                 setError('');
                 
-                addDebugLog('✅ Token guardado, redirecionando...', 'success');
+                addDebugInfo('✅ Token guardado com sucesso');
+                addDebugInfo('🔄 Redirecionando para dashboard...');
+                
+                // Redirecionar após pequeno delay
                 setTimeout(() => {
                     window.location.href = '/admin-dashboard';
-                }, 1500);
+                }, 1000);
                 
             } else {
-                const errorMsg = data.message || 'Login falhou - resposta inválida';
-                addDebugLog(`❌ LOGIN FALHOU: ${errorMsg}`, 'error');
-                setError(errorMsg);
+                // Login falhou
+                const errorMsg = data.message || `Login falhou (Status: ${response.status})`;
+                addDebugInfo(`❌ LOGIN FALHOU: ${errorMsg}`);
+                
+                if (response.status === 401) {
+                    setError('Credenciais inválidas. Verifica o utilizador e palavra-passe.');
+                } else if (response.status >= 500) {
+                    setError('Erro interno do servidor. O servidor pode estar a reiniciar (cold start).');
+                } else {
+                    setError(errorMsg);
+                }
             }
         } catch (error) {
-            addDebugLog(`💥 ERRO CAPTURADO: ${error.message}`, 'error');
-            addDebugLog(`💥 Error stack: ${error.stack}`, 'error');
+            addDebugInfo(`💥 ERRO CAPTURADO: ${error.name} - ${error.message}`);
             
-            if (error.response) {
-                addDebugLog(`💥 Error response: ${JSON.stringify(error.response)}`, 'error');
-                setError(error.response?.data?.message || 'Erro do servidor');
-            } else if (error.request) {
-                addDebugLog('💥 Erro de network - sem resposta do servidor', 'error');
-                setError('Sem resposta do servidor. Verifica se está a correr.');
+            if (error.name === 'AbortError') {
+                setError('Timeout: O servidor demorou muito a responder. Tenta novamente.');
+                addDebugInfo('⏰ Timeout - servidor pode estar em cold start');
+            } else if (error.message.includes('Failed to fetch')) {
+                setError('Erro de conexão: Não foi possível conectar ao servidor.');
+                addDebugInfo('🌐 Erro de rede - verificar CORS ou URL do backend');
             } else {
-                setError('Erro: ' + error.message);
+                setError(`Erro: ${error.message}`);
             }
         } finally {
             setLoading(false);
         }
     };
 
-    const clearLogs = () => {
-        setDebugLogs([]);
-        addDebugLog('🧹 Logs limpos');
+    const clearDebugInfo = () => {
+        setDebugInfo('');
+        addDebugInfo('🧹 Debug info limpo');
     };
 
-    const testDifferentCredentials = async () => {
-        const credentialsToTest = [
-            { username: 'admin', password: 'admin' },
-            { username: 'admin', password: 'password' },
-            { username: 'admin', password: '123456' },
-            { username: 'admin', password: 'odracirladiv' },
-            { username: 'ricardo', password: 'admin' }
-        ];
-
-        addDebugLog('🧪 Testando diferentes credenciais...');
-        
-        for (const creds of credentialsToTest) {
-            try {
-                const response = await fetch(`${api.defaults.baseURL}/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(creds)
-                });
-                
-                const data = await response.json();
-                addDebugLog(`🧪 ${creds.username}/${creds.password} → Status: ${response.status}, Success: ${data.success}`);
-            } catch (error) {
-                addDebugLog(`🧪 ${creds.username}/${creds.password} → Erro: ${error.message}`);
-            }
-        }
+    const testConnection = async () => {
+        addDebugInfo('🧪 Testando conexão manual...');
+        await checkServerStatus();
     };
 
     return (
         <div className={styles.loginContainer}>
-            <div className={styles.loginBox} style={{ maxWidth: '800px' }}>
+            <div className={styles.loginBox} style={{ maxWidth: '600px' }}>
                 <div className="text-center mb-4">
                     <i className="bi bi-shield-lock" style={{ fontSize: '3rem', color: '#007bff' }}></i>
                     <h2 className="mt-2">Área de Administração</h2>
                     <p className="text-muted">Portfolio - Ricardo Vidal</p>
-                    <div className={`badge ${
-                        serverStatus === 'online' ? 'bg-success' : 
-                        serverStatus === 'offline' ? 'bg-danger' : 
-                        'bg-warning'
-                    }`}>
-                        Servidor: {serverStatus}
+                    <div className="d-flex justify-content-center gap-2">
+                        <span className="badge bg-info">Vercel Frontend</span>
+                        <span className={`badge ${
+                            serverStatus === 'online' ? 'bg-success' : 
+                            serverStatus === 'offline' ? 'bg-danger' : 
+                            'bg-warning'
+                        }`}>
+                            Render Backend: {serverStatus}
+                        </span>
                     </div>
                 </div>
                 
@@ -249,107 +238,104 @@ const AdminLogin = () => {
                         </div>
                     )}
                     
-                    <div className="row">
-                        <div className="col-md-6">
-                            <div className={styles.formGroup}>
-                                <label htmlFor="username" className="form-label">
-                                    <i className="bi bi-person me-2"></i>
-                                    Utilizador
-                                </label>
-                                <input 
-                                    type="text" 
-                                    id="username"
-                                    className="form-control"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Insire o teu utilizador"
-                                    required
-                                    disabled={loading}
-                                    autoComplete="username"
-                                />
-                            </div>
-                        </div>
-                        <div className="col-md-6">
-                            <div className={styles.formGroup}>
-                                <label htmlFor="password" className="form-label">
-                                    <i className="bi bi-lock me-2"></i>
-                                    Palavra-passe
-                                </label>
-                                <input 
-                                    type="password" 
-                                    id="password"
-                                    className="form-control"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Insire a tua palavra-passe"
-                                    required
-                                    disabled={loading}
-                                    autoComplete="current-password"
-                                />
-                            </div>
-                        </div>
+                    <div className={styles.formGroup}>
+                        <label htmlFor="username" className="form-label">
+                            <i className="bi bi-person me-2"></i>
+                            Utilizador
+                        </label>
+                        <input 
+                            type="text" 
+                            id="username"
+                            className="form-control"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Insire o teu utilizador"
+                            required
+                            disabled={loading}
+                            autoComplete="username"
+                        />
                     </div>
                     
-                    <div className="d-grid gap-2 d-md-flex justify-content-md-end mb-3">
+                    <div className={styles.formGroup}>
+                        <label htmlFor="password" className="form-label">
+                            <i className="bi bi-lock me-2"></i>
+                            Palavra-passe
+                        </label>
+                        <input 
+                            type="password" 
+                            id="password"
+                            className="form-control"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Insire a tua palavra-passe"
+                            required
+                            disabled={loading}
+                            autoComplete="current-password"
+                        />
+                    </div>
+                    
+                    <div className="d-flex gap-2 mb-3">
                         <button 
                             type="button" 
-                            className="btn btn-outline-info btn-sm"
-                            onClick={testDifferentCredentials}
+                            className="btn btn-outline-info btn-sm flex-fill"
+                            onClick={testConnection}
                             disabled={loading}
                         >
-                            🧪 Testar Credenciais
+                            🧪 Testar Conexão
                         </button>
                         <button 
                             type="button" 
-                            className="btn btn-outline-secondary btn-sm"
-                            onClick={clearLogs}
+                            className="btn btn-outline-secondary btn-sm flex-fill"
+                            onClick={clearDebugInfo}
                         >
-                            🧹 Limpar Logs
+                            🧹 Limpar Debug
                         </button>
                     </div>
                     
                     <button 
                         type="submit" 
                         className={`btn btn-primary w-100 ${styles.loginButton}`}
-                        disabled={loading}
+                        disabled={loading || serverStatus === 'offline'}
                     >
                         {loading ? (
                             <>
                                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                 A entrar...
                             </>
+                        ) : serverStatus === 'offline' ? (
+                            <>
+                                <i className="bi bi-wifi-off me-2"></i>
+                                Servidor Offline
+                            </>
                         ) : (
                             <>
                                 <i className="bi bi-box-arrow-in-right me-2"></i>
-                                Entrar (DEBUG)
+                                Entrar
                             </>
                         )}
                     </button>
                 </form>
 
                 {/* Painel de Debug */}
-                <div className="mt-4">
-                    <div className="card">
-                        <div className="card-header d-flex justify-content-between align-items-center">
-                            <h6 className="mb-0">🔍 Debug Console</h6>
-                            <small className="text-muted">{debugLogs.length} logs</small>
-                        </div>
-                        <div className="card-body p-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                            {debugLogs.length === 0 ? (
-                                <p className="text-muted mb-0">Nenhum log ainda...</p>
-                            ) : (
+                {debugInfo && (
+                    <div className="mt-4">
+                        <div className="card">
+                            <div className="card-header">
+                                <h6 className="mb-0">🔍 Debug Info (Produção)</h6>
+                            </div>
+                            <div className="card-body p-2" style={{ maxHeight: '250px', overflowY: 'auto' }}>
                                 <pre style={{ 
-                                    fontSize: '11px', 
+                                    fontSize: '10px', 
                                     margin: 0, 
                                     whiteSpace: 'pre-wrap',
                                     fontFamily: 'Consolas, monospace'
                                 }}>
-                                    {debugLogs.join('\n')}
+                                    {debugInfo}
                                 </pre>
-                            )}
+                            </div>
                         </div>
                     </div>
-                </div>
+                )}
 
                 <hr className="my-4" />
                 
@@ -357,7 +343,7 @@ const AdminLogin = () => {
                     <small className="text-muted">
                         Instituto Politécnico de Viseu - ESTGV<br />
                         Tecnologias e Design Multimédia<br />
-                        <span className="badge bg-warning mt-1">MODO DEBUG ATIVO</span>
+                        <span className="badge bg-success mt-1">PRODUÇÃO ATIVA</span>
                     </small>
                 </div>
                 
