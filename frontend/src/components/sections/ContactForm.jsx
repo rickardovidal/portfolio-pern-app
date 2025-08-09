@@ -153,7 +153,7 @@ const ContactForm = () => {
                                     value={formData.nome}
                                     onChange={handleChange}
                                     className={`${styles.formInput} ${errors.nome ? styles.formInputError : ''}`}
-                                    placeholder="O teu nome completo"
+                                    placeholder="O seu nome completo"
                                     maxLength={100}
                                 />
                                 {errors.nome && (
@@ -234,7 +234,7 @@ const ContactForm = () => {
                                 value={formData.assunto}
                                 onChange={handleChange}
                                 className={`${styles.formInput} ${errors.assunto ? styles.formInputError : ''}`}
-                                placeholder="Qual é o assunto da tua mensagem?"
+                                placeholder="Qual é o assunto da sua mensagem?"
                                 maxLength={200}
                             />
                             {errors.assunto && (
@@ -253,7 +253,7 @@ const ContactForm = () => {
                                 value={formData.mensagem}
                                 onChange={handleChange}
                                 className={`${styles.formTextarea} ${errors.mensagem ? styles.formInputError : ''}`}
-                                placeholder="Descreve o teu projeto, necessidades ou questões..."
+                                placeholder="Descreva o seu projeto, necessidades ou questões..."
                                 rows={5}
                                 maxLength={2000}
                             />
@@ -295,7 +295,7 @@ const ContactForm = () => {
                         </button>
 
                         <p className={styles.formNote}>
-                            * Campos obrigatórios. Os teus dados serão tratados com total confidencialidade.
+                            * Campos obrigatórios. Os seus dados serão tratados com total confidencialidade.
                         </p>
                     </form>
                 </div>
