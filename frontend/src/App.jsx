@@ -1,6 +1,6 @@
 // src/App.jsx (ADICIONAR estas rotas)
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 // Lazy loading components para melhor performance
 const Navbar = lazy(() => import('./components/layout/Navbar'));
@@ -33,9 +33,10 @@ const LoadingSpinner = () => (
 // Componente para proteger rotas administrativas
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('adminToken');
+    const navigate = useNavigate(); // Hook para navegação programática
     
     if (!token) {
-        window.location.href = '/admin-login';
+        navigate('/admin-login'); // Redireciona usando useNavigate
         return <LoadingSpinner />;
     }
     
@@ -178,6 +179,8 @@ function App() {
             </Routes>
         </Router>
     );
+    //
 }
 
 export default App;
+
