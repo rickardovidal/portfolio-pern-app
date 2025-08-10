@@ -74,22 +74,24 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const loadClientes = async () => {
         try {
-            console.log('🔄 A carregar clientes para projetos...');
-            const response = await api.get('/clientes');
+            setLoading(true);
+            NotificationService.loading('A carregar clientes...');
 
+            const response = await api.get('/clientes');
             if (response.data.success) {
-                const clientesData = response.data.data || [];
-                console.log(`✅ ${clientesData.length} clientes carregados para projetos`);
-                setClientes(clientesData);
-            } else {
-                console.error('❌ Erro na resposta do servidor');
-                NotificationService.errorToast('Erro ao carregar clientes');
+                setClientes(response.data.data || []);
+                NotificationService.closeLoading();
+                NotificationService.successToast('Clientes carregados!');
             }
         } catch (error) {
-            console.error('❌ Erro ao carregar clientes:', error);
+            console.error('Erro ao carregar clientes:', error);
+            NotificationService.closeLoading();
             NotificationService.errorToast('Erro ao carregar clientes');
+        } finally {
+            setLoading(false);
         }
     };
+
     // ✅ CORRIGIDO - Carregamento simples com toast
     const loadEstadosProjeto = async () => {
         try {
