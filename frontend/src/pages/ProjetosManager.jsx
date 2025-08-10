@@ -94,17 +94,18 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     // Função simplificada para obter nome do cliente
     const getClienteNome = (projeto) => {
-        // Estratégia 1: Associação do backend
+        // Estratégia 1: Associação do backend (se o backend já envia o objeto cliente aninhado)
         if (projeto.cliente && projeto.cliente.nome) {
             return projeto.cliente.nome;
         }
         
-        // Estratégia 2: Lista local
+        // Estratégia 2: Procurar na lista local de clientes carregada
         const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
         if (clienteLocal) {
             return clienteLocal.nome;
         }
         
+        // Se nenhuma das estratégias funcionar, retorna N/A
         return 'N/A';
     };
 
@@ -429,226 +430,211 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">A carregar...</span>
                     </div>
+                    <p className="mt-2 text-muted">A carregar projetos...</p>
+                </div>
+            ) : projetos.length === 0 ? (
+                <div className="alert alert-info text-center" role="alert">
+                    Nenhum projeto encontrado.
                 </div>
             ) : (
-                <div className="card">
-                    <div className="card-header">
-                        <h5 className="mb-0">
-                            Lista de Projetos
-                            <span className="badge bg-primary ms-2">{filteredProjetos.length}</span>
-                        </h5>
-                    </div>
-                    <div className="card-body p-0">
-                        {filteredProjetos.length === 0 ? (
-                            <div className="text-center p-4">
-                                <i className="bi bi-folder-x fa-3x text-muted mb-3"></i>
-                                <p className="text-muted">
-                                    {searchTerm || filterCliente || filterEstado || filterStatus ? 'Nenhum projeto encontrado com os filtros aplicados.' : 'Ainda não tens projetos registados.'}
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="table-responsive">
-                                <table className="table table-hover mb-0">
-                                    <thead className="table-light">
-                                        <tr>
-                                            <th>Nome do Projeto</th>
-                                            <th>Cliente</th>
-                                            <th>Estado</th>
-                                            <th>Orçamento</th>
-                                            <th>Início</th>
-                                            <th>Fim Previsto</th>
-                                            <th className="text-center">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredProjetos.map(projeto => (
-                                            <tr key={projeto.idProjeto}>
-                                                <td>
-                                                    <strong>{projeto.nomeProjeto}</strong>
-                                                </td>
-                                                <td>{getClienteNome(projeto)}</td>
-                                                <td>
-                                                    <span className={`badge ${getEstadoProjetoBadgeClass(projeto.idEstado_Projeto)}`}>
-                                                        {getEstadoProjetoNome(projeto.idEstado_Projeto)}
-                                                    </span>
-                                                </td>
-                                                <td>{parseFloat(projeto.orcamentoTotal).toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}</td>
-                                                <td>{projeto.dataInicio ? new Date(projeto.dataInicio).toLocaleDateString('pt-PT') : 'N/A'}</td>
-                                                <td>{projeto.dataPrevista_Fim ? new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT') : 'N/A'}</td>
-                                                <td className="text-center">
-                                                    <div className="btn-group" role="group">
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-sm btn-outline-primary"
-                                                            onClick={() => handleEdit(projeto)}
-                                                            title="Editar projeto"
-                                                        >
-                                                            <i className="bi bi-pencil"></i>
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            className={`btn btn-sm ${projeto.ativo ? 'btn-outline-warning' : 'btn-outline-success'}`}
-                                                            onClick={() => handleToggleStatus(projeto)}
-                                                            title={projeto.ativo ? 'Desativar projeto' : 'Ativar projeto'}
-                                                        >
-                                                            <i className={`bi ${projeto.ativo ? 'bi-toggle-on' : 'bi-toggle-off'}`}></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Projeto</th>
+                                <th>Cliente</th>
+                                <th>Estado</th>
+                                <th>Orçamento</th>
+                                <th>Data Início</th>
+                                <th>Data Fim Prevista</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredProjetos.map(projeto => (
+                                <tr key={projeto.idProjeto}>
+                                    <td>
+                                        <strong>{projeto.nomeProjeto}</strong><br />
+                                        <small className="text-muted">{projeto.descricaoProjeto}</small>
+                                    </td>
+                                    <td>{getClienteNome(projeto)}</td>
+                                    <td>
+                                        <span className={`badge ${getEstadoProjetoBadgeClass(projeto.idEstado_Projeto)}`}>
+                                            {getEstadoProjetoNome(projeto.idEstado_Projeto)}
+                                        </span>
+                                    </td>
+                                    <td>{parseFloat(projeto.orcamentoTotal).toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}</td>
+                                    <td>{new Date(projeto.dataInicio).toLocaleDateString('pt-PT')}</td>
+                                    <td>{new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT')}</td>
+                                    <td>
+                                        <span className={`badge ${projeto.ativo ? 'bg-success' : 'bg-danger'}`}>
+                                            {projeto.ativo ? 'Ativo' : 'Inativo'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-outline-primary me-1"
+                                            onClick={() => handleEdit(projeto)}
+                                            title="Editar Projeto"
+                                        >
+                                            <i className="bi bi-pencil"></i>
+                                        </button>
+                                        <button
+                                            className={`btn btn-sm ${projeto.ativo ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                                            onClick={() => handleToggleStatus(projeto)}
+                                            title={projeto.ativo ? 'Desativar Projeto' : 'Ativar Projeto'}
+                                        >
+                                            <i className={`bi ${projeto.ativo ? 'bi-toggle-off' : 'bi-toggle-on'}`}></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 
-            {/* Modal para Adicionar/Editar Projeto */}
-            {showModal && (
-                <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">{editingProject ? 'Editar Projeto' : 'Adicionar Projeto'}</h5>
-                                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
-                            </div>
-                            <div className="modal-body">
-                                <form onSubmit={handleSubmit}>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="nomeProjeto" className="form-label">Nome do Projeto</label>
-                                            <input
-                                                type="text"
-                                                className={`form-control ${errors.nomeProjeto ? 'is-invalid' : ''}`}
-                                                id="nomeProjeto"
-                                                name="nomeProjeto"
-                                                value={formData.nomeProjeto}
-                                                onChange={handleInputChange}
-                                                required
-                                            />
-                                            {errors.nomeProjeto && <div className="invalid-feedback">{errors.nomeProjeto}</div>}
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="idCliente" className="form-label">Cliente</label>
-                                            <select
-                                                className={`form-select ${errors.idCliente ? 'is-invalid' : ''}`}
-                                                id="idCliente"
-                                                name="idCliente"
-                                                value={formData.idCliente}
-                                                onChange={handleInputChange}
-                                                required
-                                            >
-                                                <option value="">Seleciona um cliente</option>
-                                                {clientes.map(cliente => (
-                                                    <option key={cliente.idCliente} value={cliente.idCliente}>
-                                                        {cliente.nome}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {errors.idCliente && <div className="invalid-feedback">{errors.idCliente}</div>}
-                                        </div>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="descricaoProjeto" className="form-label">Descrição</label>
-                                        <textarea
-                                            className="form-control"
-                                            id="descricaoProjeto"
-                                            name="descricaoProjeto"
-                                            rows="3"
-                                            value={formData.descricaoProjeto}
+            {/* Modal de Adicionar/Editar Projeto */}
+            <div className={`modal fade ${showModal ? 'show' : ''}`} style={{ display: showModal ? 'block' : 'none' }} tabIndex="-1" aria-labelledby="projectModalLabel" aria-hidden={!showModal}>
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h5 className="modal-title" id="projectModalLabel">
+                                {editingProject ? 'Editar Projeto' : 'Adicionar Novo Projeto'}
+                            </h5>
+                            <button type="button" className="btn-close" onClick={handleCloseModal} aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <form onSubmit={handleSubmit}>
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="nomeProjeto" className="form-label">Nome do Projeto <span className="text-danger">*</span></label>
+                                        <input
+                                            type="text"
+                                            className={`form-control ${errors.nomeProjeto ? 'is-invalid' : ''}`}
+                                            id="nomeProjeto"
+                                            name="nomeProjeto"
+                                            value={formData.nomeProjeto}
                                             onChange={handleInputChange}
-                                        ></textarea>
+                                            required
+                                        />
+                                        {errors.nomeProjeto && <div className="invalid-feedback">{errors.nomeProjeto}</div>}
                                     </div>
-                                    <div className="row">
-                                        <div className="col-md-4 mb-3">
-                                            <label htmlFor="dataInicio" className="form-label">Data de Início</label>
-                                            <input
-                                                type="date"
-                                                className="form-control"
-                                                id="dataInicio"
-                                                name="dataInicio"
-                                                value={formData.dataInicio}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                        <div className="col-md-4 mb-3">
-                                            <label htmlFor="dataPrevista_Fim" className="form-label">Data Prevista de Fim</label>
-                                            <input
-                                                type="date"
-                                                className={`form-control ${errors.dataPrevista_Fim ? 'is-invalid' : ''}`}
-                                                id="dataPrevista_Fim"
-                                                name="dataPrevista_Fim"
-                                                value={formData.dataPrevista_Fim}
-                                                onChange={handleInputChange}
-                                            />
-                                            {errors.dataPrevista_Fim && <div className="invalid-feedback">{errors.dataPrevista_Fim}</div>}
-                                        </div>
-                                        <div className="col-md-4 mb-3">
-                                            <label htmlFor="dataFim" className="form-label">Data de Fim (Real)</label>
-                                            <input
-                                                type="date"
-                                                className="form-control"
-                                                id="dataFim"
-                                                name="dataFim"
-                                                value={formData.dataFim}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total</label>
-                                            <input
-                                                type="number"
-                                                className={`form-control ${errors.orcamentoTotal ? 'is-invalid' : ''}`}
-                                                id="orcamentoTotal"
-                                                name="orcamentoTotal"
-                                                value={formData.orcamentoTotal}
-                                                onChange={handleInputChange}
-                                                step="0.01"
-                                                min="0"
-                                                required
-                                            />
-                                            {errors.orcamentoTotal && <div className="invalid-feedback">{errors.orcamentoTotal}</div>}
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="idEstado_Projeto" className="form-label">Estado do Projeto</label>
-                                            <select
-                                                className={`form-select ${errors.idEstado_Projeto ? 'is-invalid' : ''}`}
-                                                id="idEstado_Projeto"
-                                                name="idEstado_Projeto"
-                                                value={formData.idEstado_Projeto}
-                                                onChange={handleInputChange}
-                                                required
-                                            >
-                                                <option value="">Seleciona um estado</option>
-                                                {estadosProjeto.map(estado => (
-                                                    <option key={estado.idEstado_Projeto} value={estado.idEstado_Projeto}>
-                                                        {estado.designacaoEstado_Projeto}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {errors.idEstado_Projeto && <div className="invalid-feedback">{errors.idEstado_Projeto}</div>}
-                                        </div>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="notas" className="form-label">Notas</label>
-                                        <textarea
-                                            className="form-control"
-                                            id="notas"
-                                            name="notas"
-                                            rows="3"
-                                            value={formData.notas}
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="idCliente" className="form-label">Cliente <span className="text-danger">*</span></label>
+                                        <select
+                                            className={`form-select ${errors.idCliente ? 'is-invalid' : ''}`}
+                                            id="idCliente"
+                                            name="idCliente"
+                                            value={formData.idCliente}
                                             onChange={handleInputChange}
-                                        ></textarea>
+                                            required
+                                        >
+                                            <option value="">Selecionar Cliente</option>
+                                            {clientes.map(cliente => (
+                                                <option key={cliente.idCliente} value={cliente.idCliente}>
+                                                    {cliente.nome}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.idCliente && <div className="invalid-feedback">{errors.idCliente}</div>}
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Serviços Associados</label>
-                                        <div className="d-flex flex-wrap">
-                                            {servicos.map(servico => (
-                                                <div key={servico.idServico} className="form-check me-3">
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="descricaoProjeto" className="form-label">Descrição do Projeto</label>
+                                    <textarea
+                                        className="form-control"
+                                        id="descricaoProjeto"
+                                        name="descricaoProjeto"
+                                        rows="3"
+                                        value={formData.descricaoProjeto}
+                                        onChange={handleInputChange}
+                                    ></textarea>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-4 mb-3">
+                                        <label htmlFor="dataInicio" className="form-label">Data Início</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            id="dataInicio"
+                                            name="dataInicio"
+                                            value={formData.dataInicio}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                    <div className="col-md-4 mb-3">
+                                        <label htmlFor="dataPrevista_Fim" className="form-label">Data Prevista Fim <span className="text-danger">*</span></label>
+                                        <input
+                                            type="date"
+                                            className={`form-control ${errors.dataPrevista_Fim ? 'is-invalid' : ''}`}
+                                            id="dataPrevista_Fim"
+                                            name="dataPrevista_Fim"
+                                            value={formData.dataPrevista_Fim}
+                                            onChange={handleInputChange}
+                                            required
+                                        />
+                                        {errors.dataPrevista_Fim && <div className="invalid-feedback">{errors.dataPrevista_Fim}</div>}
+                                    </div>
+                                    <div className="col-md-4 mb-3">
+                                        <label htmlFor="dataFim" className="form-label">Data Fim Real</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            id="dataFim"
+                                            name="dataFim"
+                                            value={formData.dataFim}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="row">
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total <span className="text-danger">*</span></label>
+                                        <input
+                                            type="number"
+                                            className={`form-control ${errors.orcamentoTotal ? 'is-invalid' : ''}`}
+                                            id="orcamentoTotal"
+                                            name="orcamentoTotal"
+                                            value={formData.orcamentoTotal}
+                                            onChange={handleInputChange}
+                                            required
+                                            min="0"
+                                            step="0.01"
+                                        />
+                                        {errors.orcamentoTotal && <div className="invalid-feedback">{errors.orcamentoTotal}</div>}
+                                    </div>
+                                    <div className="col-md-6 mb-3">
+                                        <label htmlFor="idEstado_Projeto" className="form-label">Estado do Projeto <span className="text-danger">*</span></label>
+                                        <select
+                                            className={`form-select ${errors.idEstado_Projeto ? 'is-invalid' : ''}`}
+                                            id="idEstado_Projeto"
+                                            name="idEstado_Projeto"
+                                            value={formData.idEstado_Projeto}
+                                            onChange={handleInputChange}
+                                            required
+                                        >
+                                            <option value="">Selecionar Estado</option>
+                                            {estadosProjeto.map(estado => (
+                                                <option key={estado.idEstado_Projeto} value={estado.idEstado_Projeto}>
+                                                    {estado.designacaoEstado_Projeto}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {errors.idEstado_Projeto && <div className="invalid-feedback">{errors.idEstado_Projeto}</div>}
+                                    </div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="form-label">Serviços Associados</label>
+                                    <div className="row">
+                                        {servicos.map(servico => (
+                                            <div className="col-md-4" key={servico.idServico}>
+                                                <div className="form-check">
                                                     <input
                                                         className="form-check-input"
                                                         type="checkbox"
@@ -658,39 +644,56 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                         onChange={() => handleServicoChange(servico.idServico)}
                                                     />
                                                     <label className="form-check-label" htmlFor={`servico-${servico.idServico}`}>
-                                                        {servico.designacaoServico}
+                                                        {servico.nomeServico}
                                                     </label>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="form-check mb-3">
-                                        <input
-                                            className="form-check-input"
-                                            type="checkbox"
-                                            id="ativo"
-                                            name="ativo"
-                                            checked={formData.ativo}
-                                            onChange={handleInputChange}
-                                        />
-                                        <label className="form-check-label" htmlFor="ativo">
-                                            Projeto Ativo
-                                        </label>
-                                    </div>
-                                    <div className="modal-footer d-flex justify-content-between">
-                                        <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancelar</button>
-                                        <button type="submit" className="btn btn-primary">{editingProject ? 'Guardar Alterações' : 'Adicionar Projeto'}</button>
-                                    </div>
-                                </form>
-                            </div>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="notas" className="form-label">Notas</label>
+                                    <textarea
+                                        className="form-control"
+                                        id="notas"
+                                        name="notas"
+                                        rows="3"
+                                        value={formData.notas}
+                                        onChange={handleInputChange}
+                                    ></textarea>
+                                </div>
+
+                                <div className="form-check mb-3">
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id="ativo"
+                                        name="ativo"
+                                        checked={formData.ativo}
+                                        onChange={handleInputChange}
+                                    />
+                                    <label className="form-check-label" htmlFor="ativo">
+                                        Projeto Ativo
+                                    </label>
+                                </div>
+
+                                <div className="modal-footer d-flex justify-content-between">
+                                    <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        {editingProject ? 'Guardar Alterações' : 'Criar Projeto'}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };
 
 export default ProjetosManager;
-
 
