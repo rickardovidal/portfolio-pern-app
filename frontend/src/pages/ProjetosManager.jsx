@@ -229,11 +229,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     // Função melhorada para obter nome do cliente com múltiplas estratégias
     const getClienteNome = (projeto) => {
-        // A API já retorna a associação correcta
-        if (projeto.cliente?.nome) {
-            return projeto.cliente.nome;
-        }
-        return 'N/A';
+        return projeto.cliente?.nome || 'N/A';
     };
 
     // Resto das funções existentes mantidas como estavam
