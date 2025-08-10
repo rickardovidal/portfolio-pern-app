@@ -386,8 +386,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const getClienteNome = (projeto) => {
         // PRIORIDADE 1: Usar associação que vem do backend
-        if (projeto.cliente?.nome) {
-            return projeto.cliente.nome;
+        if (projeto.clientes?.nome) {
+            return projeto.clientes.nome;
         }
 
         // PRIORIDADE 2: Procurar na lista local (fallback)
