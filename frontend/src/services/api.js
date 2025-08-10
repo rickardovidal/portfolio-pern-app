@@ -2,7 +2,8 @@
 import axios from 'axios';
 
 // Configurar base URL da API
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+// Usar a URL do backend no Render diretamente, pois a variável de ambiente VITE_API_URL não está a ser configurada corretamente no Vercel
+const API_BASE_URL = 'https://portfolio-pern-app.onrender.com/api';
 
 // Criar instância do axios
 const api = axios.create({
@@ -44,3 +45,4 @@ api.interceptors.response.use(
 );
 
 export default api;
+
