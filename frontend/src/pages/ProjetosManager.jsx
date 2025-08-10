@@ -48,17 +48,21 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         try {
             setLoading(true);
             const response = await api.get('/projetos');
+
             if (response.data.success) {
-                console.log('📂 Projetos carregados:', response.data.data);
-                // Verificar se os projetos têm a associação cliente
-                response.data.data.forEach(projeto => {
+                const projetosData = response.data.data || [];
+                console.log('📂 Projetos carregados:', projetosData);
+
+                // 🔍 DEBUG: Verificar se as associações cliente vêm do backend
+                projetosData.forEach(projeto => {
                     console.log(`Projeto "${projeto.nomeProjeto}":`, {
                         idCliente: projeto.idCliente,
                         temAssociacaoCliente: !!projeto.cliente,
-                        nomeCliente: projeto.cliente?.nome || 'SEM ASSOCIAÇÃO'
+                        nomeViaAssociacao: projeto.cliente?.nome || 'SEM ASSOCIAÇÃO'
                     });
                 });
-                setProjetos(response.data.data || []);
+
+                setProjetos(projetosData);
             }
         } catch (error) {
             console.error('Erro ao carregar projetos:', error);
@@ -70,12 +74,19 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const loadClientes = async () => {
         try {
+            console.log('🔄 A carregar clientes para projetos...');
             const response = await api.get('/clientes');
+
             if (response.data.success) {
-                setClientes(response.data.data || []);
+                const clientesData = response.data.data || [];
+                console.log(`✅ ${clientesData.length} clientes carregados para projetos`);
+                setClientes(clientesData);
+            } else {
+                console.error('❌ Erro na resposta do servidor');
+                NotificationService.errorToast('Erro ao carregar clientes');
             }
         } catch (error) {
-            console.error('Erro ao carregar clientes:', error);
+            console.error('❌ Erro ao carregar clientes:', error);
             NotificationService.errorToast('Erro ao carregar clientes');
         }
     };
@@ -372,20 +383,20 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     });
 
     const getClienteNome = (projeto) => {
-    // Primeiro tenta usar a associação que vem do backend
-    if (projeto.cliente?.nome) {
-        return projeto.cliente.nome;
-    }
-    
-    // Fallback para a lista de clientes local
-    const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
-    if (clienteLocal?.nome) {
-        return clienteLocal.nome;
-    }
-    
-    // Último recurso: mostrar ID do cliente
-    return projeto.idCliente ? `Cliente ID: ${projeto.idCliente}` : 'Cliente não definido';
-};
+        // PRIORIDADE 1: Usar associação que vem do backend
+        if (projeto.cliente?.nome) {
+            return projeto.cliente.nome;
+        }
+
+        // PRIORIDADE 2: Procurar na lista local (fallback)
+        const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
+        if (clienteLocal?.nome) {
+            return clienteLocal.nome;
+        }
+
+        // ÚLTIMO RECURSO: Mostrar que há problema
+        return `Cliente não encontrado (ID: ${projeto.idCliente})`;
+    };
     const getEstadoNome = (idEstado) => {
         const estado = estadosProjeto.find(e => e.idEstado_Projeto == idEstado);
         return estado ? estado.designacaoEstado_Projeto : 'N/A';
