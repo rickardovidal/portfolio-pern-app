@@ -47,48 +47,69 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const loadProjetos = async () => {
         try {
             setLoading(true);
+            console.log('🔄 Carregando projetos...');
+
             const response = await api.get('/projetos');
 
             if (response.data.success) {
                 const projetosData = response.data.data || [];
-                console.log('📂 Projetos carregados:', projetosData);
+                console.log('✅ Projetos carregados:', projetosData.length, 'projetos');
 
-                // 🔍 DEBUG: Verificar se as associações cliente vêm do backend
+                // 🔍 DEBUG: Verificar estrutura das associações
                 projetosData.forEach(projeto => {
                     console.log(`Projeto "${projeto.nomeProjeto}":`, {
                         idCliente: projeto.idCliente,
-                        temAssociacaoCliente: !!projeto.cliente,
-                        nomeViaAssociacao: projeto.cliente?.nome || 'SEM ASSOCIAÇÃO'
+                        // Corrigir: deve ser 'cliente', não 'clientes' 
+                        associacaoCliente: projeto.cliente?.nome || 'SEM ASSOCIAÇÃO',
+                        estruturaCompleta: JSON.stringify(projeto.cliente, null, 2)
                     });
                 });
 
                 setProjetos(projetosData);
+            } else {
+                console.warn('⚠️ Resposta da API não indica sucesso para projetos');
+                NotificationService.errorToast('Erro ao carregar projetos');
             }
         } catch (error) {
-            console.error('Erro ao carregar projetos:', error);
+            console.error('❌ Erro ao carregar projetos:', error);
             NotificationService.errorToast('Erro ao carregar projetos');
         } finally {
             setLoading(false);
         }
     };
-
     const loadClientes = async () => {
         try {
-            setLoading(true);
-            NotificationService.loading('A carregar clientes...');
+            console.log('🔄 Iniciando carregamento de clientes...');
 
             const response = await api.get('/clientes');
+
             if (response.data.success) {
-                setClientes(response.data.data || []);
-                NotificationService.closeLoading();
-                NotificationService.successToast('Clientes carregados!');
+                const clientesData = response.data.data || [];
+                console.log('✅ Clientes carregados com sucesso:', clientesData.length, 'clientes');
+
+                setClientes(clientesData);
+
+                // Opcional: Mostra sucesso apenas se há clientes
+                if (clientesData.length > 0) {
+                    NotificationService.successToast(`${clientesData.length} clientes carregados!`);
+                }
+            } else {
+                console.warn('⚠️ Resposta da API não indica sucesso:', response.data);
+                NotificationService.errorToast('Resposta inválida ao carregar clientes');
             }
         } catch (error) {
-            console.error('Erro ao carregar clientes:', error);
-            NotificationService.closeLoading();
+            console.error('❌ Erro ao carregar clientes:', error);
+
+            // Log mais detalhado do erro
+            if (error.response) {
+                console.error('Status:', error.response.status);
+                console.error('Data:', error.response.data);
+            }
+
             NotificationService.errorToast('Erro ao carregar clientes');
-        } finally {
-            setLoading(false);
+
+            // Garantir que clientes fica como array vazio em caso de erro
+            setClientes([]);
         }
     };
 
@@ -385,9 +406,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     });
 
     const getClienteNome = (projeto) => {
-        // PRIORIDADE 1: Usar associação que vem do backend
-        if (projeto.clientes?.nome) {
-            return projeto.clientes.nome;
+        // PRIORIDADE 1: Usar a associação 'cliente' (singular) que vem do backend
+        if (projeto.cliente?.nome) {
+            return projeto.cliente.nome;
         }
 
         // PRIORIDADE 2: Procurar na lista local (fallback)
@@ -396,9 +417,10 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             return clienteLocal.nome;
         }
 
-        // ÚLTIMO RECURSO: Mostrar que há problema
-        return `Cliente não encontrado (ID: ${projeto.idCliente})`;
+        // ÚLTIMO RECURSO: Mostrar N/A em vez de mensagem confusa
+        return 'N/A';
     };
+
     const getEstadoNome = (idEstado) => {
         const estado = estadosProjeto.find(e => e.idEstado_Projeto == idEstado);
         return estado ? estado.designacaoEstado_Projeto : 'N/A';
