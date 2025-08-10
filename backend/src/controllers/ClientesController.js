@@ -1,5 +1,5 @@
-const Clientes = require('../models/Clientes');
-const Tipos_Clientes = require('../models/Tipos_Clientes');
+const Clientes = require("../models/Clientes");
+const Tipos_Clientes = require("../models/Tipos_Clientes");
 
 const clientesController = {
     
@@ -7,10 +7,9 @@ const clientesController = {
     listar: async (req, res) => {
         try {
             const clientes = await Clientes.findAll({
-                where: { ativo: true },
                 include: [{
                     model: Tipos_Clientes,
-                    as: 'tipo'
+                    as: "tipo"
                 }]
             });
 
@@ -20,10 +19,10 @@ const clientesController = {
             });
 
         } catch (error) {
-            console.error('Erro ao listar clientes:', error);
+            console.error("Erro ao listar clientes:", error);
             res.status(500).json({
                 success: false,
-                message: 'Erro interno do servidor'
+                message: "Erro interno do servidor"
             });
         }
     },
@@ -40,14 +39,14 @@ const clientesController = {
                 },
                 include: [{
                     model: Tipos_Clientes,
-                    as: 'tipo'
+                    as: "tipo"
                 }]
             });
 
             if (!cliente) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Cliente não encontrado'
+                    message: "Cliente não encontrado"
                 });
             }
 
@@ -57,10 +56,10 @@ const clientesController = {
             });
 
         } catch (error) {
-            console.error('Erro ao obter cliente:', error);
+            console.error("Erro ao obter cliente:", error);
             res.status(500).json({
                 success: false,
-                message: 'Erro interno do servidor'
+                message: "Erro interno do servidor"
             });
         }
     },
@@ -74,7 +73,7 @@ const clientesController = {
             if (!nome || !morada || !idTipo_Cliente) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Nome, morada e tipo de cliente são obrigatórios'
+                    message: "Nome, morada e tipo de cliente são obrigatórios"
                 });
             }
 
@@ -92,15 +91,15 @@ const clientesController = {
 
             res.status(201).json({
                 success: true,
-                message: 'Cliente criado com sucesso',
+                message: "Cliente criado com sucesso",
                 data: novoCliente
             });
 
         } catch (error) {
-            console.error('Erro ao criar cliente:', error);
+            console.error("Erro ao criar cliente:", error);
             res.status(500).json({
                 success: false,
-                message: 'Erro interno do servidor'
+                message: "Erro interno do servidor"
             });
         }
     },
@@ -121,7 +120,7 @@ const clientesController = {
             if (!cliente) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Cliente não encontrado'
+                    message: "Cliente não encontrado"
                 });
             }
 
@@ -138,15 +137,15 @@ const clientesController = {
 
             res.json({
                 success: true,
-                message: 'Cliente atualizado com sucesso',
+                message: "Cliente atualizado com sucesso",
                 data: cliente
             });
 
         } catch (error) {
-            console.error('Erro ao atualizar cliente:', error);
+            console.error("Erro ao atualizar cliente:", error);
             res.status(500).json({
                 success: false,
-                message: 'Erro interno do servidor'
+                message: "Erro interno do servidor"
             });
         }
     },
@@ -166,7 +165,7 @@ const clientesController = {
             if (!cliente) {
                 return res.status(404).json({
                     success: false,
-                    message: 'Cliente não encontrado'
+                    message: "Cliente não encontrado"
                 });
             }
 
@@ -174,14 +173,14 @@ const clientesController = {
 
             res.json({
                 success: true,
-                message: 'Cliente excluído com sucesso'
+                message: "Cliente excluído com sucesso"
             });
 
         } catch (error) {
-            console.error('Erro ao excluir cliente:', error);
+            console.error("Erro ao excluir cliente:", error);
             res.status(500).json({
                 success: false,
-                message: 'Erro interno do servidor'
+                message: "Erro interno do servidor"
             });
         }
     }
