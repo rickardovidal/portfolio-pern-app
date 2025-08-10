@@ -9,10 +9,64 @@ const Utilizador = require('./models/Utilizador');
 
 const app = express();
 
+// ✅ CORRIGIDO: Configuração CORS mais específica para produção
+const corsOptions = {
+    origin: [
+        'http://localhost:5173', // Desenvolvimento local (Vite)
+        'http://localhost:3000', // Desenvolvimento alternativo
+        'https://portfolio-pern-app-ricardo.vercel.app', // ✅ URL do frontend no Vercel
+        'https://vercel.app', // ✅ Domínio adicional do Vercel
+        'https://*.vercel.app' // ✅ Subdomínios do Vercel
+    ],
+    credentials: true, // ✅ Importante para autenticação JWT
+    optionsSuccessStatus: 200,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+// ✅ ADICIONADO: Middleware de CORS mais robusto
+app.use(cors(corsOptions));
+
+// ✅ ADICIONADO: Headers de CORS manuais para maior compatibilidade
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    
+    // Lista de origens permitidas
+    const allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'https://portfolio-pern-app-ricardo.vercel.app'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+        return;
+    }
+    
+    next();
+});
+
 // Middlewares básicos
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' })); // ✅ AUMENTADO limite para uploads
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ✅ ADICIONADO: Middleware de debug para produção
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    if (req.body && Object.keys(req.body).length > 0) {
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+    }
+    next();
+});
 
 // Definir associações entre modelos
 defineAssociations();
@@ -42,6 +96,7 @@ app.get('/api', (req, res) => {
         message: 'Portfolio API - Backend do Ricardo Vidal',
         version: '1.0.0',
         timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
         endpoints: {
             health: '/api/health',
             auth: '/api/auth',
@@ -83,40 +138,60 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/init', initRoutes);
 app.use('/api/emergency', emergencySetup);
 
-// Rota de teste
-app.get('/api/health', (req, res) => {
-    res.json({
-        success: true,
-        message: 'API está funcional',
-        timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development',
-        database: {
-            host: process.env.DB_HOST || 'localhost',
-            name: process.env.DB_NAME || 'portfolio'
-        }
-    });
+// ✅ CORRIGIDO: Rota de teste melhorada
+app.get('/api/health', async (req, res) => {
+    try {
+        // Testar conexão à base de dados
+        await sequelize.authenticate();
+        
+        res.json({
+            success: true,
+            message: 'API está funcional',
+            timestamp: new Date().toISOString(),
+            environment: process.env.NODE_ENV || 'development',
+            database: {
+                status: 'conectada',
+                host: process.env.DB_HOST || 'localhost',
+                name: process.env.DB_NAME || 'portfolio'
+            },
+            version: '1.0.0'
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Erro na base de dados',
+            error: error.message
+        });
+    }
 });
 
-// Middleware de erro global
-app.use((error, req, res, next) => {
-    console.error('Erro não tratado:', error);
-    res.status(500).json({
-        success: false,
-        message: 'Erro interno do servidor',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+// ✅ ADICIONADO: Endpoint de teste específico para clientes
+app.get('/api/test/clientes', async (req, res) => {
+    try {
+        const Clientes = require('./models/Clientes');
+        const Tipos_Clientes = require('./models/Tipos_Clientes');
+        
+        const clientes = await Clientes.findAll({
+            where: { ativo: true },
+            include: [{
+                model: Tipos_Clientes,
+                as: "tipo"
+            }]
+        });
+        
+        res.json({
+            success: true,
+            message: 'Teste de clientes',
+            count: clientes.length,
+            data: clientes
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
 });
-
-// Middleware para rotas não encontradas
-app.use('*', (req, res) => {
-    res.status(404).json({
-        success: false,
-        message: 'Rota não encontrada',
-        path: req.originalUrl
-    });
-});
-
-// ADICIONA ESTAS LINHAS ANTES DE "const PORT = process.env.PORT || 3000;"
 
 // Endpoint para criar utilizador admin
 app.post('/api/emergency-create-admin', async (req, res) => {
@@ -169,91 +244,54 @@ app.post('/api/emergency-create-admin', async (req, res) => {
     }
 });
 
-// Endpoint para verificar se admin existe
-app.get('/api/emergency-check-admin', async (req, res) => {
-    try {
-        const admin = await Utilizador.findOne({
-            where: { username: 'admin' }
-        });
-        
-        const userCount = await Utilizador.count();
-        
-        res.json({
-            success: true,
-            adminExists: admin !== null,
-            userCount: userCount,
-            admin: admin ? {
-                id: admin.idUtilizador,
-                username: admin.username,
-                email: admin.email
-            } : null
-        });
-        
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Erro ao verificar admin',
-            error: error.message
-        });
-    }
+// Middleware de erro global
+app.use((error, req, res, next) => {
+    console.error('❌ Erro não tratado:', error);
+    res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Erro interno'
+    });
+});
+
+// Middleware para rotas não encontradas
+app.use('*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'Rota não encontrada',
+        path: req.originalUrl,
+        method: req.method,
+        timestamp: new Date().toISOString()
+    });
 });
 
 const PORT = process.env.PORT || 3000;
 
-// Função para iniciar o servidor
 async function startServer() {
     try {
-        // Testar conexão à base de dados
-        console.log('A testar a conexão à base de dados...');
+        // ✅ ADICIONADO: Testar conexão à base de dados antes de iniciar
+        console.log('🔌 Testando conexão à base de dados...');
         await sequelize.authenticate();
-        console.log('Conexão à base de dados estabelecida com sucesso!');
-
-        // Sincronizar com a base de dados (NÃO força a recriação em produção)
-        console.log('A sincronizar modelos com a base de dados...');
-        await sequelize.sync({
-            force: false, // NUNCA usar true em produção!
-            alter: process.env.NODE_ENV === 'development' // Apenas em desenvolvimento
-        });
-        console.log('Modelos sincronizados com sucesso!');
-
-        // Iniciar servidor
-        app.listen(PORT, () => {
-            console.log(`Servidor a correr na porta ${PORT}`);
-            console.log(`API disponível em: http://localhost:${PORT}/api`);
-            console.log(`Health check: http://localhost:${PORT}/api/health`);
-            console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
-        });
-
-    } catch (error) {
-        console.error('Erro ao iniciar servidor:', error);
-
-        if (error.name === 'SequelizeConnectionError') {
-            console.error(' Verifica se:');
-            console.error('   - PostgreSQL está a correr');
-            console.error('   - Base de dados "portfolio" existe');
-            console.error('   - Credenciais no .env estão corretas');
+        console.log('✅ Conexão à base de dados estabelecida com sucesso!');
+        
+        // ✅ ADICIONADO: Sincronizar modelos (não forçar em produção)
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('🔄 Sincronizando modelos...');
+            await sequelize.sync({ alter: true });
+            console.log('✅ Modelos sincronizados!');
         }
-
+        
+        app.listen(PORT, () => {
+            console.log(`🚀 Servidor a correr na porta ${PORT}`);
+            console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`📡 API disponível em: http://localhost:${PORT}/api`);
+            console.log(`💾 Base de dados: ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || '5432'}`);
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao iniciar servidor:', error);
         process.exit(1);
     }
 }
 
-// Tratar encerramento gracioso
-process.on('SIGINT', async () => {
-    console.log('\n Encerrando servidor...');
-    await sequelize.close();
-    console.log(' Conexão à base de dados fechada.');
-    process.exit(0);
-});
-
-process.on('SIGTERM', async () => {
-    console.log('\n Encerrando servidor...');
-    await sequelize.close();
-    console.log(' Conexão à base de dados fechada.');
-    process.exit(0);
-});
-
-// Iniciar o servidor
 startServer();
-
-module.exports = app;

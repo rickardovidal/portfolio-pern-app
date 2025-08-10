@@ -3,15 +3,23 @@ const Tipos_Clientes = require("../models/Tipos_Clientes");
 
 const clientesController = {
     
-    // Listar todos os clientes ativos
+    // ✅ CORRIGIDO: Listar todos os clientes ativos
     listar: async (req, res) => {
         try {
             const clientes = await Clientes.findAll({
+                where: { 
+                    ativo: true  // ✅ ADICIONADO: Filtrar apenas clientes ativos
+                },
                 include: [{
                     model: Tipos_Clientes,
                     as: "tipo"
-                }]
+                }],
+                order: [
+                    ['nome', 'ASC'] // ✅ ADICIONADO: Ordenar por nome
+                ]
             });
+
+            console.log(`📋 Clientes encontrados: ${clientes.length}`); // ✅ DEBUG
 
             res.json({
                 success: true,
@@ -19,7 +27,7 @@ const clientesController = {
             });
 
         } catch (error) {
-            console.error("Erro ao listar clientes:", error);
+            console.error("❌ Erro ao listar clientes:", error);
             res.status(500).json({
                 success: false,
                 message: "Erro interno do servidor"
@@ -125,14 +133,14 @@ const clientesController = {
             }
 
             await cliente.update({
-                nome,
-                email,
-                telefone,
-                empresa,
-                nif,
-                morada,
-                notas,
-                idTipo_Cliente
+                nome: nome || cliente.nome,
+                email: email || cliente.email,
+                telefone: telefone || cliente.telefone,
+                empresa: empresa || cliente.empresa,
+                nif: nif || cliente.nif,
+                morada: morada || cliente.morada,
+                notas: notas || cliente.notas,
+                idTipo_Cliente: idTipo_Cliente || cliente.idTipo_Cliente
             });
 
             res.json({
@@ -150,7 +158,7 @@ const clientesController = {
         }
     },
 
-    // Soft delete - desativar cliente
+    // Excluir cliente (soft delete)
     excluir: async (req, res) => {
         try {
             const { id } = req.params;
@@ -173,7 +181,7 @@ const clientesController = {
 
             res.json({
                 success: true,
-                message: "Cliente excluído com sucesso"
+                message: "Cliente desativado com sucesso"
             });
 
         } catch (error) {
