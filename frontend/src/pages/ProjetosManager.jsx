@@ -34,10 +34,13 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        loadClientes();
-        loadEstadosProjeto();
-        loadServicos();
-        loadProjetos();
+        const initData = async () => {
+            await loadClientes();
+            await loadEstadosProjeto();
+            await loadServicos();
+            await loadProjetos();
+        };
+        initData();
     }, []);
 
     // ✅ CORRIGIDO - Carregamento simples com toast
@@ -69,7 +72,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         try {
             const response = await api.get('/clientes');
             if (response.data.success) {
-                console.log('👥 Clientes carregados:', response.data.data);
                 setClientes(response.data.data || []);
             }
         } catch (error) {
@@ -370,27 +372,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     });
 
     const getClienteNome = (projeto) => {
-        console.log('🔍 getClienteNome chamada para projeto:', {
-            nomeProject: projeto.nomeProjeto,
-            idCliente: projeto.idCliente,
-            temAssociacaoCliente: !!projeto.cliente,
-            nomeClienteAssociacao: projeto.cliente?.nome,
-            totalClientesCarregados: clientes.length
-        });
-
-        // Primeiro tenta usar a associação que vem do backend
-        if (projeto.cliente && projeto.cliente.nome) {
-            console.log('✅ Nome encontrado via associação:', projeto.cliente.nome);
-            return projeto.cliente.nome;
-        }
-
-        // Fallback: procurar na lista de clientes
-        const cliente = clientes.find(c => c.idCliente == projeto.idCliente);
-        console.log('🔄 Procura fallback resultado:', cliente?.nome || 'NÃO ENCONTRADO');
-
-        return cliente ? cliente.nome : 'N/A';
+        const cliente = clientes.find(c => c.idCliente === projeto.idCliente);
+        return cliente ? cliente.nome : 'Cliente não encontrado';
     };
-
     const getEstadoNome = (idEstado) => {
         const estado = estadosProjeto.find(e => e.idEstado_Projeto == idEstado);
         return estado ? estado.designacaoEstado_Projeto : 'N/A';
