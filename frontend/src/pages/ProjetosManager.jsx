@@ -37,7 +37,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             console.log('📥 A carregar clientes...');
             const response = await api.get('/clientes');
             console.log('Resposta clientes:', response.data);
-            
+
             if (response.data.success) {
                 const clientesData = response.data.data || [];
                 setClientes(clientesData);
@@ -59,7 +59,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         try {
             console.log('📥 A carregar estados de projeto...');
             const response = await api.get('/estados-projeto');
-            
+
             if (response.data.success) {
                 const estadosData = response.data.data || [];
                 setEstadosProjeto(estadosData);
@@ -81,7 +81,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         try {
             console.log('📥 A carregar serviços...');
             const response = await api.get('/servicos');
-            
+
             if (response.data.success) {
                 const servicosData = response.data.data || [];
                 setServicos(servicosData);
@@ -103,7 +103,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         try {
             console.log('📥 A carregar projetos...');
             const response = await api.get('/projetos');
-            
+
             if (response.data.success) {
                 const projetosData = response.data.data || [];
                 setProjetos(projetosData);
@@ -129,16 +129,16 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
             // IMPORTANTE: Carregar dados sequencialmente para evitar problemas de concorrência
             console.log('🚀 Iniciando carregamento de dados...');
-            
+
             // 1. Primeiro carregar clientes (essencial para mostrar nos projetos)
             const clientesCarregados = await loadClientes();
-            
+
             // 2. Depois carregar estados de projeto
             const estadosCarregados = await loadEstadosProjeto();
-            
+
             // 3. Carregar serviços
             const servicosCarregados = await loadServicos();
-            
+
             // 4. Por fim, carregar projetos
             const projetosCarregados = await loadProjetos();
 
@@ -172,22 +172,22 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             window.location.href = '/admin-login';
             return;
         }
-        
+
         initData();
     }, []);
 
     // CORREÇÃO: Função melhorada para obter nome do cliente
     const getClienteNome = (projeto) => {
         if (!projeto) return 'N/A';
-        
+
         // Debug: verificar dados do projeto
         console.log('Projeto:', projeto.idProjeto, 'idCliente:', projeto.idCliente);
-        
+
         // Estratégia 1: Verificar se o backend já enviou o cliente aninhado
         if (projeto.cliente && projeto.cliente.nome) {
             return projeto.cliente.nome;
         }
-        
+
         // Estratégia 2: Procurar na lista local de clientes
         if (clientes && clientes.length > 0) {
             const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
@@ -195,7 +195,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 return clienteLocal.nome;
             }
         }
-        
+
         // Debug: se não encontrou, mostrar porquê
         console.warn(`Cliente não encontrado para projeto ${projeto.nomeProjeto} (idCliente: ${projeto.idCliente})`);
         return 'N/A';
@@ -488,9 +488,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                         onChange={(e) => setFilterCliente(e.target.value)}
                     >
                         <option value="">Todos os Clientes</option>
-                        {clientes.map(cliente => (
+                        {clientes && clientes.length > 0 && clientes.map(cliente => (
                             <option key={cliente.idCliente} value={cliente.idCliente}>
-                                {cliente.nome}
+                                {cliente.nome || 'Cliente sem nome'}
                             </option>
                         ))}
                     </select>
@@ -584,20 +584,20 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    {projeto.dataInicio ? 
-                                                        new Date(projeto.dataInicio).toLocaleDateString('pt-PT') : 
+                                                    {projeto.dataInicio ?
+                                                        new Date(projeto.dataInicio).toLocaleDateString('pt-PT') :
                                                         '-'
                                                     }
                                                 </td>
                                                 <td>
-                                                    {projeto.dataPrevista_Fim ? 
-                                                        new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT') : 
+                                                    {projeto.dataPrevista_Fim ?
+                                                        new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT') :
                                                         '-'
                                                     }
                                                 </td>
                                                 <td>
-                                                    {projeto.orcamentoTotal ? 
-                                                        `€ ${parseFloat(projeto.orcamentoTotal).toFixed(2)}` : 
+                                                    {projeto.orcamentoTotal ?
+                                                        `€ ${parseFloat(projeto.orcamentoTotal).toFixed(2)}` :
                                                         '-'
                                                     }
                                                 </td>
@@ -671,19 +671,27 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             <select
                                                 className={`form-select ${errors.idCliente ? 'is-invalid' : ''}`}
                                                 name="idCliente"
-                                                value={formData.idCliente}
+                                                value={formData.idCliente || ''}
                                                 onChange={handleInputChange}
                                             >
                                                 <option value="">Selecionar cliente...</option>
-                                                {clientes.map(cliente => (
-                                                    <option key={cliente.idCliente} value={cliente.idCliente}>
-                                                        {cliente.nome}
-                                                    </option>
-                                                ))}
+                                                {clientes && clientes.length > 0 ? (
+                                                    clientes.map(cliente => (
+                                                        <option key={cliente.idCliente} value={cliente.idCliente}>
+                                                            {cliente.nome || 'Cliente sem nome'}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <option value="" disabled>Nenhum cliente disponível</option>
+                                                )}
                                             </select>
                                             {errors.idCliente && (
                                                 <div className="invalid-feedback">{errors.idCliente}</div>
                                             )}
+                                            {/* Debug temporário - remove depois de testar */}
+                                            <small className="text-muted">
+                                                {clientes.length} clientes carregados
+                                            </small>
                                         </div>
                                     </div>
 
@@ -779,8 +787,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                             checked={selectedServicos.includes(servico.idServico)}
                                                             onChange={() => handleServicoToggle(servico.idServico)}
                                                         />
-                                                        <label 
-                                                            className="form-check-label" 
+                                                        <label
+                                                            className="form-check-label"
                                                             htmlFor={`servico-${servico.idServico}`}
                                                         >
                                                             {servico.nome_servico} - €{parseFloat(servico.preco_base_servico).toFixed(2)}
