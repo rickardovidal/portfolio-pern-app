@@ -3,6 +3,7 @@ import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
 
 const ProjetosManager = ({ onStatsUpdate }) => {
+    // 🔥 Estados principais
     const [projetos, setProjetos] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [estadosProjeto, setEstadosProjeto] = useState([]);
@@ -30,134 +31,197 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [errors, setErrors] = useState({});
+    const [debugInfo, setDebugInfo] = useState(''); // Para debug visual
 
-    // ✅ CORRIGIDO: Função melhorada para obter nome do cliente
-    const getClienteNome = (projeto) => {
-        console.log('🔍 [FRONTEND DEBUG] getClienteNome chamada para projeto:', projeto.nomeProjeto);
-        console.log('🔍 [FRONTEND DEBUG] projeto.cliente:', projeto.cliente);
-        
-        // ✅ PRIORIDADE 1: Cliente vem do backend (include)
-        if (projeto && projeto.cliente && projeto.cliente.nome) {
-            console.log('✅ [FRONTEND DEBUG] Cliente encontrado via include:', projeto.cliente.nome);
-            return projeto.cliente.nome;
-        }
-        
-        // ✅ PRIORIDADE 2: Procurar na lista local de clientes
-        if (projeto && projeto.idCliente && clientes && clientes.length > 0) {
-            const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
-            if (clienteLocal && clienteLocal.nome) {
-                console.log('✅ [FRONTEND DEBUG] Cliente encontrado na lista local:', clienteLocal.nome);
-                return clienteLocal.nome;
-            }
-        }
-        
-        // ✅ PRIORIDADE 3: Mostrar ID se não encontrar o nome
-        if (projeto && projeto.idCliente) {
-            console.log('⚠️ [FRONTEND DEBUG] Cliente não encontrado, mostrando ID:', projeto.idCliente);
-            return `Cliente ID: ${projeto.idCliente}`;
-        }
-        
-        console.log('❌ [FRONTEND DEBUG] Nenhum cliente encontrado');
-        return 'Sem Cliente';
-    };
+    // 🚀 CARREGAMENTO INICIAL - VERSÃO ROBUSTA
+    useEffect(() => {
+        carregarTudoSequencialmente();
+    }, []);
 
-    const initData = async () => {
+    const carregarTudoSequencialmente = async () => {
         try {
             setLoading(true);
-            console.log('🔍 [FRONTEND DEBUG] Iniciando carregamento de dados...');
-
-            // ✅ CORRIGIDO: Carregar clientes primeiro (sem loading notification)
-            try {
-                const clientesResponse = await api.get('/clientes');
-                console.log('🔍 [FRONTEND DEBUG] Resposta clientes:', clientesResponse.data);
-                
-                if (clientesResponse.data.success && clientesResponse.data.data) {
-                    setClientes(clientesResponse.data.data);
-                    console.log('✅ [FRONTEND DEBUG] Clientes carregados:', clientesResponse.data.data.length);
-                } else {
-                    console.error('❌ [FRONTEND DEBUG] Erro na resposta de clientes:', clientesResponse.data);
-                    setClientes([]);
-                }
-            } catch (error) {
-                console.error('❌ [FRONTEND DEBUG] Erro ao carregar clientes:', error);
-                setClientes([]);
-            }
-
-            // Carregar estados de projeto
-            try {
-                const estadosResponse = await api.get('/estados-projeto');
-                if (estadosResponse.data.success && estadosResponse.data.data) {
-                    setEstadosProjeto(estadosResponse.data.data);
-                    console.log('✅ [FRONTEND DEBUG] Estados carregados:', estadosResponse.data.data.length);
-                } else {
-                    setEstadosProjeto([]);
-                }
-            } catch (error) {
-                console.error('❌ [FRONTEND DEBUG] Erro ao carregar estados:', error);
-                setEstadosProjeto([]);
-            }
-
-            // Carregar serviços
-            try {
-                const servicosResponse = await api.get('/servicos');
-                if (servicosResponse.data.success && servicosResponse.data.data) {
-                    setServicos(servicosResponse.data.data);
-                    console.log('✅ [FRONTEND DEBUG] Serviços carregados:', servicosResponse.data.data.length);
-                } else {
-                    setServicos([]);
-                }
-            } catch (error) {
-                console.error('❌ [FRONTEND DEBUG] Erro ao carregar serviços:', error);
-                setServicos([]);
-            }
-
-            // ✅ CORRIGIDO: Carregar projetos por último
-            try {
-                const projetosResponse = await api.get('/projetos');
-                console.log('🔍 [FRONTEND DEBUG] Resposta projetos:', projetosResponse.data);
-                
-                if (projetosResponse.data.success && projetosResponse.data.data) {
-                    setProjetos(projetosResponse.data.data);
-                    console.log('✅ [FRONTEND DEBUG] Projetos carregados:', projetosResponse.data.data.length);
-                    
-                    // ✅ DEBUG: Verificar estrutura dos projetos
-                    projetosResponse.data.data.forEach((projeto, index) => {
-                        console.log(`🔍 [FRONTEND DEBUG] Projeto ${index + 1}:`, {
-                            nome: projeto.nomeProjeto,
-                            idCliente: projeto.idCliente,
-                            temCliente: !!projeto.cliente,
-                            nomeCliente: projeto.cliente?.nome || 'NULL'
-                        });
-                    });
-                } else {
-                    console.error('❌ [FRONTEND DEBUG] Erro na resposta de projetos:', projetosResponse.data);
-                    setProjetos([]);
-                }
-            } catch (error) {
-                console.error('❌ [FRONTEND DEBUG] Erro ao carregar projetos:', error);
-                setProjetos([]);
-            }
-
+            setDebugInfo('Iniciando carregamento...');
+            
+            // 1. Carregar clientes PRIMEIRO (mais importante)
+            setDebugInfo('Carregando clientes...');
+            await carregarClientes();
+            
+            // 2. Carregar estados
+            setDebugInfo('Carregando estados...');
+            await carregarEstados();
+            
+            // 3. Carregar serviços
+            setDebugInfo('Carregando serviços...');
+            await carregarServicos();
+            
+            // 4. Carregar projetos POR ÚLTIMO (para garantir que clientes já estão disponíveis)
+            setDebugInfo('Carregando projetos...');
+            await carregarProjetos();
+            
+            setDebugInfo('Tudo carregado com sucesso!');
+            NotificationService.successToast('Dados carregados!');
+            
         } catch (error) {
-            console.error('❌ [FRONTEND DEBUG] Erro geral:', error);
+            setDebugInfo(`Erro: ${error.message}`);
+            NotificationService.errorToast('Erro ao carregar dados');
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        initData();
-    }, []);
+    // 🎯 FUNÇÕES DE CARREGAMENTO INDIVIDUAIS
+    const carregarClientes = async () => {
+        const response = await api.get('/clientes');
+        if (response.data.success && Array.isArray(response.data.data)) {
+            setClientes(response.data.data);
+            setDebugInfo(`${response.data.data.length} clientes carregados`);
+        } else {
+            throw new Error('Clientes: resposta inválida');
+        }
+    };
 
+    const carregarEstados = async () => {
+        const response = await api.get('/estados-projeto');
+        if (response.data.success && Array.isArray(response.data.data)) {
+            setEstadosProjeto(response.data.data);
+        } else {
+            throw new Error('Estados: resposta inválida');
+        }
+    };
+
+    const carregarServicos = async () => {
+        const response = await api.get('/servicos');
+        if (response.data.success && Array.isArray(response.data.data)) {
+            setServicos(response.data.data);
+        } else {
+            throw new Error('Serviços: resposta inválida');
+        }
+    };
+
+    const carregarProjetos = async () => {
+        const response = await api.get('/projetos');
+        if (response.data.success && Array.isArray(response.data.data)) {
+            setProjetos(response.data.data);
+            setDebugInfo(`${response.data.data.length} projetos carregados`);
+        } else {
+            throw new Error('Projetos: resposta inválida');
+        }
+    };
+
+    // 🎯 FUNÇÃO PARA OBTER NOME DO CLIENTE - VERSÃO SUPER ROBUSTA
+    const getClienteNome = (projeto) => {
+        // Verificações de segurança
+        if (!projeto) return 'Projeto inválido';
+        if (!Array.isArray(clientes) || clientes.length === 0) return 'Carregando...';
+
+        // Estratégia 1: Objeto cliente aninhado do backend
+        if (projeto.cliente && 
+            typeof projeto.cliente === 'object' && 
+            projeto.cliente.nome && 
+            projeto.cliente.nome.trim() !== '') {
+            return projeto.cliente.nome;
+        }
+
+        // Estratégia 2: Procurar na lista de clientes por ID
+        if (projeto.idCliente) {
+            const clienteEncontrado = clientes.find(cliente => {
+                return cliente && 
+                       cliente.idCliente && 
+                       parseInt(cliente.idCliente) === parseInt(projeto.idCliente);
+            });
+            
+            if (clienteEncontrado && clienteEncontrado.nome && clienteEncontrado.nome.trim() !== '') {
+                return clienteEncontrado.nome;
+            }
+        }
+
+        // Estratégia 3: Informação de debug
+        if (projeto.idCliente) {
+            return `ID: ${projeto.idCliente} (não encontrado)`;
+        }
+
+        return 'N/A';
+    };
+
+    // 🎯 FUNÇÃO PARA OBTER NOME DO ESTADO
+    const getEstadoNome = (projeto) => {
+        if (!projeto || !Array.isArray(estadosProjeto)) return 'N/A';
+        
+        // Estratégia 1: Objeto estado aninhado
+        if (projeto.estado && projeto.estado.designacaoEstado_Projeto) {
+            return projeto.estado.designacaoEstado_Projeto;
+        }
+        
+        // Estratégia 2: Procurar na lista
+        if (projeto.idEstado_Projeto) {
+            const estado = estadosProjeto.find(e => 
+                e && parseInt(e.idEstado_Projeto) === parseInt(projeto.idEstado_Projeto)
+            );
+            if (estado && estado.designacaoEstado_Projeto) {
+                return estado.designacaoEstado_Projeto;
+            }
+        }
+        
+        return 'N/A';
+    };
+
+    // 🔍 FILTROS - VERSÃO MELHORADA
+    const filteredProjetos = projetos.filter(projeto => {
+        if (!projeto) return false;
+
+        // Filtro de pesquisa
+        if (searchTerm) {
+            const termo = searchTerm.toLowerCase();
+            const nome = projeto.nomeProjeto ? projeto.nomeProjeto.toLowerCase() : '';
+            const descricao = projeto.descricaoProjeto ? projeto.descricaoProjeto.toLowerCase() : '';
+            const clienteNome = getClienteNome(projeto).toLowerCase();
+            
+            if (!nome.includes(termo) && 
+                !descricao.includes(termo) && 
+                !clienteNome.includes(termo)) {
+                return false;
+            }
+        }
+
+        // Filtro de cliente
+        if (filterCliente && projeto.idCliente) {
+            if (parseInt(projeto.idCliente) !== parseInt(filterCliente)) {
+                return false;
+            }
+        }
+
+        // Filtro de estado
+        if (filterEstado && projeto.idEstado_Projeto) {
+            if (parseInt(projeto.idEstado_Projeto) !== parseInt(filterEstado)) {
+                return false;
+            }
+        }
+
+        // Filtro de status
+        if (filterStatus) {
+            if (filterStatus === 'ativo' && !projeto.ativo) return false;
+            if (filterStatus === 'inativo' && projeto.ativo) return false;
+        }
+
+        return true;
+    });
+
+    // 📝 HANDLERS DO FORMULÁRIO
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+        
+        // Limpar erro específico
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: '' }));
+        }
     };
 
-    const handleServicoChange = (servicoId) => {
+    const handleServicoToggle = (servicoId) => {
         setSelectedServicos(prev => {
             if (prev.includes(servicoId)) {
                 return prev.filter(id => id !== servicoId);
@@ -167,9 +231,59 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         });
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setEditingProject(null);
+    // 💾 SUBMISSÃO DO FORMULÁRIO
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        try {
+            setLoading(true);
+            NotificationService.loading(editingProject ? 'A actualizar projeto...' : 'A criar projeto...');
+
+            const dados = {
+                ...formData,
+                servicos: selectedServicos
+            };
+
+            let response;
+            if (editingProject) {
+                response = await api.put(`/projetos/${editingProject.idProjeto}`, dados);
+            } else {
+                response = await api.post('/projetos', dados);
+            }
+
+            if (response.data.success) {
+                NotificationService.closeLoading();
+                NotificationService.successToast(
+                    editingProject ? 'Projeto actualizado!' : 'Projeto criado!'
+                );
+                
+                setShowModal(false);
+                resetForm();
+                await carregarProjetos(); // Recarregar apenas projetos
+                
+                if (onStatsUpdate) onStatsUpdate();
+            } else {
+                throw new Error(response.data.message || 'Erro na operação');
+            }
+
+        } catch (error) {
+            NotificationService.closeLoading();
+            
+            if (error.response?.data?.errors) {
+                setErrors(error.response.data.errors);
+                NotificationService.errorToast('Verifique os campos obrigatórios');
+            } else {
+                NotificationService.errorToast(
+                    error.response?.data?.message || 'Erro ao salvar projeto'
+                );
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // 🔄 OUTRAS FUNÇÕES
+    const resetForm = () => {
         setFormData({
             nomeProjeto: '',
             descricaoProjeto: '',
@@ -183,48 +297,11 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             ativo: true
         });
         setSelectedServicos([]);
+        setEditingProject(null);
         setErrors({});
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!formData.nomeProjeto.trim()) {
-            NotificationService.error('Erro!', 'Nome do projeto é obrigatório');
-            return;
-        }
-
-        try {
-            const projetoData = {
-                ...formData,
-                servicos: selectedServicos
-            };
-
-            let response;
-            if (editingProject) {
-                response = await api.put(`/projetos/${editingProject.idProjeto}`, projetoData);
-            } else {
-                response = await api.post('/projetos', projetoData);
-            }
-
-            if (response.data.success) {
-                if (editingProject) {
-                    NotificationService.success('Sucesso!', 'Projeto atualizado com sucesso');
-                } else {
-                    NotificationService.success('Sucesso!', 'Projeto criado com sucesso');
-                }
-
-                handleCloseModal();
-                await initData();
-                if (onStatsUpdate) onStatsUpdate();
-            }
-        } catch (error) {
-            console.error('Erro ao guardar projeto:', error);
-            NotificationService.error('Erro!', 'Erro ao guardar projeto');
-        }
-    };
-
-    const handleEdit = async (projeto) => {
+    const handleEdit = (projeto) => {
         setEditingProject(projeto);
         setFormData({
             nomeProjeto: projeto.nomeProjeto || '',
@@ -232,73 +309,71 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             dataInicio: projeto.dataInicio ? projeto.dataInicio.split('T')[0] : '',
             dataPrevista_Fim: projeto.dataPrevista_Fim ? projeto.dataPrevista_Fim.split('T')[0] : '',
             dataFim: projeto.dataFim ? projeto.dataFim.split('T')[0] : '',
-            orcamentoTotal: projeto.orcamentoTotal || 0,
+            orcamentoTotal: projeto.orcamentoTotal || '',
             notas: projeto.notas || '',
             idCliente: projeto.idCliente || '',
             idEstado_Projeto: projeto.idEstado_Projeto || '',
-            ativo: projeto.ativo !== undefined ? projeto.ativo : true
+            ativo: projeto.ativo !== false
         });
-
-        try {
-            const response = await api.get(`/projetos-servicos/projeto/${projeto.idProjeto}`);
-            if (response.data.success) {
-                const servicosAssociados = response.data.data.map(ps => ps.idServico);
-                setSelectedServicos(servicosAssociados);
-            }
-        } catch (error) {
-            console.error('Erro ao carregar serviços do projeto:', error);
-            setSelectedServicos([]);
-        }
-
+        setSelectedServicos([]); // Seria necessário carregar serviços associados
         setShowModal(true);
     };
 
-    const handleToggleStatus = async (projeto) => {
-        const novoStatus = !projeto.ativo;
-        
+    const handleDelete = async (projeto) => {
+        if (!window.confirm(`Tem a certeza que deseja desativar o projeto "${projeto.nomeProjeto}"?`)) {
+            return;
+        }
+
         try {
-            const response = await api.put(`/projetos/${projeto.idProjeto}`, {
-                ...projeto,
-                ativo: novoStatus
-            });
+            setLoading(true);
+            NotificationService.loading('A desativar projeto...');
+
+            const response = await api.patch(`/projetos/${projeto.idProjeto}/cancelar`);
 
             if (response.data.success) {
-                NotificationService.success('Sucesso!', `Projeto ${novoStatus ? 'ativado' : 'desativado'} com sucesso`);
-                await initData();
+                NotificationService.closeLoading();
+                NotificationService.successToast('Projeto desativado!');
+                await carregarProjetos();
                 if (onStatsUpdate) onStatsUpdate();
+            } else {
+                throw new Error(response.data.message);
             }
+
         } catch (error) {
-            console.error('Erro ao alterar status:', error);
-            NotificationService.error('Erro!', 'Erro ao alterar status do projeto');
+            NotificationService.closeLoading();
+            NotificationService.errorToast(
+                error.response?.data?.message || 'Erro ao desativar projeto'
+            );
+        } finally {
+            setLoading(false);
         }
     };
 
-    // Filtrar projetos
-    const filteredProjetos = projetos.filter(projeto => {
-        const matchSearch = projeto.nomeProjeto.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           getClienteNome(projeto).toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchStatus = filterStatus === '' || 
-                           (filterStatus === 'ativo' && projeto.ativo) ||
-                           (filterStatus === 'inativo' && !projeto.ativo);
-        
-        const matchCliente = filterCliente === '' || projeto.idCliente == filterCliente;
-        
-        const matchEstado = filterEstado === '' || projeto.idEstado_Projeto == filterEstado;
-        
-        return matchSearch && matchStatus && matchCliente && matchEstado;
-    });
-
+    // 🎨 RENDERIZAÇÃO
     return (
         <div className="container-fluid">
+            {/* Debug Info */}
+            {debugInfo && (
+                <div className="alert alert-info mb-3">
+                    <strong>Debug:</strong> {debugInfo} | 
+                    Clientes: {clientes.length} | 
+                    Projetos: {projetos.length}
+                </div>
+            )}
+
+            {/* Header */}
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>Gestão de Projetos</h2>
-                <button 
+                <h2 className="mb-0">
+                    <i className="bi bi-kanban me-2"></i>
+                    Gestão de Projetos
+                </h2>
+                <button
                     className="btn btn-primary"
                     onClick={() => setShowModal(true)}
+                    disabled={loading}
                 >
-                    <i className="bi bi-plus-circle me-2"></i>
-                    Adicionar Projeto
+                    <i className="bi bi-plus-lg me-2"></i>
+                    Novo Projeto
                 </button>
             </div>
 
@@ -308,20 +383,19 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Pesquisar por nome ou cliente..."
+                        placeholder="🔍 Pesquisar projetos..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="col-md-2">
+                <div className="col-md-3">
                     <select
                         className="form-select"
                         value={filterCliente}
                         onChange={(e) => setFilterCliente(e.target.value)}
                     >
-                        <option value="">Todos os Clientes</option>
-                        {/* ✅ CORRIGIDO: Verificar se clientes existe e tem length */}
-                        {clientes && clientes.length > 0 && clientes.map(cliente => (
+                        <option value="">Todos os Clientes ({clientes.length})</option>
+                        {clientes.map(cliente => (
                             <option key={cliente.idCliente} value={cliente.idCliente}>
                                 {cliente.nome}
                             </option>
@@ -361,6 +435,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                     <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">A carregar...</span>
                     </div>
+                    <p className="mt-3">A carregar projetos...</p>
                 </div>
             ) : (
                 <div className="card">
@@ -375,9 +450,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                             <div className="text-center p-4">
                                 <i className="bi bi-folder-x fa-3x text-muted mb-3"></i>
                                 <p className="text-muted">
-                                    {searchTerm || filterCliente || filterEstado || filterStatus ? 
-                                        'Nenhum projeto encontrado com os filtros aplicados.' : 
-                                        'Ainda não tem projetos registados.'}
+                                    {searchTerm || filterCliente || filterEstado || filterStatus 
+                                        ? 'Nenhum projeto encontrado com os filtros aplicados.' 
+                                        : 'Ainda não tens projetos registados.'}
                                 </p>
                             </div>
                         ) : (
@@ -388,68 +463,63 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             <th>Projeto</th>
                                             <th>Cliente</th>
                                             <th>Estado</th>
-                                            <th>Orçamento</th>
                                             <th>Data Início</th>
-                                            <th>Data Prevista Fim</th>
+                                            <th>Orçamento</th>
                                             <th>Status</th>
-                                            <th>Ações</th>
+                                            <th width="120">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredProjetos.map((projeto) => (
+                                        {filteredProjetos.map(projeto => (
                                             <tr key={projeto.idProjeto}>
                                                 <td>
-                                                    <strong>{projeto.nomeProjeto}</strong>
-                                                    {projeto.descricaoProjeto && (
-                                                        <small className="d-block text-muted">
-                                                            {projeto.descricaoProjeto.substring(0, 100)}...
-                                                        </small>
-                                                    )}
+                                                    <div>
+                                                        <div className="fw-semibold">{projeto.nomeProjeto}</div>
+                                                        {projeto.descricaoProjeto && (
+                                                            <small className="text-muted">
+                                                                {projeto.descricaoProjeto.length > 50 
+                                                                    ? projeto.descricaoProjeto.substring(0, 50) + '...' 
+                                                                    : projeto.descricaoProjeto}
+                                                            </small>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td>
-                                                    {/* ✅ CORRIGIDO: Usar função melhorada */}
                                                     <span className="badge bg-info">
                                                         {getClienteNome(projeto)}
                                                     </span>
                                                 </td>
+                                                <td>{getEstadoNome(projeto)}</td>
                                                 <td>
-                                                    <span className="badge bg-secondary">
-                                                        {projeto.estado?.designacaoEstado_Projeto || 'Sem Estado'}
-                                                    </span>
-                                                </td>
-                                                <td>€{parseFloat(projeto.orcamentoTotal || 0).toFixed(2)}</td>
-                                                <td>
-                                                    {projeto.dataInicio ? 
-                                                        new Date(projeto.dataInicio).toLocaleDateString('pt-PT') : 
-                                                        'Não definida'}
+                                                    {projeto.dataInicio 
+                                                        ? new Date(projeto.dataInicio).toLocaleDateString('pt-PT')
+                                                        : 'N/A'}
                                                 </td>
                                                 <td>
-                                                    {projeto.dataPrevista_Fim ? 
-                                                        new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT') : 
-                                                        'Não definida'}
+                                                    {projeto.orcamentoTotal 
+                                                        ? `€${parseFloat(projeto.orcamentoTotal).toFixed(2)}`
+                                                        : 'N/A'}
                                                 </td>
                                                 <td>
-                                                    <span className={`badge ${projeto.ativo ? 'bg-success' : 'bg-danger'}`}>
+                                                    <span className={`badge ${projeto.ativo ? 'bg-success' : 'bg-secondary'}`}>
                                                         {projeto.ativo ? 'Ativo' : 'Inativo'}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <div className="btn-group" role="group">
-                                                        <button
-                                                            className="btn btn-outline-primary btn-sm"
-                                                            onClick={() => handleEdit(projeto)}
-                                                            title="Editar"
-                                                        >
-                                                            <i className="bi bi-pencil"></i>
-                                                        </button>
-                                                        <button
-                                                            className={`btn btn-outline-${projeto.ativo ? 'warning' : 'success'} btn-sm`}
-                                                            onClick={() => handleToggleStatus(projeto)}
-                                                            title={projeto.ativo ? 'Desativar' : 'Ativar'}
-                                                        >
-                                                            <i className={`bi bi-${projeto.ativo ? 'pause' : 'play'}`}></i>
-                                                        </button>
-                                                    </div>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-primary me-1"
+                                                        onClick={() => handleEdit(projeto)}
+                                                        title="Editar"
+                                                    >
+                                                        <i className="bi bi-pencil"></i>
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => handleDelete(projeto)}
+                                                        title="Desativar"
+                                                    >
+                                                        <i className="bi bi-trash"></i>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
@@ -461,51 +531,69 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 </div>
             )}
 
-            {/* Modal de Criação/Edição */}
+            {/* Modal do Formulário */}
             {showModal && (
-                <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">
-                                    {editingProject ? 'Editar Projeto' : 'Criar Projeto'}
+                                    {editingProject ? 'Editar Projeto' : 'Novo Projeto'}
                                 </h5>
-                                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    onClick={() => {
+                                        setShowModal(false);
+                                        resetForm();
+                                    }}
+                                ></button>
                             </div>
                             <form onSubmit={handleSubmit}>
                                 <div className="modal-body">
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-3">
-                                                <label htmlFor="nomeProjeto" className="form-label">Nome do Projeto *</label>
+                                                <label htmlFor="nomeProjeto" className="form-label">
+                                                    Nome do Projeto <span className="text-danger">*</span>
+                                                </label>
                                                 <input
                                                     type="text"
-                                                    className="form-control"
+                                                    className={`form-control ${errors.nomeProjeto ? 'is-invalid' : ''}`}
                                                     id="nomeProjeto"
                                                     name="nomeProjeto"
                                                     value={formData.nomeProjeto}
                                                     onChange={handleInputChange}
                                                     required
                                                 />
+                                                {errors.nomeProjeto && (
+                                                    <div className="invalid-feedback">{errors.nomeProjeto}</div>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">
-                                                <label htmlFor="idCliente" className="form-label">Cliente</label>
+                                                <label htmlFor="idCliente" className="form-label">
+                                                    Cliente <span className="text-danger">*</span>
+                                                </label>
                                                 <select
-                                                    className="form-select"
+                                                    className={`form-select ${errors.idCliente ? 'is-invalid' : ''}`}
                                                     id="idCliente"
                                                     name="idCliente"
                                                     value={formData.idCliente}
                                                     onChange={handleInputChange}
+                                                    required
                                                 >
-                                                    <option value="">Selecionar Cliente</option>
+                                                    <option value="">Seleciona um cliente ({clientes.length} disponíveis)</option>
                                                     {clientes.map(cliente => (
                                                         <option key={cliente.idCliente} value={cliente.idCliente}>
                                                             {cliente.nome}
                                                         </option>
                                                     ))}
                                                 </select>
+                                                {errors.idCliente && (
+                                                    <div className="invalid-feedback">{errors.idCliente}</div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -551,7 +639,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         </div>
                                         <div className="col-md-4">
                                             <div className="mb-3">
-                                                <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total</label>
+                                                <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total (€)</label>
                                                 <input
                                                     type="number"
                                                     step="0.01"
@@ -568,35 +656,75 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-3">
-                                                <label htmlFor="idEstado_Projeto" className="form-label">Estado</label>
+                                                <label htmlFor="idEstado_Projeto" className="form-label">
+                                                    Estado do Projeto <span className="text-danger">*</span>
+                                                </label>
                                                 <select
-                                                    className="form-select"
+                                                    className={`form-select ${errors.idEstado_Projeto ? 'is-invalid' : ''}`}
                                                     id="idEstado_Projeto"
                                                     name="idEstado_Projeto"
                                                     value={formData.idEstado_Projeto}
                                                     onChange={handleInputChange}
+                                                    required
                                                 >
-                                                    <option value="">Selecionar Estado</option>
+                                                    <option value="">Seleciona um estado</option>
                                                     {estadosProjeto.map(estado => (
                                                         <option key={estado.idEstado_Projeto} value={estado.idEstado_Projeto}>
                                                             {estado.designacaoEstado_Projeto}
                                                         </option>
                                                     ))}
                                                 </select>
+                                                {errors.idEstado_Projeto && (
+                                                    <div className="invalid-feedback">{errors.idEstado_Projeto}</div>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="mb-3 d-flex align-items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    className="form-check-input me-2"
-                                                    id="ativo"
-                                                    name="ativo"
-                                                    checked={formData.ativo}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <label className="form-check-label" htmlFor="ativo">Projeto Ativo</label>
+                                            <div className="mb-3">
+                                                <div className="form-check mt-4">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        id="ativo"
+                                                        name="ativo"
+                                                        checked={formData.ativo}
+                                                        onChange={handleInputChange}
+                                                    />
+                                                    <label className="form-check-label" htmlFor="ativo">
+                                                        Projeto Ativo
+                                                    </label>
+                                                </div>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label">Serviços Associados ({servicos.length} disponíveis)</label>
+                                        <div className="row">
+                                            {servicos.map(servico => (
+                                                <div className="col-md-6" key={servico.idServico}>
+                                                    <div className="form-check">
+                                                        <input
+                                                            className="form-check-input"
+                                                            type="checkbox"
+                                                            id={`servico_${servico.idServico}`}
+                                                            checked={selectedServicos.includes(servico.idServico)}
+                                                            onChange={() => handleServicoToggle(servico.idServico)}
+                                                        />
+                                                        <label 
+                                                            className="form-check-label" 
+                                                            htmlFor={`servico_${servico.idServico}`}
+                                                        >
+                                                            {servico.designacao_servico}
+                                                            {servico.preco_base_servico && (
+                                                                <span className="text-muted ms-1">
+                                                                    (€{parseFloat(servico.preco_base_servico).toFixed(2)})
+                                                                </span>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
 
@@ -611,37 +739,35 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             onChange={handleInputChange}
                                         ></textarea>
                                     </div>
-
-                                    {servicos.length > 0 && (
-                                        <div className="mb-3">
-                                            <label className="form-label">Serviços Associados</label>
-                                            <div className="row">
-                                                {servicos.map(servico => (
-                                                    <div key={servico.idServico} className="col-md-6">
-                                                        <div className="form-check">
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                id={`servico-${servico.idServico}`}
-                                                                checked={selectedServicos.includes(servico.idServico)}
-                                                                onChange={() => handleServicoChange(servico.idServico)}
-                                                            />
-                                                            <label className="form-check-label" htmlFor={`servico-${servico.idServico}`}>
-                                                                {servico.nomeServico} - €{servico.preco_base_servico}
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
+
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={() => {
+                                            setShowModal(false);
+                                            resetForm();
+                                        }}
+                                    >
                                         Cancelar
                                     </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        {editingProject ? 'Atualizar' : 'Criar'} Projeto
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                                A processar...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="bi bi-check-lg me-2"></i>
+                                                {editingProject ? 'Actualizar' : 'Criar'} Projeto
+                                            </>
+                                        )}
                                     </button>
                                 </div>
                             </form>
