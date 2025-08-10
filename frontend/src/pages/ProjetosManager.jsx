@@ -46,8 +46,16 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             setLoading(true);
             const response = await api.get('/projetos');
             if (response.data.success) {
+                console.log('📂 Projetos carregados:', response.data.data);
+                // Verificar se os projetos têm a associação cliente
+                response.data.data.forEach(projeto => {
+                    console.log(`Projeto "${projeto.nomeProjeto}":`, {
+                        idCliente: projeto.idCliente,
+                        temAssociacaoCliente: !!projeto.cliente,
+                        nomeCliente: projeto.cliente?.nome || 'SEM ASSOCIAÇÃO'
+                    });
+                });
                 setProjetos(response.data.data || []);
-                NotificationService.successToast('Projetos carregados!');
             }
         } catch (error) {
             console.error('Erro ao carregar projetos:', error);
@@ -57,19 +65,18 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         }
     };
 
-   const loadClientes = async () => {
-    try {
-        const response = await api.get('/clientes'); // ✅ Adicionar await
-        if (response.data.success) {
-            setClientes(response.data.data || []);
-            NotificationService.successToast('Clientes carregados!');
+    const loadClientes = async () => {
+        try {
+            const response = await api.get('/clientes');
+            if (response.data.success) {
+                console.log('👥 Clientes carregados:', response.data.data);
+                setClientes(response.data.data || []);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar clientes:', error);
+            NotificationService.errorToast('Erro ao carregar clientes');
         }
-    } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
-        NotificationService.errorToast('Erro ao carregar clientes');
-    }
-};
-
+    };
     // ✅ CORRIGIDO - Carregamento simples com toast
     const loadEstadosProjeto = async () => {
         try {
@@ -362,16 +369,27 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         return matchesSearch && matchesStatus && matchesEstado && matchesCliente;
     });
 
-  const getClienteNome = (projeto) => {
-    // Primeiro tenta usar a associação que vem do backend
-    if (projeto.cliente && projeto.cliente.nome) {
-        return projeto.cliente.nome;
-    }
-    
-    // Fallback: procurar na lista de clientes
-    const cliente = clientes.find(c => c.idCliente == projeto.idCliente);
-    return cliente ? cliente.nome : 'N/A';
-};
+    const getClienteNome = (projeto) => {
+        console.log('🔍 getClienteNome chamada para projeto:', {
+            nomeProject: projeto.nomeProjeto,
+            idCliente: projeto.idCliente,
+            temAssociacaoCliente: !!projeto.cliente,
+            nomeClienteAssociacao: projeto.cliente?.nome,
+            totalClientesCarregados: clientes.length
+        });
+
+        // Primeiro tenta usar a associação que vem do backend
+        if (projeto.cliente && projeto.cliente.nome) {
+            console.log('✅ Nome encontrado via associação:', projeto.cliente.nome);
+            return projeto.cliente.nome;
+        }
+
+        // Fallback: procurar na lista de clientes
+        const cliente = clientes.find(c => c.idCliente == projeto.idCliente);
+        console.log('🔄 Procura fallback resultado:', cliente?.nome || 'NÃO ENCONTRADO');
+
+        return cliente ? cliente.nome : 'N/A';
+    };
 
     const getEstadoNome = (idEstado) => {
         const estado = estadosProjeto.find(e => e.idEstado_Projeto == idEstado);
