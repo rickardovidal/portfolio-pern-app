@@ -15,6 +15,10 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [filterCliente, setFilterCliente] = useState('');
     const [filterEstado, setFilterEstado] = useState('');
 
+    // DEBUG: Estados para mostrar informação na interface
+    const [debugInfo, setDebugInfo] = useState('Inicializando...');
+    const [showDebug, setShowDebug] = useState(true);
+
     const [formData, setFormData] = useState({
         nomeProjeto: '',
         descricaoProjeto: '',
@@ -31,118 +35,177 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [errors, setErrors] = useState({});
 
+    // Função para actualizar debug info na interface
+    const updateDebug = (message) => {
+        const timestamp = new Date().toLocaleTimeString();
+        setDebugInfo(prev => `${prev}\n[${timestamp}] ${message}`);
+        console.log(message);
+    };
+
     useEffect(() => {
+        let isMounted = true; // Evitar race conditions
+
         const initData = async () => {
             try {
-                console.log('🚀 Iniciando carregamento de dados...');
+                updateDebug('🚀 Iniciando carregamento...');
                 setLoading(true);
                 
-                // Carregar tudo em paralelo para ser mais rápido
-                const [clientesRes, estadosRes, servicosRes] = await Promise.all([
-                    api.get('/clientes'),
-                    api.get('/estados-projeto'),
-                    api.get('/servicos')
-                ]);
-
-                // Processar clientes
-                if (clientesRes.data.success) {
-                    const clientesData = clientesRes.data.data || [];
-                    setClientes(clientesData);
-                    console.log('✅ Clientes carregados:', clientesData.length);
+                // Teste 1: Verificar token
+                const token = localStorage.getItem('adminToken');
+                updateDebug(`🔑 Token existe: ${!!token} (${token ? token.length + ' chars' : 'nenhum'})`);
+                
+                if (!token) {
+                    updateDebug('❌ ERRO: Sem token de autenticação!');
+                    return;
                 }
 
-                // Processar estados
-                if (estadosRes.data.success) {
-                    const estadosData = estadosRes.data.data || [];
-                    setEstadosProjeto(estadosData);
-                    console.log('✅ Estados carregados:', estadosData.length);
+                // Teste 2: Carregar clientes PRIMEIRO
+                updateDebug('📞 Fazendo requisição para /clientes...');
+                const clientesResponse = await api.get('/clientes');
+                updateDebug(`📡 Resposta clientes: status=${clientesResponse.status}, success=${clientesResponse.data.success}`);
+                
+                if (clientesResponse.data.success) {
+                    const clientesData = clientesResponse.data.data || [];
+                    updateDebug(`✅ Clientes recebidos: ${clientesData.length}`);
+                    
+                    if (clientesData.length > 0) {
+                        updateDebug(`👤 Primeiro cliente: ${clientesData[0].nome} (ID: ${clientesData[0].idCliente})`);
+                    }
+                    
+                    if (isMounted) {
+                        setClientes(clientesData);
+                        updateDebug(`💾 Estado clientes actualizado no React`);
+                    }
+                } else {
+                    updateDebug(`❌ ERRO: API clientes retornou success=false`);
                 }
 
-                // Processar serviços
-                if (servicosRes.data.success) {
-                    const servicosData = servicosRes.data.data || [];
-                    setServicos(servicosData);
-                    console.log('✅ Serviços carregados:', servicosData.length);
+                // Teste 3: Carregar outros dados
+                updateDebug('📞 Carregando estados de projeto...');
+                const estadosResponse = await api.get('/estados-projeto');
+                if (estadosResponse.data.success && isMounted) {
+                    setEstadosProjeto(estadosResponse.data.data || []);
+                    updateDebug(`✅ Estados carregados: ${estadosResponse.data.data?.length || 0}`);
                 }
 
-                // Carregar projetos por último, depois dos outros dados estarem prontos
-                await loadProjetos();
+                updateDebug('📞 Carregando serviços...');
+                const servicosResponse = await api.get('/servicos');
+                if (servicosResponse.data.success && isMounted) {
+                    setServicos(servicosResponse.data.data || []);
+                    updateDebug(`✅ Serviços carregados: ${servicosResponse.data.data?.length || 0}`);
+                }
+
+                // Teste 4: Carregar projetos POR ÚLTIMO
+                updateDebug('📞 Fazendo requisição para /projetos...');
+                const projetosResponse = await api.get('/projetos');
+                updateDebug(`📡 Resposta projetos: status=${projetosResponse.status}, success=${projetosResponse.data.success}`);
+                
+                if (projetosResponse.data.success) {
+                    const projetosData = projetosResponse.data.data || [];
+                    updateDebug(`✅ Projetos recebidos: ${projetosData.length}`);
+                    
+                    if (projetosData.length > 0) {
+                        const primeiroProject = projetosData[0];
+                        updateDebug(`📁 Primeiro projeto: "${primeiroProject.nomeProjeto}"`);
+                        updateDebug(`🔗 ID Cliente: ${primeiroProject.idCliente}`);
+                        updateDebug(`👤 Tem associação cliente: ${!!primeiroProject.cliente}`);
+                        updateDebug(`📝 Nome via associação: ${primeiroProject.cliente?.nome || 'NENHUM'}`);
+                    }
+                    
+                    if (isMounted) {
+                        setProjetos(projetosData);
+                        updateDebug(`💾 Estado projetos actualizado no React`);
+                    }
+                } else {
+                    updateDebug(`❌ ERRO: API projetos retornou success=false`);
+                }
+
+                updateDebug('🎉 Carregamento completo!');
 
             } catch (error) {
-                console.error('❌ Erro na inicialização:', error);
-                NotificationService.errorToast('Erro ao carregar dados');
+                updateDebug(`💥 ERRO CRÍTICO: ${error.message}`);
+                if (error.response) {
+                    updateDebug(`📊 Status HTTP: ${error.response.status}`);
+                    updateDebug(`📋 Dados do erro: ${JSON.stringify(error.response.data)}`);
+                }
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                    updateDebug('⏹️ Loading concluído');
+                }
             }
         };
 
         initData();
-    }, []);
 
-    const loadProjetos = async () => {
-        try {
-            console.log('🔄 Carregando projetos...');
-            const response = await api.get('/projetos');
-
-            if (response.data.success) {
-                const projetosData = response.data.data || [];
-                console.log('✅ Projetos carregados:', projetosData.length);
-                
-                // Log detalhado de cada projeto para debug
-                projetosData.forEach((projeto, index) => {
-                    console.log(`📁 Projeto ${index + 1}:`, {
-                        nome: projeto.nomeProjeto,
-                        idCliente: projeto.idCliente,
-                        temCliente: !!projeto.cliente,
-                        nomeCliente: projeto.cliente?.nome
-                    });
-                });
-
-                setProjetos(projetosData);
-                NotificationService.successToast(`${projetosData.length} projetos carregados!`);
-            } else {
-                console.error('❌ Erro na resposta dos projetos:', response.data);
-                NotificationService.errorToast('Erro ao carregar projetos');
-            }
-        } catch (error) {
-            console.error('❌ Erro ao carregar projetos:', error);
-            NotificationService.errorToast('Erro ao carregar projetos');
-        }
-    };
-
-    const loadClientes = async () => {
-        try {
-            console.log('🔄 Recarregando clientes...');
-            const response = await api.get('/clientes');
-            
-            if (response.data.success) {
-                const clientesData = response.data.data || [];
-                setClientes(clientesData);
-                console.log('✅ Clientes recarregados:', clientesData.length);
-                NotificationService.successToast(`${clientesData.length} clientes carregados!`);
-            }
-        } catch (error) {
-            console.error('❌ Erro ao recarregar clientes:', error);
-            NotificationService.errorToast('Erro ao carregar clientes');
-        }
-    };
+        // Cleanup para evitar memory leaks
+        return () => {
+            isMounted = false;
+        };
+    }, []); // Array vazio para executar apenas uma vez
 
     // Função simplificada para obter nome do cliente
     const getClienteNome = (projeto) => {
-        // Se o projeto tem a associação cliente do backend, usar essa
+        updateDebug(`🔍 getClienteNome chamado para projeto: ${projeto.nomeProjeto}`);
+        
+        // Estratégia 1: Associação do backend
         if (projeto.cliente && projeto.cliente.nome) {
+            updateDebug(`✅ Nome encontrado via backend: ${projeto.cliente.nome}`);
             return projeto.cliente.nome;
         }
         
-        // Fallback: procurar na lista local de clientes
+        // Estratégia 2: Lista local
         if (clientes.length > 0) {
             const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
             if (clienteLocal) {
+                updateDebug(`✅ Nome encontrado na lista local: ${clienteLocal.nome}`);
                 return clienteLocal.nome;
+            } else {
+                updateDebug(`❌ Cliente não encontrado na lista local (ID: ${projeto.idCliente})`);
+                updateDebug(`📋 Clientes disponíveis: ${clientes.map(c => `${c.idCliente}:${c.nome}`).join(', ')}`);
             }
+        } else {
+            updateDebug(`⚠️ Lista de clientes está vazia!`);
         }
         
+        updateDebug(`❌ Retornando N/A para projeto: ${projeto.nomeProjeto}`);
         return 'N/A';
+    };
+
+    // Teste manual forçado
+    const testeManual = async () => {
+        updateDebug('🧪 === TESTE MANUAL INICIADO ===');
+        
+        try {
+            // Limpar estados
+            setClientes([]);
+            setProjetos([]);
+            updateDebug('🧹 Estados limpos');
+            
+            // Fazer requisições frescas
+            const [clientesRes, projetosRes] = await Promise.all([
+                api.get('/clientes'),
+                api.get('/projetos')
+            ]);
+            
+            updateDebug(`📊 Clientes API: ${clientesRes.data.success} - ${clientesRes.data.data?.length || 0} itens`);
+            updateDebug(`📊 Projetos API: ${projetosRes.data.success} - ${projetosRes.data.data?.length || 0} itens`);
+            
+            if (clientesRes.data.success) {
+                setClientes(clientesRes.data.data);
+                updateDebug(`💾 Clientes definidos no estado: ${clientesRes.data.data.length}`);
+            }
+            
+            if (projetosRes.data.success) {
+                setProjetos(projetosRes.data.data);
+                updateDebug(`💾 Projetos definidos no estado: ${projetosRes.data.data.length}`);
+            }
+            
+            updateDebug('🧪 === TESTE MANUAL COMPLETO ===');
+            
+        } catch (error) {
+            updateDebug(`💥 Erro no teste manual: ${error.message}`);
+        }
     };
 
     const handleInputChange = (e) => {
@@ -237,11 +300,12 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 }
 
                 handleCloseModal();
-                await loadProjetos();
+                // Recarregar dados após criar/editar
+                await testeManual();
                 if (onStatsUpdate) onStatsUpdate();
             }
         } catch (error) {
-            console.error('❌ Erro ao guardar projeto:', error);
+            updateDebug(`❌ Erro ao guardar projeto: ${error.message}`);
             NotificationService.closeLoading();
 
             if (error.response?.data?.message) {
@@ -274,7 +338,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 setSelectedServicos(servicosAssociados);
             }
         } catch (error) {
-            console.error('❌ Erro ao carregar serviços do projeto:', error);
+            updateDebug(`❌ Erro ao carregar serviços do projeto: ${error.message}`);
             setSelectedServicos([]);
         }
 
@@ -312,11 +376,11 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
                 if (response.data.success) {
                     NotificationService.successToast(`Projeto ${novoStatus ? 'ativado' : 'desativado'}!`);
-                    await loadProjetos();
+                    await testeManual();
                     if (onStatsUpdate) onStatsUpdate();
                 }
             } catch (error) {
-                console.error('❌ Erro ao alterar estado do projeto:', error);
+                updateDebug(`❌ Erro ao alterar estado do projeto: ${error.message}`);
                 NotificationService.errorToast('Erro ao alterar estado do projeto');
             }
         }
@@ -393,28 +457,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         }));
     }, [selectedServicos, servicos]);
 
-    // Função de diagnóstico simplificada
-    const diagnosticoSimples = () => {
-        console.log('🔍 DIAGNÓSTICO SIMPLES:');
-        console.log('- Clientes carregados:', clientes.length);
-        console.log('- Projetos carregados:', projetos.length);
-        console.log('- Estados carregados:', estadosProjeto.length);
-        console.log('- Serviços carregados:', servicos.length);
-        
-        if (projetos.length > 0) {
-            console.log('- Primeiro projeto:', projetos[0]);
-            console.log('- Nome do cliente do primeiro projeto:', getClienteNome(projetos[0]));
-        }
-        
-        alert(`Diagnóstico:
-Clientes: ${clientes.length}
-Projetos: ${projetos.length}
-Estados: ${estadosProjeto.length}
-Serviços: ${servicos.length}
-
-Ver console para mais detalhes.`);
-    };
-
     return (
         <div>
             <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -430,26 +472,63 @@ Ver console para mais detalhes.`);
                     </button>
                     <button
                         type="button"
-                        className="btn btn-outline-info me-2"
-                        onClick={diagnosticoSimples}
-                        title="Diagnóstico rápido"
+                        className="btn btn-outline-success me-2"
+                        onClick={testeManual}
+                        title="Teste manual forçado"
                     >
-                        🔍 Debug
+                        🧪 Teste Manual
                     </button>
                     <button
                         type="button"
-                        className="btn btn-outline-secondary"
-                        onClick={async () => {
-                            console.log('🔄 Recarregamento manual...');
-                            await loadClientes();
-                            await loadProjetos();
-                        }}
-                        title="Recarregar dados"
+                        className="btn btn-outline-info me-2"
+                        onClick={() => setShowDebug(!showDebug)}
+                        title="Mostrar/ocultar debug"
                     >
-                        🔄 Recarregar
+                        {showDebug ? '🙈' : '👁️'} Debug
                     </button>
                 </div>
             </div>
+
+            {/* ÁREA DE DEBUG VISÍVEL NA INTERFACE */}
+            {showDebug && (
+                <div className="card mb-3 border-warning">
+                    <div className="card-header bg-warning text-dark">
+                        <h6 className="mb-0">🔧 Informações de Debug em Tempo Real</h6>
+                    </div>
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col-md-6">
+                                <h6>📊 Estados Actuais:</h6>
+                                <ul className="list-unstyled">
+                                    <li>✅ Clientes: <strong>{clientes.length}</strong></li>
+                                    <li>✅ Projetos: <strong>{projetos.length}</strong></li>
+                                    <li>✅ Estados: <strong>{estadosProjeto.length}</strong></li>
+                                    <li>✅ Serviços: <strong>{servicos.length}</strong></li>
+                                </ul>
+                            </div>
+                            <div className="col-md-6">
+                                <h6>🧪 Teste Rápido:</h6>
+                                {projetos.length > 0 && (
+                                    <div>
+                                        <strong>Primeiro projeto:</strong> {projetos[0].nomeProjeto}<br />
+                                        <strong>Cliente ID:</strong> {projetos[0].idCliente}<br />
+                                        <strong>Nome resolvido:</strong> <span className="badge bg-primary">{getClienteNome(projetos[0])}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <hr />
+                        <h6>📋 Log de Eventos:</h6>
+                        <textarea 
+                            className="form-control" 
+                            value={debugInfo} 
+                            readOnly 
+                            rows="8"
+                            style={{ fontSize: '0.75em', fontFamily: 'monospace' }}
+                        />
+                    </div>
+                </div>
+            )}
 
             <div className="row mb-3">
                 <div className="col-md-3">
@@ -497,7 +576,9 @@ Ver console para mais detalhes.`);
                         value={filterCliente}
                         onChange={(e) => setFilterCliente(e.target.value)}
                     >
-                        <option value="">Todos os Clientes</option>
+                        <option value="">
+                            {clientes.length === 0 ? 'Nenhum cliente carregado!' : `Todos os Clientes (${clientes.length})`}
+                        </option>
                         {clientes.map(cliente => (
                             <option key={cliente.idCliente} value={cliente.idCliente}>
                                 {cliente.nome}
@@ -624,7 +705,7 @@ Ver console para mais detalhes.`);
                 </div>
             )}
 
-            {/* Modal para Adicionar/Editar Projeto */}
+            {/* Modal permanece igual... */}
             {showModal && (
                 <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-xl">
@@ -709,7 +790,7 @@ Ver console para mais detalhes.`);
                                             {errors.idCliente && <div className="invalid-feedback">{errors.idCliente}</div>}
                                             {clientes.length === 0 && (
                                                 <small className="text-warning">
-                                                    ⚠️ Nenhum cliente carregado. Clica em Recarregar.
+                                                    ⚠️ Nenhum cliente carregado. Clica em "Teste Manual".
                                                 </small>
                                             )}
                                         </div>
