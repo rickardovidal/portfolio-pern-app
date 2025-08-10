@@ -121,30 +121,68 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         }
     };
 
-    // CORREÇÃO: Função initData melhorada com carregamento sequencial
+    // Substitui a tua função initData actual por esta versão corrigida:
+
     const initData = async () => {
         try {
             setLoading(true);
             NotificationService.loading('A carregar dados...');
 
-            // IMPORTANTE: Carregar dados sequencialmente para evitar problemas de concorrência
-            console.log('🚀 Iniciando carregamento de dados...');
+            // Fazer todas as chamadas em paralelo mas aguardar todas
+            const [clientesRes, estadosRes, servicosRes, projetosRes] = await Promise.all([
+                api.get('/clientes').catch(err => {
+                    console.error('Erro ao carregar clientes:', err);
+                    return { data: { success: false, data: [] } };
+                }),
+                api.get('/estados-projeto').catch(err => {
+                    console.error('Erro ao carregar estados:', err);
+                    return { data: { success: false, data: [] } };
+                }),
+                api.get('/servicos').catch(err => {
+                    console.error('Erro ao carregar serviços:', err);
+                    return { data: { success: false, data: [] } };
+                }),
+                api.get('/projetos').catch(err => {
+                    console.error('Erro ao carregar projetos:', err);
+                    return { data: { success: false, data: [] } };
+                })
+            ]);
 
-            // 1. Primeiro carregar clientes (essencial para mostrar nos projetos)
-            const clientesCarregados = await loadClientes();
+            // Processar respostas com validação
+            if (clientesRes.data.success) {
+                const clientesData = clientesRes.data.data || [];
+                console.log(`✅ ${clientesData.length} clientes carregados:`, clientesData);
+                setClientes(clientesData);
+            } else {
+                console.error('❌ Falha ao carregar clientes');
+                setClientes([]);
+            }
 
-            // 2. Depois carregar estados de projeto
-            const estadosCarregados = await loadEstadosProjeto();
+            if (estadosRes.data.success) {
+                const estadosData = estadosRes.data.data || [];
+                console.log(`✅ ${estadosData.length} estados carregados`);
+                setEstadosProjeto(estadosData);
+            } else {
+                console.error('❌ Falha ao carregar estados');
+                setEstadosProjeto([]);
+            }
 
-            // 3. Carregar serviços
-            const servicosCarregados = await loadServicos();
+            if (servicosRes.data.success) {
+                const servicosData = servicosRes.data.data || [];
+                console.log(`✅ ${servicosData.length} serviços carregados`);
+                setServicos(servicosData);
+            } else {
+                console.error('❌ Falha ao carregar serviços');
+                setServicos([]);
+            }
 
-            // 4. Por fim, carregar projetos
-            const projetosCarregados = await loadProjetos();
-
-            // Verificar se conseguimos carregar pelo menos os dados essenciais
-            if (clientesCarregados.length === 0) {
-                console.warn('⚠️ Nenhum cliente foi carregado');
+            if (projetosRes.data.success) {
+                const projetosData = projetosRes.data.data || [];
+                console.log(`✅ ${projetosData.length} projetos carregados`);
+                setProjetos(projetosData);
+            } else {
+                console.error('❌ Falha ao carregar projetos');
+                setProjetos([]);
             }
 
             NotificationService.closeLoading();
@@ -153,66 +191,15 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         } catch (error) {
             console.error('❌ Erro crítico ao carregar dados:', error);
             NotificationService.closeLoading();
-            if (error.response?.data?.message) {
-                NotificationService.error('Erro!', error.response.data.message);
-            } else {
-                NotificationService.errorToast('Erro ao carregar dados');
-            }
+            NotificationService.errorToast('Erro ao carregar dados');
+
+            // Definir arrays vazios em caso de erro
+            setClientes([]);
+            setEstadosProjeto([]);
+            setServicos([]);
+            setProjetos([]);
         } finally {
             setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        // Verificar se temos token antes de carregar dados
-        const token = localStorage.getItem('adminToken');
-        if (!token) {
-            console.error('❌ Token não encontrado!');
-            NotificationService.error('Erro', 'Sessão expirada. Por favor, faça login novamente.');
-            window.location.href = '/admin-login';
-            return;
-        }
-
-        initData();
-    }, []);
-
-    // CORREÇÃO: Função melhorada para obter nome do cliente
-    const getClienteNome = (projeto) => {
-        if (!projeto) return 'N/A';
-
-        // Debug: verificar dados do projeto
-        console.log('Projeto:', projeto.idProjeto, 'idCliente:', projeto.idCliente);
-
-        // Estratégia 1: Verificar se o backend já enviou o cliente aninhado
-        if (projeto.cliente && projeto.cliente.nome) {
-            return projeto.cliente.nome;
-        }
-
-        // Estratégia 2: Procurar na lista local de clientes
-        if (clientes && clientes.length > 0) {
-            const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
-            if (clienteLocal) {
-                return clienteLocal.nome;
-            }
-        }
-
-        // Debug: se não encontrou, mostrar porquê
-        console.warn(`Cliente não encontrado para projeto ${projeto.nomeProjeto} (idCliente: ${projeto.idCliente})`);
-        return 'N/A';
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
-
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
         }
     };
 
