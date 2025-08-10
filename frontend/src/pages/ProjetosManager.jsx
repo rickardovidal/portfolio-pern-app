@@ -11,7 +11,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
-    
+
     // Estados de filtros
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
@@ -34,7 +34,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [errors, setErrors] = useState({});
-    
+
     // Estado de diagnóstico para mostrar informações na interface
     const [diagnosticInfo, setDiagnosticInfo] = useState('');
 
@@ -49,7 +49,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 alert(`DEBUG: ${message}`);
             }
         }
-        
+
         // Actualiza informações de diagnóstico na interface
         setDiagnosticInfo(prev => prev + '\n' + message + (data ? ' - ' + JSON.stringify(data) : ''));
     };
@@ -57,24 +57,24 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     // Inicialização quando o componente monta
     useEffect(() => {
         debugLog('🚀 CRÍTICO: ProjetosManager inicializando...');
-        
+
         const initData = async () => {
             try {
                 debugLog('📋 Iniciando carregamento sequencial de dados...');
-                
+
                 // Carrega dados de forma sequencial para evitar conflitos
                 await loadClientes();
                 await loadEstadosProjeto();
                 await loadServicos();
                 await loadProjetos();
-                
+
                 debugLog('✅ Inicialização completa');
             } catch (error) {
                 debugLog('❌ CRÍTICO: Erro na inicialização', error.message);
                 NotificationService.errorToast('Erro ao inicializar dados');
             }
         };
-        
+
         initData();
     }, []);
 
@@ -82,7 +82,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const loadClientes = async () => {
         try {
             debugLog('🔄 Iniciando carregamento de clientes...');
-            
+
             // Verifica se o token existe
             const token = localStorage.getItem('adminToken');
             if (!token) {
@@ -102,12 +102,12 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             if (response?.data?.success) {
                 const clientesData = response.data.data || [];
                 debugLog(`✅ ${clientesData.length} clientes processados`);
-                
+
                 // Validação dos dados recebidos
-                const clientesValidos = clientesData.filter(cliente => 
+                const clientesValidos = clientesData.filter(cliente =>
                     cliente && cliente.idCliente && cliente.nome
                 );
-                
+
                 if (clientesValidos.length !== clientesData.length) {
                     debugLog('⚠️ Alguns clientes têm dados inválidos', {
                         total: clientesData.length,
@@ -117,7 +117,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
                 setClientes(clientesValidos);
                 debugLog('💾 Estado de clientes atualizado');
-                
+
                 if (clientesValidos.length > 0) {
                     NotificationService.successToast(`${clientesValidos.length} clientes carregados!`);
                 } else {
@@ -134,7 +134,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 status: error.response?.status,
                 data: error.response?.data
             });
-            
+
             NotificationService.errorToast('Erro ao carregar clientes');
             setClientes([]); // Garante array vazio em caso de erro
         }
@@ -174,7 +174,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
                 setProjetos(projetosData);
                 debugLog('💾 Estado de projetos atualizado');
-                
+
             } else {
                 debugLog('❌ API retornou success: false para projetos', response?.data);
                 NotificationService.errorToast('Erro na resposta do servidor ao carregar projetos');
@@ -196,7 +196,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         try {
             debugLog('🔄 Carregando estados de projeto...');
             const response = await api.get('/estados-projeto');
-            
+
             if (response?.data?.success) {
                 const estadosData = response.data.data || [];
                 setEstadosProjeto(estadosData);
@@ -214,7 +214,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         try {
             debugLog('🔄 Carregando serviços...');
             const response = await api.get('/servicos');
-            
+
             if (response?.data?.success) {
                 const servicosData = response.data.data || [];
                 setServicos(servicosData);
@@ -229,58 +229,10 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     // Função melhorada para obter nome do cliente com múltiplas estratégias
     const getClienteNome = (projeto) => {
-        if (!projeto) {
-            debugLog('⚠️ Projeto inválido passado para getClienteNome');
-            return 'N/A';
-        }
-
-        debugLog(`🔍 Buscando cliente para projeto "${projeto.nomeProjeto}"`, {
-            idCliente: projeto.idCliente,
-            totalClientesDisponiveis: clientes.length
-        });
-
-        // Estratégia 1: Usar associação direta do backend (mais eficiente)
+        // A API já retorna a associação correcta
         if (projeto.cliente?.nome) {
-            debugLog(`✅ Nome encontrado via associação backend: ${projeto.cliente.nome}`);
             return projeto.cliente.nome;
         }
-
-        // Estratégia 2: Verificar variação plural da associação
-        if (projeto.clientes?.nome) {
-            debugLog(`✅ Nome encontrado via associação plural: ${projeto.clientes.nome}`);
-            return projeto.clientes.nome;
-        }
-
-        // Estratégia 3: Buscar na lista local com comparação robusta
-        if (clientes.length > 0) {
-            // Comparação exata
-            let clienteEncontrado = clientes.find(c => c.idCliente === projeto.idCliente);
-            if (clienteEncontrado) {
-                debugLog(`✅ Cliente encontrado por ID exato: ${clienteEncontrado.nome}`);
-                return clienteEncontrado.nome;
-            }
-
-            // Comparação convertendo para string (caso haja diferença de tipos)
-            clienteEncontrado = clientes.find(c => String(c.idCliente) === String(projeto.idCliente));
-            if (clienteEncontrado) {
-                debugLog(`✅ Cliente encontrado por ID como string: ${clienteEncontrado.nome}`);
-                return clienteEncontrado.nome;
-            }
-
-            // Comparação convertendo para número
-            clienteEncontrado = clientes.find(c => Number(c.idCliente) === Number(projeto.idCliente));
-            if (clienteEncontrado) {
-                debugLog(`✅ Cliente encontrado por ID como número: ${clienteEncontrado.nome}`);
-                return clienteEncontrado.nome;
-            }
-        }
-
-        // Se chegou aqui, não conseguiu encontrar o cliente
-        debugLog(`❌ Cliente não encontrado para projeto "${projeto.nomeProjeto}"`, {
-            idClienteProcurado: projeto.idCliente,
-            clientesDisponiveis: clientes.map(c => ({ id: c.idCliente, nome: c.nome }))
-        });
-
         return 'N/A';
     };
 
@@ -570,7 +522,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         };
 
         debugLog('🔍 DIAGNÓSTICO COMPLETO', diagnostico);
-        
+
         // Exibe também na interface para facilitar visualização
         alert(`DIAGNÓSTICO:
 Clientes: ${diagnostico.estados.clientes}
@@ -626,7 +578,7 @@ Ver console para detalhes completos.`);
                 <div className="alert alert-info mt-2" style={{ fontSize: '0.8em', maxHeight: '150px', overflow: 'auto' }}>
                     <strong>Debug Info:</strong>
                     <pre style={{ margin: 0, fontSize: '0.7em' }}>{diagnosticInfo}</pre>
-                    <button 
+                    <button
                         className="btn btn-sm btn-outline-primary mt-1"
                         onClick={() => setDiagnosticInfo('')}
                     >
