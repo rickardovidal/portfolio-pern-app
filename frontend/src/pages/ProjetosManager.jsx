@@ -3,7 +3,6 @@ import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
 
 const ProjetosManager = ({ onStatsUpdate }) => {
-    // Estados principais da aplicação
     const [projetos, setProjetos] = useState([]);
     const [clientes, setClientes] = useState([]);
     const [estadosProjeto, setEstadosProjeto] = useState([]);
@@ -11,14 +10,11 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
-
-    // Estados de filtros
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
     const [filterCliente, setFilterCliente] = useState('');
     const [filterEstado, setFilterEstado] = useState('');
 
-    // Estados do formulário
     const [formData, setFormData] = useState({
         nomeProjeto: '',
         descricaoProjeto: '',
@@ -35,204 +31,120 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [errors, setErrors] = useState({});
 
-    // Estado de diagnóstico para mostrar informações na interface
-    const [diagnosticInfo, setDiagnosticInfo] = useState('');
-
-    // Função utilitária para logs que sempre funcionam
-    const debugLog = (message, data = null) => {
-        // Tenta múltiplas formas de logging
-        try {
-            console.log(message, data);
-        } catch (e) {
-            // Se console.log falhar, tenta alert como fallback para debug crítico
-            if (message.includes('CRÍTICO')) {
-                alert(`DEBUG: ${message}`);
-            }
-        }
-
-        // Actualiza informações de diagnóstico na interface
-        setDiagnosticInfo(prev => prev + '\n' + message + (data ? ' - ' + JSON.stringify(data) : ''));
-    };
-
-    // Inicialização quando o componente monta
     useEffect(() => {
-        debugLog('🚀 CRÍTICO: ProjetosManager inicializando...');
-
         const initData = async () => {
             try {
-                debugLog('📋 Iniciando carregamento sequencial de dados...');
+                console.log('🚀 Iniciando carregamento de dados...');
+                setLoading(true);
+                
+                // Carregar tudo em paralelo para ser mais rápido
+                const [clientesRes, estadosRes, servicosRes] = await Promise.all([
+                    api.get('/clientes'),
+                    api.get('/estados-projeto'),
+                    api.get('/servicos')
+                ]);
 
-                // Carrega dados de forma sequencial para evitar conflitos
-                await loadClientes();
-                await loadEstadosProjeto();
-                await loadServicos();
+                // Processar clientes
+                if (clientesRes.data.success) {
+                    const clientesData = clientesRes.data.data || [];
+                    setClientes(clientesData);
+                    console.log('✅ Clientes carregados:', clientesData.length);
+                }
+
+                // Processar estados
+                if (estadosRes.data.success) {
+                    const estadosData = estadosRes.data.data || [];
+                    setEstadosProjeto(estadosData);
+                    console.log('✅ Estados carregados:', estadosData.length);
+                }
+
+                // Processar serviços
+                if (servicosRes.data.success) {
+                    const servicosData = servicosRes.data.data || [];
+                    setServicos(servicosData);
+                    console.log('✅ Serviços carregados:', servicosData.length);
+                }
+
+                // Carregar projetos por último, depois dos outros dados estarem prontos
                 await loadProjetos();
 
-                debugLog('✅ Inicialização completa');
             } catch (error) {
-                debugLog('❌ CRÍTICO: Erro na inicialização', error.message);
-                NotificationService.errorToast('Erro ao inicializar dados');
+                console.error('❌ Erro na inicialização:', error);
+                NotificationService.errorToast('Erro ao carregar dados');
+            } finally {
+                setLoading(false);
             }
         };
 
         initData();
     }, []);
 
-    // Função para carregar clientes com verificações robustas
-    const loadClientes = async () => {
-        try {
-            debugLog('🔄 Iniciando carregamento de clientes...');
-
-            // Verifica se o token existe
-            const token = localStorage.getItem('adminToken');
-            if (!token) {
-                debugLog('❌ CRÍTICO: Token não encontrado');
-                NotificationService.errorToast('Sessão expirada. Por favor, faz login novamente.');
-                return;
-            }
-
-            const response = await api.get('/clientes');
-            debugLog('📡 Resposta recebida para clientes', {
-                status: response?.status,
-                success: response?.data?.success,
-                dataExists: !!response?.data?.data,
-                dataLength: response?.data?.data?.length
-            });
-
-            if (response?.data?.success) {
-                const clientesData = response.data.data || [];
-                debugLog(`✅ ${clientesData.length} clientes processados`);
-
-                // Validação dos dados recebidos
-                const clientesValidos = clientesData.filter(cliente =>
-                    cliente && cliente.idCliente && cliente.nome
-                );
-
-                if (clientesValidos.length !== clientesData.length) {
-                    debugLog('⚠️ Alguns clientes têm dados inválidos', {
-                        total: clientesData.length,
-                        validos: clientesValidos.length
-                    });
-                }
-
-                setClientes(clientesValidos);
-                debugLog('💾 Estado de clientes atualizado');
-
-                if (clientesValidos.length > 0) {
-                    NotificationService.successToast(`${clientesValidos.length} clientes carregados!`);
-                } else {
-                    debugLog('⚠️ Nenhum cliente válido encontrado');
-                    NotificationService.errorToast('Nenhum cliente encontrado');
-                }
-            } else {
-                debugLog('❌ API retornou success: false', response?.data);
-                NotificationService.errorToast('Erro na resposta do servidor ao carregar clientes');
-            }
-        } catch (error) {
-            debugLog('💥 Erro ao carregar clientes', {
-                message: error.message,
-                status: error.response?.status,
-                data: error.response?.data
-            });
-
-            NotificationService.errorToast('Erro ao carregar clientes');
-            setClientes([]); // Garante array vazio em caso de erro
-        }
-    };
-
-    // Função para carregar projetos com análise detalhada das associações
     const loadProjetos = async () => {
         try {
-            setLoading(true);
-            debugLog('🔄 Iniciando carregamento de projetos...');
-
+            console.log('🔄 Carregando projetos...');
             const response = await api.get('/projetos');
-            debugLog('📡 Resposta recebida para projetos', {
-                status: response?.status,
-                success: response?.data?.success,
-                dataExists: !!response?.data?.data,
-                dataLength: response?.data?.data?.length
-            });
 
-            if (response?.data?.success) {
+            if (response.data.success) {
                 const projetosData = response.data.data || [];
-                debugLog(`✅ ${projetosData.length} projetos processados`);
-
-                // Análise detalhada de cada projeto e suas associações
+                console.log('✅ Projetos carregados:', projetosData.length);
+                
+                // Log detalhado de cada projeto para debug
                 projetosData.forEach((projeto, index) => {
-                    debugLog(`📁 Projeto ${index + 1}: ${projeto.nomeProjeto}`, {
-                        idProjeto: projeto.idProjeto,
+                    console.log(`📁 Projeto ${index + 1}:`, {
+                        nome: projeto.nomeProjeto,
                         idCliente: projeto.idCliente,
-                        idClienteTipo: typeof projeto.idCliente,
-                        temAssociacaoCliente: !!projeto.cliente,
-                        temAssociacaoClientes: !!projeto.clientes,
-                        nomeViaCliente: projeto.cliente?.nome,
-                        nomeViaClientes: projeto.clientes?.nome,
-                        todasChaves: Object.keys(projeto)
+                        temCliente: !!projeto.cliente,
+                        nomeCliente: projeto.cliente?.nome
                     });
                 });
 
                 setProjetos(projetosData);
-                debugLog('💾 Estado de projetos atualizado');
-
+                NotificationService.successToast(`${projetosData.length} projetos carregados!`);
             } else {
-                debugLog('❌ API retornou success: false para projetos', response?.data);
-                NotificationService.errorToast('Erro na resposta do servidor ao carregar projetos');
+                console.error('❌ Erro na resposta dos projetos:', response.data);
+                NotificationService.errorToast('Erro ao carregar projetos');
             }
         } catch (error) {
-            debugLog('💥 Erro ao carregar projetos', {
-                message: error.message,
-                status: error.response?.status,
-                data: error.response?.data
-            });
+            console.error('❌ Erro ao carregar projetos:', error);
             NotificationService.errorToast('Erro ao carregar projetos');
-        } finally {
-            setLoading(false);
         }
     };
 
-    // Função para carregar estados de projeto
-    const loadEstadosProjeto = async () => {
+    const loadClientes = async () => {
         try {
-            debugLog('🔄 Carregando estados de projeto...');
-            const response = await api.get('/estados-projeto');
-
-            if (response?.data?.success) {
-                const estadosData = response.data.data || [];
-                setEstadosProjeto(estadosData);
-                debugLog(`✅ ${estadosData.length} estados carregados`);
-                NotificationService.successToast('Estados carregados!');
+            console.log('🔄 Recarregando clientes...');
+            const response = await api.get('/clientes');
+            
+            if (response.data.success) {
+                const clientesData = response.data.data || [];
+                setClientes(clientesData);
+                console.log('✅ Clientes recarregados:', clientesData.length);
+                NotificationService.successToast(`${clientesData.length} clientes carregados!`);
             }
         } catch (error) {
-            debugLog('❌ Erro ao carregar estados de projeto', error.message);
-            NotificationService.errorToast('Erro ao carregar estados');
+            console.error('❌ Erro ao recarregar clientes:', error);
+            NotificationService.errorToast('Erro ao carregar clientes');
         }
     };
 
-    // Função para carregar serviços
-    const loadServicos = async () => {
-        try {
-            debugLog('🔄 Carregando serviços...');
-            const response = await api.get('/servicos');
-
-            if (response?.data?.success) {
-                const servicosData = response.data.data || [];
-                setServicos(servicosData);
-                debugLog(`✅ ${servicosData.length} serviços carregados`);
-                NotificationService.successToast('Serviços carregados!');
-            }
-        } catch (error) {
-            debugLog('❌ Erro ao carregar serviços', error.message);
-            NotificationService.errorToast('Erro ao carregar serviços');
-        }
-    };
-
-    // Função melhorada para obter nome do cliente com múltiplas estratégias
+    // Função simplificada para obter nome do cliente
     const getClienteNome = (projeto) => {
-        return projeto.cliente?.nome || 'N/A';
+        // Se o projeto tem a associação cliente do backend, usar essa
+        if (projeto.cliente && projeto.cliente.nome) {
+            return projeto.cliente.nome;
+        }
+        
+        // Fallback: procurar na lista local de clientes
+        if (clientes.length > 0) {
+            const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
+            if (clienteLocal) {
+                return clienteLocal.nome;
+            }
+        }
+        
+        return 'N/A';
     };
 
-    // Resto das funções existentes mantidas como estavam
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
@@ -250,13 +162,11 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const handleServicoChange = (servicoId) => {
         setSelectedServicos(prev => {
-            let newSelected;
             if (prev.includes(servicoId)) {
-                newSelected = prev.filter(id => id !== servicoId);
+                return prev.filter(id => id !== servicoId);
             } else {
-                newSelected = [...prev, servicoId];
+                return [...prev, servicoId];
             }
-            return newSelected;
         });
     };
 
@@ -312,10 +222,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
             let response;
             if (editingProject) {
-                response = await api.put(
-                    `/projetos/${editingProject.idProjeto}`,
-                    projetoData
-                );
+                response = await api.put(`/projetos/${editingProject.idProjeto}`, projetoData);
             } else {
                 response = await api.post('/projetos', projetoData);
             }
@@ -334,7 +241,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 if (onStatsUpdate) onStatsUpdate();
             }
         } catch (error) {
-            debugLog('❌ Erro ao guardar projeto', error.response?.data);
+            console.error('❌ Erro ao guardar projeto:', error);
             NotificationService.closeLoading();
 
             if (error.response?.data?.message) {
@@ -367,7 +274,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 setSelectedServicos(servicosAssociados);
             }
         } catch (error) {
-            debugLog('❌ Erro ao carregar serviços do projeto', error.message);
+            console.error('❌ Erro ao carregar serviços do projeto:', error);
             setSelectedServicos([]);
         }
 
@@ -397,24 +304,19 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                     }
                 }
 
-                const response = await api.put(
-                    `/projetos/${projeto.idProjeto}`,
-                    {
-                        ...projeto,
-                        ativo: novoStatus,
-                        idEstado_Projeto: estadoId
-                    }
-                );
+                const response = await api.put(`/projetos/${projeto.idProjeto}`, {
+                    ...projeto,
+                    ativo: novoStatus,
+                    idEstado_Projeto: estadoId
+                });
 
                 if (response.data.success) {
-                    NotificationService.successToast(
-                        `Projeto ${novoStatus ? 'ativado' : 'desativado'}!`
-                    );
+                    NotificationService.successToast(`Projeto ${novoStatus ? 'ativado' : 'desativado'}!`);
                     await loadProjetos();
                     if (onStatsUpdate) onStatsUpdate();
                 }
             } catch (error) {
-                debugLog('❌ Erro ao alterar estado do projeto', error.message);
+                console.error('❌ Erro ao alterar estado do projeto:', error);
                 NotificationService.errorToast('Erro ao alterar estado do projeto');
             }
         }
@@ -423,7 +325,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const handleCloseModal = () => {
         setShowModal(false);
         setEditingProject(null);
-
         setFormData({
             nomeProjeto: '',
             descricaoProjeto: '',
@@ -436,7 +337,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             idEstado_Projeto: '',
             ativo: true
         });
-
         setSelectedServicos([]);
         setErrors({});
     };
@@ -450,7 +350,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             (filterStatus === 'inativo' && projeto.ativo === false);
 
         const matchesEstado = !filterEstado || projeto.idEstado_Projeto == filterEstado;
-
         const matchesCliente = !filterCliente || projeto.idCliente == filterCliente;
 
         return matchesSearch && matchesStatus && matchesEstado && matchesCliente;
@@ -494,41 +393,26 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         }));
     }, [selectedServicos, servicos]);
 
-    // Função de diagnóstico completo melhorada
-    const diagnosticoCompleto = () => {
-        const diagnostico = {
-            timestamp: new Date().toISOString(),
-            estados: {
-                clientes: clientes.length,
-                projetos: projetos.length,
-                estadosProjeto: estadosProjeto.length,
-                servicos: servicos.length
-            },
-            clientesData: clientes.map(c => ({ id: c.idCliente, nome: c.nome })),
-            projetosData: projetos.map(p => ({
-                nome: p.nomeProjeto,
-                idCliente: p.idCliente,
-                clienteAssociado: getClienteNome(p),
-                temAssociacao: !!p.cliente
-            })),
-            localStorage: {
-                token: !!localStorage.getItem('adminToken'),
-                tokenLength: localStorage.getItem('adminToken')?.length || 0
-            }
-        };
+    // Função de diagnóstico simplificada
+    const diagnosticoSimples = () => {
+        console.log('🔍 DIAGNÓSTICO SIMPLES:');
+        console.log('- Clientes carregados:', clientes.length);
+        console.log('- Projetos carregados:', projetos.length);
+        console.log('- Estados carregados:', estadosProjeto.length);
+        console.log('- Serviços carregados:', servicos.length);
+        
+        if (projetos.length > 0) {
+            console.log('- Primeiro projeto:', projetos[0]);
+            console.log('- Nome do cliente do primeiro projeto:', getClienteNome(projetos[0]));
+        }
+        
+        alert(`Diagnóstico:
+Clientes: ${clientes.length}
+Projetos: ${projetos.length}
+Estados: ${estadosProjeto.length}
+Serviços: ${servicos.length}
 
-        debugLog('🔍 DIAGNÓSTICO COMPLETO', diagnostico);
-
-        // Exibe também na interface para facilitar visualização
-        alert(`DIAGNÓSTICO:
-Clientes: ${diagnostico.estados.clientes}
-Projetos: ${diagnostico.estados.projetos}
-Estados: ${diagnostico.estados.estadosProjeto}
-Serviços: ${diagnostico.estados.servicos}
-
-Ver console para detalhes completos.`);
-
-        return diagnostico;
+Ver console para mais detalhes.`);
     };
 
     return (
@@ -547,41 +431,25 @@ Ver console para detalhes completos.`);
                     <button
                         type="button"
                         className="btn btn-outline-info me-2"
-                        onClick={diagnosticoCompleto}
-                        title="Executar diagnóstico completo"
+                        onClick={diagnosticoSimples}
+                        title="Diagnóstico rápido"
                     >
-                        🔍 Debug Completo
+                        🔍 Debug
                     </button>
-                    {/* Botão adicional para recarregar dados */}
                     <button
                         type="button"
                         className="btn btn-outline-secondary"
                         onClick={async () => {
-                            debugLog('🔄 Recarregamento manual iniciado');
+                            console.log('🔄 Recarregamento manual...');
                             await loadClientes();
                             await loadProjetos();
-                            debugLog('✅ Recarregamento manual completo');
                         }}
-                        title="Recarregar todos os dados"
+                        title="Recarregar dados"
                     >
                         🔄 Recarregar
                     </button>
                 </div>
             </div>
-
-            {/* Área de diagnóstico visível na interface (removível após debug) */}
-            {diagnosticInfo && (
-                <div className="alert alert-info mt-2" style={{ fontSize: '0.8em', maxHeight: '150px', overflow: 'auto' }}>
-                    <strong>Debug Info:</strong>
-                    <pre style={{ margin: 0, fontSize: '0.7em' }}>{diagnosticInfo}</pre>
-                    <button
-                        className="btn btn-sm btn-outline-primary mt-1"
-                        onClick={() => setDiagnosticInfo('')}
-                    >
-                        Limpar
-                    </button>
-                </div>
-            )}
 
             <div className="row mb-3">
                 <div className="col-md-3">
@@ -694,7 +562,11 @@ Ver console para detalhes completos.`);
                                                         )}
                                                     </div>
                                                 </td>
-                                                <td>{getClienteNome(projeto)}</td>
+                                                <td>
+                                                    <strong className="text-primary">
+                                                        {getClienteNome(projeto)}
+                                                    </strong>
+                                                </td>
                                                 <td>
                                                     <span className={`badge ${getEstadoBadgeClass(getEstadoNome(projeto.idEstado_Projeto))}`}>
                                                         {getEstadoNome(projeto.idEstado_Projeto)}
@@ -837,7 +709,7 @@ Ver console para detalhes completos.`);
                                             {errors.idCliente && <div className="invalid-feedback">{errors.idCliente}</div>}
                                             {clientes.length === 0 && (
                                                 <small className="text-warning">
-                                                    ⚠️ Nenhum cliente carregado. Verifica a ligação à base de dados.
+                                                    ⚠️ Nenhum cliente carregado. Clica em Recarregar.
                                                 </small>
                                             )}
                                         </div>
