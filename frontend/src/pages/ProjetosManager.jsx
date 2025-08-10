@@ -34,10 +34,10 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        loadProjetos();
         loadClientes();
         loadEstadosProjeto();
         loadServicos();
+        loadProjetos();
     }, []);
 
     // ✅ CORRIGIDO - Carregamento simples com toast
