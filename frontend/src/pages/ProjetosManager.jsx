@@ -15,10 +15,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [filterCliente, setFilterCliente] = useState('');
     const [filterEstado, setFilterEstado] = useState('');
 
-    // DEBUG: Estados para mostrar informação na interface
-    const [debugInfo, setDebugInfo] = useState('Inicializando...');
-    const [showDebug, setShowDebug] = useState(true);
-
     const [formData, setFormData] = useState({
         nomeProjeto: '',
         descricaoProjeto: '',
@@ -35,177 +31,81 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [errors, setErrors] = useState({});
 
-    // Função para actualizar debug info na interface
-    const updateDebug = (message) => {
-        const timestamp = new Date().toLocaleTimeString();
-        setDebugInfo(prev => `${prev}\n[${timestamp}] ${message}`);
-        console.log(message);
+    const initData = async () => {
+        try {
+            setLoading(true);
+            NotificationService.loading('A carregar dados...');
+
+            // Carregar clientes
+            const clientesResponse = await api.get('/clientes');
+            if (clientesResponse.data.success) {
+                setClientes(clientesResponse.data.data || []);
+            } else {
+                console.error('Erro: API clientes retornou success=false', clientesResponse.data);
+                NotificationService.errorToast('Erro ao carregar clientes');
+            }
+
+            // Carregar estados de projeto
+            const estadosResponse = await api.get('/estados-projeto');
+            if (estadosResponse.data.success) {
+                setEstadosProjeto(estadosResponse.data.data || []);
+            } else {
+                console.error('Erro: API estados-projeto retornou success=false', estadosResponse.data);
+                NotificationService.errorToast('Erro ao carregar estados de projeto');
+            }
+
+            // Carregar serviços
+            const servicosResponse = await api.get('/servicos');
+            if (servicosResponse.data.success) {
+                setServicos(servicosResponse.data.data || []);
+            } else {
+                console.error('Erro: API servicos retornou success=false', servicosResponse.data);
+                NotificationService.errorToast('Erro ao carregar serviços');
+            }
+
+            // Carregar projetos
+            const projetosResponse = await api.get('/projetos');
+            if (projetosResponse.data.success) {
+                setProjetos(projetosResponse.data.data || []);
+            } else {
+                console.error('Erro: API projetos retornou success=false', projetosResponse.data);
+                NotificationService.errorToast('Erro ao carregar projetos');
+            }
+
+            NotificationService.closeLoading();
+            NotificationService.successToast('Dados carregados com sucesso!');
+
+        } catch (error) {
+            console.error('Erro crítico ao carregar dados:', error);
+            NotificationService.closeLoading();
+            if (error.response?.data?.message) {
+                NotificationService.error('Erro!', error.response.data.message);
+            } else {
+                NotificationService.errorToast('Erro ao carregar dados');
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        let isMounted = true; // Evitar race conditions
-
-        const initData = async () => {
-            try {
-                updateDebug('🚀 Iniciando carregamento...');
-                setLoading(true);
-                
-                // Teste 1: Verificar token
-                const token = localStorage.getItem('adminToken');
-                updateDebug(`🔑 Token existe: ${!!token} (${token ? token.length + ' chars' : 'nenhum'})`);
-                
-                if (!token) {
-                    updateDebug('❌ ERRO: Sem token de autenticação!');
-                    return;
-                }
-
-                // Teste 2: Carregar clientes PRIMEIRO
-                updateDebug('📞 Fazendo requisição para /clientes...');
-                const clientesResponse = await api.get('/clientes');
-                updateDebug(`📡 Resposta clientes: status=${clientesResponse.status}, success=${clientesResponse.data.success}`);
-                
-                if (clientesResponse.data.success) {
-                    const clientesData = clientesResponse.data.data || [];
-                    updateDebug(`✅ Clientes recebidos: ${clientesData.length}`);
-                    
-                    if (clientesData.length > 0) {
-                        updateDebug(`👤 Primeiro cliente: ${clientesData[0].nome} (ID: ${clientesData[0].idCliente})`);
-                    }
-                    
-                    if (isMounted) {
-                        setClientes(clientesData);
-                        updateDebug(`💾 Estado clientes actualizado no React`);
-                    }
-                } else {
-                    updateDebug(`❌ ERRO: API clientes retornou success=false`);
-                }
-
-                // Teste 3: Carregar outros dados
-                updateDebug('📞 Carregando estados de projeto...');
-                const estadosResponse = await api.get('/estados-projeto');
-                if (estadosResponse.data.success && isMounted) {
-                    setEstadosProjeto(estadosResponse.data.data || []);
-                    updateDebug(`✅ Estados carregados: ${estadosResponse.data.data?.length || 0}`);
-                }
-
-                updateDebug('📞 Carregando serviços...');
-                const servicosResponse = await api.get('/servicos');
-                if (servicosResponse.data.success && isMounted) {
-                    setServicos(servicosResponse.data.data || []);
-                    updateDebug(`✅ Serviços carregados: ${servicosResponse.data.data?.length || 0}`);
-                }
-
-                // Teste 4: Carregar projetos POR ÚLTIMO
-                updateDebug('📞 Fazendo requisição para /projetos...');
-                const projetosResponse = await api.get('/projetos');
-                updateDebug(`📡 Resposta projetos: status=${projetosResponse.status}, success=${projetosResponse.data.success}`);
-                
-                if (projetosResponse.data.success) {
-                    const projetosData = projetosResponse.data.data || [];
-                    updateDebug(`✅ Projetos recebidos: ${projetosData.length}`);
-                    
-                    if (projetosData.length > 0) {
-                        const primeiroProject = projetosData[0];
-                        updateDebug(`📁 Primeiro projeto: "${primeiroProject.nomeProjeto}"`);
-                        updateDebug(`🔗 ID Cliente: ${primeiroProject.idCliente}`);
-                        updateDebug(`👤 Tem associação cliente: ${!!primeiroProject.cliente}`);
-                        updateDebug(`📝 Nome via associação: ${primeiroProject.cliente?.nome || 'NENHUM'}`);
-                    }
-                    
-                    if (isMounted) {
-                        setProjetos(projetosData);
-                        updateDebug(`💾 Estado projetos actualizado no React`);
-                    }
-                } else {
-                    updateDebug(`❌ ERRO: API projetos retornou success=false`);
-                }
-
-                updateDebug('🎉 Carregamento completo!');
-
-            } catch (error) {
-                updateDebug(`💥 ERRO CRÍTICO: ${error.message}`);
-                if (error.response) {
-                    updateDebug(`📊 Status HTTP: ${error.response.status}`);
-                    updateDebug(`📋 Dados do erro: ${JSON.stringify(error.response.data)}`);
-                }
-            } finally {
-                if (isMounted) {
-                    setLoading(false);
-                    updateDebug('⏹️ Loading concluído');
-                }
-            }
-        };
-
         initData();
-
-        // Cleanup para evitar memory leaks
-        return () => {
-            isMounted = false;
-        };
-    }, []); // Array vazio para executar apenas uma vez
+    }, []);
 
     // Função simplificada para obter nome do cliente
     const getClienteNome = (projeto) => {
-        updateDebug(`🔍 getClienteNome chamado para projeto: ${projeto.nomeProjeto}`);
-        
         // Estratégia 1: Associação do backend
         if (projeto.cliente && projeto.cliente.nome) {
-            updateDebug(`✅ Nome encontrado via backend: ${projeto.cliente.nome}`);
             return projeto.cliente.nome;
         }
         
         // Estratégia 2: Lista local
-        if (clientes.length > 0) {
-            const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
-            if (clienteLocal) {
-                updateDebug(`✅ Nome encontrado na lista local: ${clienteLocal.nome}`);
-                return clienteLocal.nome;
-            } else {
-                updateDebug(`❌ Cliente não encontrado na lista local (ID: ${projeto.idCliente})`);
-                updateDebug(`📋 Clientes disponíveis: ${clientes.map(c => `${c.idCliente}:${c.nome}`).join(', ')}`);
-            }
-        } else {
-            updateDebug(`⚠️ Lista de clientes está vazia!`);
+        const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
+        if (clienteLocal) {
+            return clienteLocal.nome;
         }
         
-        updateDebug(`❌ Retornando N/A para projeto: ${projeto.nomeProjeto}`);
         return 'N/A';
-    };
-
-    // Teste manual forçado
-    const testeManual = async () => {
-        updateDebug('🧪 === TESTE MANUAL INICIADO ===');
-        
-        try {
-            // Limpar estados
-            setClientes([]);
-            setProjetos([]);
-            updateDebug('🧹 Estados limpos');
-            
-            // Fazer requisições frescas
-            const [clientesRes, projetosRes] = await Promise.all([
-                api.get('/clientes'),
-                api.get('/projetos')
-            ]);
-            
-            updateDebug(`📊 Clientes API: ${clientesRes.data.success} - ${clientesRes.data.data?.length || 0} itens`);
-            updateDebug(`📊 Projetos API: ${projetosRes.data.success} - ${projetosRes.data.data?.length || 0} itens`);
-            
-            if (clientesRes.data.success) {
-                setClientes(clientesRes.data.data);
-                updateDebug(`💾 Clientes definidos no estado: ${clientesRes.data.data.length}`);
-            }
-            
-            if (projetosRes.data.success) {
-                setProjetos(projetosRes.data.data);
-                updateDebug(`💾 Projetos definidos no estado: ${projetosRes.data.data.length}`);
-            }
-            
-            updateDebug('🧪 === TESTE MANUAL COMPLETO ===');
-            
-        } catch (error) {
-            updateDebug(`💥 Erro no teste manual: ${error.message}`);
-        }
     };
 
     const handleInputChange = (e) => {
@@ -280,7 +180,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             const projetoData = {
                 ...formData,
                 servicos: selectedServicos,
-                orcamentoTotal: calcularOrcamentoTotal()
+                // orcamentoTotal: calcularOrcamentoTotal() // Assumindo que esta função existe e é necessária
             };
 
             let response;
@@ -300,12 +200,11 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 }
 
                 handleCloseModal();
-                // Recarregar dados após criar/editar
-                await testeManual();
+                await initData(); // Recarregar dados após criar/editar
                 if (onStatsUpdate) onStatsUpdate();
             }
         } catch (error) {
-            updateDebug(`❌ Erro ao guardar projeto: ${error.message}`);
+            console.error('Erro ao guardar projeto:', error);
             NotificationService.closeLoading();
 
             if (error.response?.data?.message) {
@@ -338,7 +237,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 setSelectedServicos(servicosAssociados);
             }
         } catch (error) {
-            updateDebug(`❌ Erro ao carregar serviços do projeto: ${error.message}`);
+            console.error('Erro ao carregar serviços do projeto:', error);
             setSelectedServicos([]);
         }
 
@@ -376,11 +275,11 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
                 if (response.data.success) {
                     NotificationService.successToast(`Projeto ${novoStatus ? 'ativado' : 'desativado'}!`);
-                    await testeManual();
+                    await initData(); // Recarregar dados após alterar status
                     if (onStatsUpdate) onStatsUpdate();
                 }
             } catch (error) {
-                updateDebug(`❌ Erro ao alterar estado do projeto: ${error.message}`);
+                console.error('Erro ao alterar estado do projeto:', error);
                 NotificationService.errorToast('Erro ao alterar estado do projeto');
             }
         }
@@ -414,48 +313,42 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             (filterStatus === 'inativo' && projeto.ativo === false);
 
         const matchesEstado = !filterEstado || projeto.idEstado_Projeto == filterEstado;
+
         const matchesCliente = !filterCliente || projeto.idCliente == filterCliente;
 
         return matchesSearch && matchesStatus && matchesEstado && matchesCliente;
     });
 
-    const getEstadoNome = (idEstado) => {
+    const getEstadoProjetoNome = (idEstado) => {
         const estado = estadosProjeto.find(e => e.idEstado_Projeto == idEstado);
         return estado ? estado.designacaoEstado_Projeto : 'N/A';
     };
 
-    const getStatusBadgeClass = (ativo) => {
-        return ativo ? 'bg-success' : 'bg-danger';
-    };
+    const getEstadoProjetoBadgeClass = (idEstado) => {
+        const estado = estadosProjeto.find(e => e.idEstado_Projeto == idEstado);
+        if (!estado) return 'bg-secondary';
 
-    const getEstadoBadgeClass = (nomeEstado) => {
-        switch (nomeEstado?.toLowerCase()) {
-            case 'concluído': return 'bg-success';
-            case 'em andamento': return 'bg-primary';
-            case 'pendente': return 'bg-warning';
-            case 'desativado': return 'bg-danger';
-            default: return 'bg-secondary';
+        switch (estado.designacaoEstado_Projeto.toLowerCase()) {
+            case 'ativo':
+                return 'bg-success';
+            case 'concluído':
+                return 'bg-primary';
+            case 'pendente':
+                return 'bg-warning text-dark';
+            case 'cancelado':
+                return 'bg-danger';
+            case 'desativado':
+                return 'bg-secondary';
+            default:
+                return 'bg-info';
         }
     };
 
     const calcularOrcamentoTotal = () => {
-        let total = 0;
-        selectedServicos.forEach(servicoId => {
-            const servico = servicos.find(s => s.idServico == servicoId);
-            if (servico) {
-                total += parseFloat(servico.preco_base_servico || 0);
-            }
-        });
-        return total.toFixed(2);
+        // Implementar lógica de cálculo do orçamento total se necessário
+        // Por agora, retorna o valor do formulário
+        return parseFloat(formData.orcamentoTotal) || 0;
     };
-
-    useEffect(() => {
-        const novoOrcamento = calcularOrcamentoTotal();
-        setFormData(prev => ({
-            ...prev,
-            orcamentoTotal: novoOrcamento
-        }));
-    }, [selectedServicos, servicos]);
 
     return (
         <div>
@@ -468,70 +361,14 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                         onClick={() => setShowModal(true)}
                     >
                         <i className="bi bi-folder-plus me-2"></i>
-                        Criar Projeto
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-outline-success me-2"
-                        onClick={testeManual}
-                        title="Teste manual forçado"
-                    >
-                        🧪 Teste Manual
-                    </button>
-                    <button
-                        type="button"
-                        className="btn btn-outline-info me-2"
-                        onClick={() => setShowDebug(!showDebug)}
-                        title="Mostrar/ocultar debug"
-                    >
-                        {showDebug ? '🙈' : '👁️'} Debug
+                        Adicionar Projeto
                     </button>
                 </div>
             </div>
 
-            {/* ÁREA DE DEBUG VISÍVEL NA INTERFACE */}
-            {showDebug && (
-                <div className="card mb-3 border-warning">
-                    <div className="card-header bg-warning text-dark">
-                        <h6 className="mb-0">🔧 Informações de Debug em Tempo Real</h6>
-                    </div>
-                    <div className="card-body">
-                        <div className="row">
-                            <div className="col-md-6">
-                                <h6>📊 Estados Actuais:</h6>
-                                <ul className="list-unstyled">
-                                    <li>✅ Clientes: <strong>{clientes.length}</strong></li>
-                                    <li>✅ Projetos: <strong>{projetos.length}</strong></li>
-                                    <li>✅ Estados: <strong>{estadosProjeto.length}</strong></li>
-                                    <li>✅ Serviços: <strong>{servicos.length}</strong></li>
-                                </ul>
-                            </div>
-                            <div className="col-md-6">
-                                <h6>🧪 Teste Rápido:</h6>
-                                {projetos.length > 0 && (
-                                    <div>
-                                        <strong>Primeiro projeto:</strong> {projetos[0].nomeProjeto}<br />
-                                        <strong>Cliente ID:</strong> {projetos[0].idCliente}<br />
-                                        <strong>Nome resolvido:</strong> <span className="badge bg-primary">{getClienteNome(projetos[0])}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <hr />
-                        <h6>📋 Log de Eventos:</h6>
-                        <textarea 
-                            className="form-control" 
-                            value={debugInfo} 
-                            readOnly 
-                            rows="8"
-                            style={{ fontSize: '0.75em', fontFamily: 'monospace' }}
-                        />
-                    </div>
-                </div>
-            )}
-
+            {/* Filtros */}
             <div className="row mb-3">
-                <div className="col-md-3">
+                <div className="col-md-4">
                     <div className="input-group">
                         <span className="input-group-text">
                             <i className="bi bi-search"></i>
@@ -539,7 +376,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                         <input
                             type="text"
                             className="form-control"
-                            placeholder="Pesquisar projetos..."
+                            placeholder="Pesquisar por nome ou descrição..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -548,12 +385,15 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 <div className="col-md-3">
                     <select
                         className="form-select"
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
+                        value={filterCliente}
+                        onChange={(e) => setFilterCliente(e.target.value)}
                     >
-                        <option value="">Status (Ativo/Inativo)</option>
-                        <option value="ativo">Apenas Ativos</option>
-                        <option value="inativo">Apenas Inativos</option>
+                        <option value="">Todos os Clientes</option>
+                        {clientes.map(cliente => (
+                            <option key={cliente.idCliente} value={cliente.idCliente}>
+                                {cliente.nome}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 <div className="col-md-3">
@@ -570,20 +410,15 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                         ))}
                     </select>
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-2">
                     <select
                         className="form-select"
-                        value={filterCliente}
-                        onChange={(e) => setFilterCliente(e.target.value)}
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
                     >
-                        <option value="">
-                            {clientes.length === 0 ? 'Nenhum cliente carregado!' : `Todos os Clientes (${clientes.length})`}
-                        </option>
-                        {clientes.map(cliente => (
-                            <option key={cliente.idCliente} value={cliente.idCliente}>
-                                {cliente.nome}
-                            </option>
-                        ))}
+                        <option value="">Todos os Status</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="inativo">Inativo</option>
                     </select>
                 </div>
             </div>
@@ -601,9 +436,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                         <h5 className="mb-0">
                             Lista de Projetos
                             <span className="badge bg-primary ms-2">{filteredProjetos.length}</span>
-                            {clientes.length > 0 && (
-                                <span className="badge bg-success ms-2">{clientes.length} clientes</span>
-                            )}
                         </h5>
                     </div>
                     <div className="card-body p-0">
@@ -611,7 +443,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                             <div className="text-center p-4">
                                 <i className="bi bi-folder-x fa-3x text-muted mb-3"></i>
                                 <p className="text-muted">
-                                    {searchTerm || filterStatus || filterCliente ? 'Nenhum projeto encontrado com os filtros aplicados.' : 'Ainda não tens projetos criados.'}
+                                    {searchTerm || filterCliente || filterEstado || filterStatus ? 'Nenhum projeto encontrado com os filtros aplicados.' : 'Ainda não tens projetos registados.'}
                                 </p>
                             </div>
                         ) : (
@@ -619,13 +451,12 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                 <table className="table table-hover mb-0">
                                     <thead className="table-light">
                                         <tr>
-                                            <th>Projeto</th>
+                                            <th>Nome do Projeto</th>
                                             <th>Cliente</th>
                                             <th>Estado</th>
                                             <th>Orçamento</th>
-                                            <th>Data Início</th>
-                                            <th>Data Fim Prevista</th>
-                                            <th>Status</th>
+                                            <th>Início</th>
+                                            <th>Fim Previsto</th>
                                             <th className="text-center">Ações</th>
                                         </tr>
                                     </thead>
@@ -633,48 +464,17 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         {filteredProjetos.map(projeto => (
                                             <tr key={projeto.idProjeto}>
                                                 <td>
-                                                    <div>
-                                                        <strong>{projeto.nomeProjeto}</strong>
-                                                        {projeto.descricaoProjeto && (
-                                                            <small className="d-block text-muted">
-                                                                {projeto.descricaoProjeto.substring(0, 100)}
-                                                                {projeto.descricaoProjeto.length > 100 ? '...' : ''}
-                                                            </small>
-                                                        )}
-                                                    </div>
+                                                    <strong>{projeto.nomeProjeto}</strong>
                                                 </td>
+                                                <td>{getClienteNome(projeto)}</td>
                                                 <td>
-                                                    <strong className="text-primary">
-                                                        {getClienteNome(projeto)}
-                                                    </strong>
-                                                </td>
-                                                <td>
-                                                    <span className={`badge ${getEstadoBadgeClass(getEstadoNome(projeto.idEstado_Projeto))}`}>
-                                                        {getEstadoNome(projeto.idEstado_Projeto)}
+                                                    <span className={`badge ${getEstadoProjetoBadgeClass(projeto.idEstado_Projeto)}`}>
+                                                        {getEstadoProjetoNome(projeto.idEstado_Projeto)}
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <strong>€{parseFloat(projeto.orcamentoTotal || 0).toFixed(2)}</strong>
-                                                </td>
-                                                <td>
-                                                    {projeto.dataInicio ? (
-                                                        <small>{new Date(projeto.dataInicio).toLocaleDateString('pt-PT')}</small>
-                                                    ) : (
-                                                        <span className="text-muted">-</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    {projeto.dataPrevista_Fim ? (
-                                                        <small>{new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT')}</small>
-                                                    ) : (
-                                                        <span className="text-muted">-</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                    <span className={`badge ${getStatusBadgeClass(projeto.ativo)}`}>
-                                                        {projeto.ativo ? 'Ativo' : 'Inativo'}
-                                                    </span>
-                                                </td>
+                                                <td>{parseFloat(projeto.orcamentoTotal).toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' })}</td>
+                                                <td>{projeto.dataInicio ? new Date(projeto.dataInicio).toLocaleDateString('pt-PT') : 'N/A'}</td>
+                                                <td>{projeto.dataPrevista_Fim ? new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT') : 'N/A'}</td>
                                                 <td className="text-center">
                                                     <div className="btn-group" role="group">
                                                         <button
@@ -691,7 +491,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                             onClick={() => handleToggleStatus(projeto)}
                                                             title={projeto.ativo ? 'Desativar projeto' : 'Ativar projeto'}
                                                         >
-                                                            <i className={`bi ${projeto.ativo ? 'bi-pause' : 'bi-play'}`}></i>
+                                                            <i className={`bi ${projeto.ativo ? 'bi-toggle-on' : 'bi-toggle-off'}`}></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -705,28 +505,20 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 </div>
             )}
 
-            {/* Modal permanece igual... */}
+            {/* Modal para Adicionar/Editar Projeto */}
             {showModal && (
                 <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-xl">
+                    <div className="modal-dialog modal-lg">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title">
-                                    {editingProject ? 'Editar Projeto' : 'Criar Novo Projeto'}
-                                </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={handleCloseModal}
-                                ></button>
+                                <h5 className="modal-title">{editingProject ? 'Editar Projeto' : 'Adicionar Projeto'}</h5>
+                                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
                             </div>
-                            <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
+                            <div className="modal-body">
+                                <form onSubmit={handleSubmit}>
                                     <div className="row">
-                                        <div className="col-md-8 mb-3">
-                                            <label htmlFor="nomeProjeto" className="form-label">
-                                                Nome do Projeto <span className="text-danger">*</span>
-                                            </label>
+                                        <div className="col-md-6 mb-3">
+                                            <label htmlFor="nomeProjeto" className="form-label">Nome do Projeto</label>
                                             <input
                                                 type="text"
                                                 className={`form-control ${errors.nomeProjeto ? 'is-invalid' : ''}`}
@@ -734,27 +526,32 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                 name="nomeProjeto"
                                                 value={formData.nomeProjeto}
                                                 onChange={handleInputChange}
-                                                placeholder="Nome do projeto"
+                                                required
                                             />
                                             {errors.nomeProjeto && <div className="invalid-feedback">{errors.nomeProjeto}</div>}
                                         </div>
-                                        <div className="col-md-4 mb-3">
-                                            <label className="form-label">Orçamento Total (Calculado)</label>
-                                            <div className="input-group">
-                                                <span className="input-group-text">€</span>
-                                                <input
-                                                    type="text"
-                                                    className="form-control bg-light"
-                                                    value={calcularOrcamentoTotal()}
-                                                    disabled
-                                                    title="Calculado automaticamente com base nos serviços selecionados"
-                                                />
-                                            </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label htmlFor="idCliente" className="form-label">Cliente</label>
+                                            <select
+                                                className={`form-select ${errors.idCliente ? 'is-invalid' : ''}`}
+                                                id="idCliente"
+                                                name="idCliente"
+                                                value={formData.idCliente}
+                                                onChange={handleInputChange}
+                                                required
+                                            >
+                                                <option value="">Seleciona um cliente</option>
+                                                {clientes.map(cliente => (
+                                                    <option key={cliente.idCliente} value={cliente.idCliente}>
+                                                        {cliente.nome}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {errors.idCliente && <div className="invalid-feedback">{errors.idCliente}</div>}
                                         </div>
                                     </div>
-
                                     <div className="mb-3">
-                                        <label htmlFor="descricaoProjeto" className="form-label">Descrição do Projeto</label>
+                                        <label htmlFor="descricaoProjeto" className="form-label">Descrição</label>
                                         <textarea
                                             className="form-control"
                                             id="descricaoProjeto"
@@ -762,60 +559,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             rows="3"
                                             value={formData.descricaoProjeto}
                                             onChange={handleInputChange}
-                                            placeholder="Descrição detalhada do projeto"
                                         ></textarea>
                                     </div>
-
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="idCliente" className="form-label">
-                                                Cliente <span className="text-danger">*</span>
-                                            </label>
-                                            <select
-                                                className={`form-select ${errors.idCliente ? 'is-invalid' : ''}`}
-                                                id="idCliente"
-                                                name="idCliente"
-                                                value={formData.idCliente}
-                                                onChange={handleInputChange}
-                                            >
-                                                <option value="">
-                                                    {clientes.length === 0 ? 'Nenhum cliente disponível' : 'Seleciona o cliente'}
-                                                </option>
-                                                {clientes.map(cliente => (
-                                                    <option key={cliente.idCliente} value={cliente.idCliente}>
-                                                        {cliente.nome} - {cliente.email}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {errors.idCliente && <div className="invalid-feedback">{errors.idCliente}</div>}
-                                            {clientes.length === 0 && (
-                                                <small className="text-warning">
-                                                    ⚠️ Nenhum cliente carregado. Clica em "Teste Manual".
-                                                </small>
-                                            )}
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label htmlFor="idEstado_Projeto" className="form-label">
-                                                Estado do Projeto <span className="text-danger">*</span>
-                                            </label>
-                                            <select
-                                                className={`form-select ${errors.idEstado_Projeto ? 'is-invalid' : ''}`}
-                                                id="idEstado_Projeto"
-                                                name="idEstado_Projeto"
-                                                value={formData.idEstado_Projeto}
-                                                onChange={handleInputChange}
-                                            >
-                                                <option value="">Seleciona o estado</option>
-                                                {estadosProjeto.map(estado => (
-                                                    <option key={estado.idEstado_Projeto} value={estado.idEstado_Projeto}>
-                                                        {estado.designacaoEstado_Projeto}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            {errors.idEstado_Projeto && <div className="invalid-feedback">{errors.idEstado_Projeto}</div>}
-                                        </div>
-                                    </div>
-
                                     <div className="row">
                                         <div className="col-md-4 mb-3">
                                             <label htmlFor="dataInicio" className="form-label">Data de Início</label>
@@ -841,7 +586,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             {errors.dataPrevista_Fim && <div className="invalid-feedback">{errors.dataPrevista_Fim}</div>}
                                         </div>
                                         <div className="col-md-4 mb-3">
-                                            <label htmlFor="dataFim" className="form-label">Data de Fim</label>
+                                            <label htmlFor="dataFim" className="form-label">Data de Fim (Real)</label>
                                             <input
                                                 type="date"
                                                 className="form-control"
@@ -852,61 +597,74 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             />
                                         </div>
                                     </div>
-
-                                    <div className="mb-3">
-                                        <label className="form-label">
-                                            Serviços Associados
-                                            <span className="badge bg-info ms-2">{selectedServicos.length}</span>
-                                        </label>
-                                        <div className="row">
-                                            {servicos.map(servico => (
-                                                <div key={servico.idServico} className="col-md-6 mb-2">
-                                                    <div className="form-check">
-                                                        <input
-                                                            className="form-check-input"
-                                                            type="checkbox"
-                                                            id={`servico-${servico.idServico}`}
-                                                            checked={selectedServicos.includes(servico.idServico)}
-                                                            onChange={(e) => {
-                                                                if (e.target.checked) {
-                                                                    setSelectedServicos([...selectedServicos, servico.idServico]);
-                                                                } else {
-                                                                    setSelectedServicos(selectedServicos.filter(id => id !== servico.idServico));
-                                                                }
-                                                            }}
-                                                        />
-                                                        <label className="form-check-label" htmlFor={`servico-${servico.idServico}`}>
-                                                            <div>
-                                                                <strong>{servico.designacao_servico}</strong>
-                                                                <br />
-                                                                <small className="text-success">
-                                                                    €{parseFloat(servico.preco_base_servico || 0).toFixed(2)}
-                                                                </small>
-                                                            </div>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                    <div className="row">
+                                        <div className="col-md-6 mb-3">
+                                            <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total</label>
+                                            <input
+                                                type="number"
+                                                className={`form-control ${errors.orcamentoTotal ? 'is-invalid' : ''}`}
+                                                id="orcamentoTotal"
+                                                name="orcamentoTotal"
+                                                value={formData.orcamentoTotal}
+                                                onChange={handleInputChange}
+                                                step="0.01"
+                                                min="0"
+                                                required
+                                            />
+                                            {errors.orcamentoTotal && <div className="invalid-feedback">{errors.orcamentoTotal}</div>}
                                         </div>
-                                        {servicos.length === 0 && (
-                                            <p className="text-muted">Nenhum serviço disponível. Cria serviços primeiro.</p>
-                                        )}
+                                        <div className="col-md-6 mb-3">
+                                            <label htmlFor="idEstado_Projeto" className="form-label">Estado do Projeto</label>
+                                            <select
+                                                className={`form-select ${errors.idEstado_Projeto ? 'is-invalid' : ''}`}
+                                                id="idEstado_Projeto"
+                                                name="idEstado_Projeto"
+                                                value={formData.idEstado_Projeto}
+                                                onChange={handleInputChange}
+                                                required
+                                            >
+                                                <option value="">Seleciona um estado</option>
+                                                {estadosProjeto.map(estado => (
+                                                    <option key={estado.idEstado_Projeto} value={estado.idEstado_Projeto}>
+                                                        {estado.designacaoEstado_Projeto}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            {errors.idEstado_Projeto && <div className="invalid-feedback">{errors.idEstado_Projeto}</div>}
+                                        </div>
                                     </div>
-
                                     <div className="mb-3">
                                         <label htmlFor="notas" className="form-label">Notas</label>
                                         <textarea
                                             className="form-control"
                                             id="notas"
                                             name="notas"
-                                            rows="2"
+                                            rows="3"
                                             value={formData.notas}
                                             onChange={handleInputChange}
-                                            placeholder="Notas adicionais sobre o projeto"
                                         ></textarea>
                                     </div>
-
-                                    <div className="form-check">
+                                    <div className="mb-3">
+                                        <label className="form-label">Serviços Associados</label>
+                                        <div className="d-flex flex-wrap">
+                                            {servicos.map(servico => (
+                                                <div key={servico.idServico} className="form-check me-3">
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        id={`servico-${servico.idServico}`}
+                                                        value={servico.idServico}
+                                                        checked={selectedServicos.includes(servico.idServico)}
+                                                        onChange={() => handleServicoChange(servico.idServico)}
+                                                    />
+                                                    <label className="form-check-label" htmlFor={`servico-${servico.idServico}`}>
+                                                        {servico.designacaoServico}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="form-check mb-3">
                                         <input
                                             className="form-check-input"
                                             type="checkbox"
@@ -916,23 +674,15 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             onChange={handleInputChange}
                                         />
                                         <label className="form-check-label" htmlFor="ativo">
-                                            Projeto ativo
+                                            Projeto Ativo
                                         </label>
                                     </div>
-                                </div>
-                                <div className="modal-footer">
-                                    <button
-                                        type="button"
-                                        className="btn btn-secondary"
-                                        onClick={handleCloseModal}
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        {editingProject ? 'Atualizar Projeto' : 'Criar Projeto'}
-                                    </button>
-                                </div>
-                            </form>
+                                    <div className="modal-footer d-flex justify-content-between">
+                                        <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>Cancelar</button>
+                                        <button type="submit" className="btn btn-primary">{editingProject ? 'Guardar Alterações' : 'Adicionar Projeto'}</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -942,3 +692,5 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 };
 
 export default ProjetosManager;
+
+
