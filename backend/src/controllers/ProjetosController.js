@@ -6,8 +6,9 @@ const projetosController = {
 
     listar: async (req, res) => {
         try {
+            console.log('🔍 [DEBUG] Iniciando listagem de projetos...');
+            
             const projetos = await Projetos.findAll({
-
                 include: [
                     {
                         model: Clientes,
@@ -24,13 +25,36 @@ const projetosController = {
                 ]
             });
 
+            console.log(`📊 [DEBUG] Projetos encontrados: ${projetos.length}`);
+            
+            // 🔍 DEBUG: Verificar cada projeto
+            projetos.forEach((projeto, index) => {
+                console.log(`[DEBUG] Projeto ${index + 1}:`);
+                console.log(`  - Nome: ${projeto.nomeProjeto}`);
+                console.log(`  - idCliente: ${projeto.idCliente}`);
+                console.log(`  - cliente object: ${projeto.cliente ? 'EXISTS' : 'NULL'}`);
+                if (projeto.cliente) {
+                    console.log(`  - cliente.nome: ${projeto.cliente.nome}`);
+                } else {
+                    console.log(`  - ❌ CLIENTE NULL - Isto é o problema!`);
+                }
+            });
+
+            // 🔍 DEBUG: Mostrar JSON da resposta
+            console.log('[DEBUG] JSON que será enviado ao frontend:');
+            console.log(JSON.stringify({
+                success: true,
+                data: projetos.slice(0, 1) // Só o primeiro para não encher os logs
+            }, null, 2));
+
             res.json({
                 success: true,
                 data: projetos
             });
 
         } catch (error) {
-            console.error('Erro ao listar projetos:', error);
+            console.error('❌ [DEBUG] Erro ao listar projetos:', error);
+            console.error('❌ [DEBUG] Stack:', error.stack);
             res.status(500).json({
                 success: false,
                 message: 'Erro interno do servidor'
