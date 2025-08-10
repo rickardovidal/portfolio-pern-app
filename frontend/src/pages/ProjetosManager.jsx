@@ -372,9 +372,20 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     });
 
     const getClienteNome = (projeto) => {
-        const cliente = clientes.find(c => c.idCliente === projeto.idCliente);
-        return cliente ? cliente.nome : 'Cliente não encontrado';
-    };
+    // Primeiro tenta usar a associação que vem do backend
+    if (projeto.cliente?.nome) {
+        return projeto.cliente.nome;
+    }
+    
+    // Fallback para a lista de clientes local
+    const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
+    if (clienteLocal?.nome) {
+        return clienteLocal.nome;
+    }
+    
+    // Último recurso: mostrar ID do cliente
+    return projeto.idCliente ? `Cliente ID: ${projeto.idCliente}` : 'Cliente não definido';
+};
     const getEstadoNome = (idEstado) => {
         const estado = estadosProjeto.find(e => e.idEstado_Projeto == idEstado);
         return estado ? estado.designacaoEstado_Projeto : 'N/A';
