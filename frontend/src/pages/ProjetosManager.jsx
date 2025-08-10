@@ -450,6 +450,19 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                         <i className="bi bi-folder-plus me-2"></i>
                         Criar Projeto
                     </button>
+                    // Adiciona após o botão "Criar Projeto" no JSX
+                    <button
+                        type="button"
+                        className="btn btn-outline-info me-2"
+                        onClick={() => {
+                            console.log('🔍 DIAGNÓSTICO:');
+                            console.log('Clientes carregados:', clientes.length);
+                            console.log('Projetos carregados:', projetos.length);
+                            console.log('Primeiro projeto:', projetos[0]);
+                        }}
+                    >
+                        🔍 Debug
+                    </button>
                 </div>
             </div>
 
