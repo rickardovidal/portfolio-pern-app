@@ -81,7 +81,7 @@ app.use('/api/utilizadores', utilizadoresRoutes);
 app.use('/api/estados-projeto', estadosProjetoRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/init', initRoutes);
-//app.use('/api/emergency', emergencySetup);
+
 
 // Rota de teste
 app.get('/api/health', (req, res) => {
@@ -116,58 +116,6 @@ app.use('*', (req, res) => {
     });
 });
 
-// ADICIONA ESTAS LINHAS ANTES DE "const PORT = process.env.PORT || 3000;"
-
-/* Endpoint para criar utilizador admin
-app.post('/api/emergency-create-admin', async (req, res) => {
-    try {
-        console.log('🚨 Criando utilizador admin...');
-        
-        // Verificar se já existe
-        const existingAdmin = await Utilizador.findOne({
-            where: { username: 'admin' }
-        });
-        
-        if (existingAdmin) {
-            return res.json({
-                success: true,
-                message: 'Admin já existe!',
-                admin: {
-                    id: existingAdmin.idUtilizador,
-                    username: existingAdmin.username,
-                    email: existingAdmin.email
-                }
-            });
-        }
-        
-        // Criar admin
-        const admin = await Utilizador.create({
-            username: 'admin',
-            email: 'admin@portfolio.com',
-            password: 'odracirladiv'
-        });
-        
-        console.log('✅ Admin criado:', admin.username);
-        
-        res.json({
-            success: true,
-            message: 'Admin criado com sucesso!',
-            admin: {
-                id: admin.idUtilizador,
-                username: admin.username,
-                email: admin.email
-            }
-        });
-        
-    } catch (error) {
-        console.error('❌ Erro ao criar admin:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Erro ao criar admin',
-            error: error.message
-        });
-    }
-});*/
 
 // Endpoint para verificar se admin existe
 app.get('/api/emergency-check-admin', async (req, res) => {
