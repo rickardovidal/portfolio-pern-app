@@ -160,14 +160,6 @@ const AdminLogin = () => {
                     </button>
                 </form>
 
-                {/* Rodapé com informações */}
-                <hr className="my-4" />
-                <div className="text-center">
-                    <small className="text-muted">
-                        Instituto Politécnico de Viseu - ESTGV<br />
-                        Tecnologias e Design Multimédia
-                    </small>
-                </div>
                 
                 {/* Link para voltar ao portfolio */}
                 <div className="text-center mt-3">

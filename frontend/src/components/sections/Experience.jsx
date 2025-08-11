@@ -23,13 +23,13 @@ const experienceData = [
     {
         period: '2024',
         title: 'Formação Certificada - 10787 - Planeamento e gestão de projeto de UX/UI (50 horas)',
-        organization: 'Instituto de Emprego e Profissional',
-        description: 'Desenvolvimento de competências em prototipagem de páginas web com foca na experiência de utilizador'
+        organization: 'Instituto de Emprego e Formação Profissional',
+        description: 'Desenvolvimento de competências em prototipagem de páginas web com foco na experiência de utilizador'
     },
     {
         period: '2023',
         title: 'Formação Certificada - 0444 - E-marketing - Tecnologias de informação e comunicação (50 horas)',
-        organization: 'Instituto de Emprego e Profissional',
+        organization: 'Instituto de Emprego e Formação Profissional',
         description: 'Desenvolvimento de competências avançadas em Marketing Digital'
     },
     {
@@ -41,14 +41,14 @@ const experienceData = [
     {
         period: '2023',
         title: 'Formação Certificada - 10784 - Gestão da presença empresarial nas redes sociais (50 horas)',
-        organization: 'Instituto de Emprego e Profissional',
+        organization: 'Instituto de Emprego e Formação Profissional',
         description: 'Formação Avancada de gestão da presença empresarial nas redes sociais.'
     },
     {
         period: '2023',
         title: 'Formação Certificada - 7855 - Plano de negócio – criação de pequenos e médios negócios (50 horas)',
-        organization: 'Instituto de Emprego e Profissional',
-        description: 'Formação inicial de criacao de marca e sua divulgação'
+        organization: 'Instituto de Emprego e Formação Profissional',
+        description: 'Formação inicial de criação de uma marca e sua divulgação'
     },
     {
         period: '2021',
