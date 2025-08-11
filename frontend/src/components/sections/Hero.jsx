@@ -23,10 +23,11 @@ const Hero = () => {
                         Designer <strong>Multimédia</strong><br />& Desenvolvedor
                     </h1>
                     <p className={styles.heroSubtitle}>
-                        Estudante no Instituto Politécnico de Viseu, especializado em criar experiências digitais que combinam design funcional com desenvolvimento técnico avançado.
+                        Desenvolvo soluções digitais desde a conceção visual até à implementação técnica.
+                        O meu foco é criar experiências que unem design intuitivo e funcionalidade robusta.
                     </p>
-                    <a 
-                        href="#projects" 
+                    <a
+                        href="#projects"
                         className={styles.heroCta}
                         onClick={handleSmoothScroll}
                     >
