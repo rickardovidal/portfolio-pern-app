@@ -4,27 +4,27 @@ import styles from './About.module.css';
 const skillsData = [
     {
         title: 'Web Development',
-        technologies: ['HTML5', 'CSS3', 'JavaScript', 'React', 'Node.js', 'Express']
+        technologies: ['HTML5', 'CSS3', 'JavaScript', 'React', 'Node.js', 'Express', 'APIs']
     },
     {
         title: 'UI/UX Design',
-        technologies: ['Figma', 'Adobe XD', 'Sketch', 'Prototyping', 'User Research']
+        technologies: ['Figma', 'Prototyping', 'User Research']
     },
     {
-        title: 'Mobile Applications',
-        technologies: ['Flutter', 'Dart', 'Firebase', 'React Native', 'APIs']
+        title: 'Graphic Design',
+        technologies: ['Adobe Illustrator', 'Adobe InDesign', 'Adobe Photoshop']
     },
     {
-        title: '3D Graphics',
-        technologies: ['Blender', 'Unity', 'OpenGL', '3D Modeling', 'Animation']
+        title: 'Motion Design',
+        technologies: ['Adobe After Effects', 'Adobe Premiere', 'Adobe Animate', 'Adobe Character Animator',]
     },
     {
         title: 'Database Management',
-        technologies: ['MongoDB', 'PostgreSQL', 'MySQL', 'NoSQL', 'SQL']
+        technologies: ['PostgreSQL', 'SQL', 'Power Designer']
     },
     {
         title: 'Project Management',
-        technologies: ['Agile', 'Scrum', 'Git', 'Trello', 'Jira']
+        technologies: ['Trello', 'Git', 'Miro',]
     }
 ];
 
@@ -32,7 +32,7 @@ const SkillItem = ({ skill }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <div 
+        <div
             className={`${styles.skillItem} ${isExpanded ? styles.expanded : ''}`}
             onClick={() => setIsExpanded(!isExpanded)}
         >
@@ -61,12 +61,11 @@ const About = () => {
                     <h2>Criando soluções digitais através da combinação de design e tecnologia</h2>
                     <div className={styles.aboutText}>
                         <p>
-                            Atualmente no 3º ano de Tecnologias e Design Multimédia no Instituto Politécnico de Viseu, 
-                            desenvolvo competências que abrangem desde a conceção visual até à implementação técnica de projetos digitais.
+                            O meu trabalho centra-se no desenvolvimento de projetos digitais que respondem a necessidades reais.
+                            Combino competências em design e programação para criar desde interfaces web até aplicações, e outros produtos multimédia além do desenho e criação de bases de dados.
                         </p>
                         <p>
-                            O meu percurso académico foca-se em áreas como desenvolvimento web avançado, aplicações móveis, 
-                            computação gráfica e gestão de projetos, preparando-me para enfrentar os desafios do mercado digital atual.
+                            Com experiência em prototipagem, desenvolvimento web e full-stack, concepção de produtos de design gráfico e design multimédia e gestão de projetos. Procuro sempre a solução mais adequada para cada desafio, independentemente da complexidade técnica envolvida.
                         </p>
                     </div>
                     <div className={styles.skillsList}>
