@@ -115,6 +115,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             console.error('🔥 ERRO ao carregar projetos:', error);
         }
     };
+    //////
 
     // 🔥🔥🔥 FUNÇÃO COMPLETAMENTE NOVA PARA NOME DO CLIENTE 🔥🔥🔥
     const getClienteNome = (projeto) => {
