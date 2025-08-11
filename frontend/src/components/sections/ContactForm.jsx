@@ -130,11 +130,11 @@ const ContactForm = () => {
                 <div className={styles.contactFormHeader}>
                     <div className={styles.contactFormLabel}>Contacto</div>
                     <h2 className={styles.contactFormTitle}>
-                        Vamos trabalhar juntos no teu próximo projeto
+                        Vamos trabalhar juntos no seu próximo projeto
                     </h2>
                     <p className={styles.contactFormSubtitle}>
-                        Envia-me uma mensagem e entrarei em contacto contigo brevemente para discutirmos 
-                        as tuas necessidades e como posso ajudar.
+                        Envie-me uma mensagem e entrarei em contacto consigo brevemente para discutirmos 
+                        as suas necessidades e como posso ajudar.
                     </p>
                 </div>
 
