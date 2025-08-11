@@ -58,14 +58,14 @@ const About = () => {
             <div className={styles.aboutContainer}>
                 <div className={styles.aboutLabel}>Sobre</div>
                 <div className={styles.aboutContent}>
-                    <h2>Criando soluções digitais através da combinação de design e tecnologia</h2>
+                    <h2>Soluções digitais que combinam design e tecnologia</h2>
                     <div className={styles.aboutText}>
                         <p>
                             O meu trabalho centra-se no desenvolvimento de projetos digitais que respondem a necessidades reais.
                             Combino competências em design e programação para criar desde interfaces web até aplicações, e outros produtos multimédia além do desenho e criação de bases de dados.
                         </p>
                         <p>
-                            Com experiência em prototipagem, desenvolvimento web e full-stack, concepção de produtos de design gráfico e design multimédia e gestão de projetos. Procuro sempre a solução mais adequada para cada desafio, independentemente da complexidade técnica envolvida.
+                            Com experiência em prototipagem, desenvolvimento web e full-stack, concepção de produtos de design gráfico e design multimédia e gestão de projetos. Procuro sempre a solução mais adequada para cada desafio.
                         </p>
                     </div>
                     <div className={styles.skillsList}>
