@@ -23,8 +23,7 @@ const Hero = () => {
                         Designer <strong>Multimédia</strong><br />& Desenvolvedor
                     </h1>
                     <p className={styles.heroSubtitle}>
-                        Desenvolvo soluções digitais desde a conceção visual até à implementação técnica.
-                        O meu foco é criar experiências que unem design intuitivo e funcionalidade robusta.
+                        Crio soluções digitais completas, da ideia à execução, com foco em experiências intuitivas e funcionais.
                     </p>
                     <a
                         href="#projects"
