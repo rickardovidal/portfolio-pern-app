@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
 
-// 🔥🔥🔥 VERSÃO NOVA - TIMESTAMP: 2025-08-11-00:59 🔥🔥🔥
-
 const ProjetosManager = ({ onStatsUpdate }) => {
     const [projetos, setProjetos] = useState([]);
     const [clientes, setClientes] = useState([]);
@@ -32,204 +30,124 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [errors, setErrors] = useState({});
-    
-    // 🔥 TIMESTAMP PARA VERIFICAR SE É A VERSÃO NOVA
-    const BUILD_TIME = '2025-08-11 00:59:00';
 
-    useEffect(() => {
-        carregarTudoSequencialmente();
-    }, []);
+    // ✅ CORRIGIDO: Função melhorada para obter nome do cliente
+    const getClienteNome = (projeto) => {
+        console.log('🔍 [FRONTEND DEBUG] getClienteNome chamada para projeto:', projeto.nomeProjeto);
+        console.log('🔍 [FRONTEND DEBUG] projeto.cliente:', projeto.cliente);
+        
+        // ✅ PRIORIDADE 1: Cliente vem do backend (include)
+        if (projeto && projeto.cliente && projeto.cliente.nome) {
+            console.log('✅ [FRONTEND DEBUG] Cliente encontrado via include:', projeto.cliente.nome);
+            return projeto.cliente.nome;
+        }
+        
+        // ✅ PRIORIDADE 2: Procurar na lista local de clientes
+        if (projeto && projeto.idCliente && clientes && clientes.length > 0) {
+            const clienteLocal = clientes.find(c => c.idCliente === projeto.idCliente);
+            if (clienteLocal && clienteLocal.nome) {
+                console.log('✅ [FRONTEND DEBUG] Cliente encontrado na lista local:', clienteLocal.nome);
+                return clienteLocal.nome;
+            }
+        }
+        
+        // ✅ PRIORIDADE 3: Mostrar ID se não encontrar o nome
+        if (projeto && projeto.idCliente) {
+            console.log('⚠️ [FRONTEND DEBUG] Cliente não encontrado, mostrando ID:', projeto.idCliente);
+            return `Cliente ID: ${projeto.idCliente}`;
+        }
+        
+        console.log('❌ [FRONTEND DEBUG] Nenhum cliente encontrado');
+        return 'Sem Cliente';
+    };
 
-    const carregarTudoSequencialmente = async () => {
+    const initData = async () => {
         try {
             setLoading(true);
-            
-            // 🔥 CARREGAR CLIENTES PRIMEIRO - SEMPRE!
-            console.log('🔥 NOVA VERSÃO: Carregando clientes...');
-            await carregarClientes();
-            
-            console.log('🔥 NOVA VERSÃO: Carregando estados...');
-            await carregarEstados();
-            
-            console.log('🔥 NOVA VERSÃO: Carregando serviços...');
-            await carregarServicos();
-            
-            console.log('🔥 NOVA VERSÃO: Carregando projetos...');
-            await carregarProjetos();
-            
-            console.log('🔥 NOVA VERSÃO: Tudo carregado!');
-            NotificationService.successToast('🔥 NOVA VERSÃO: Dados carregados!');
-            
+            console.log('🔍 [FRONTEND DEBUG] Iniciando carregamento de dados...');
+
+            // ✅ CORRIGIDO: Carregar clientes primeiro (sem loading notification)
+            try {
+                const clientesResponse = await api.get('/clientes');
+                console.log('🔍 [FRONTEND DEBUG] Resposta clientes:', clientesResponse.data);
+                
+                if (clientesResponse.data.success && clientesResponse.data.data) {
+                    setClientes(clientesResponse.data.data);
+                    console.log('✅ [FRONTEND DEBUG] Clientes carregados:', clientesResponse.data.data.length);
+                } else {
+                    console.error('❌ [FRONTEND DEBUG] Erro na resposta de clientes:', clientesResponse.data);
+                    setClientes([]);
+                }
+            } catch (error) {
+                console.error('❌ [FRONTEND DEBUG] Erro ao carregar clientes:', error);
+                setClientes([]);
+            }
+
+            // Carregar estados de projeto
+            try {
+                const estadosResponse = await api.get('/estados-projeto');
+                if (estadosResponse.data.success && estadosResponse.data.data) {
+                    setEstadosProjeto(estadosResponse.data.data);
+                    console.log('✅ [FRONTEND DEBUG] Estados carregados:', estadosResponse.data.data.length);
+                } else {
+                    setEstadosProjeto([]);
+                }
+            } catch (error) {
+                console.error('❌ [FRONTEND DEBUG] Erro ao carregar estados:', error);
+                setEstadosProjeto([]);
+            }
+
+            // Carregar serviços
+            try {
+                const servicosResponse = await api.get('/servicos');
+                if (servicosResponse.data.success && servicosResponse.data.data) {
+                    setServicos(servicosResponse.data.data);
+                    console.log('✅ [FRONTEND DEBUG] Serviços carregados:', servicosResponse.data.data.length);
+                } else {
+                    setServicos([]);
+                }
+            } catch (error) {
+                console.error('❌ [FRONTEND DEBUG] Erro ao carregar serviços:', error);
+                setServicos([]);
+            }
+
+            // ✅ CORRIGIDO: Carregar projetos por último
+            try {
+                const projetosResponse = await api.get('/projetos');
+                console.log('🔍 [FRONTEND DEBUG] Resposta projetos:', projetosResponse.data);
+                
+                if (projetosResponse.data.success && projetosResponse.data.data) {
+                    setProjetos(projetosResponse.data.data);
+                    console.log('✅ [FRONTEND DEBUG] Projetos carregados:', projetosResponse.data.data.length);
+                    
+                    // ✅ DEBUG: Verificar estrutura dos projetos
+                    projetosResponse.data.data.forEach((projeto, index) => {
+                        console.log(`🔍 [FRONTEND DEBUG] Projeto ${index + 1}:`, {
+                            nome: projeto.nomeProjeto,
+                            idCliente: projeto.idCliente,
+                            temCliente: !!projeto.cliente,
+                            nomeCliente: projeto.cliente?.nome || 'NULL'
+                        });
+                    });
+                } else {
+                    console.error('❌ [FRONTEND DEBUG] Erro na resposta de projetos:', projetosResponse.data);
+                    setProjetos([]);
+                }
+            } catch (error) {
+                console.error('❌ [FRONTEND DEBUG] Erro ao carregar projetos:', error);
+                setProjetos([]);
+            }
+
         } catch (error) {
-            console.error('🔥 ERRO na nova versão:', error);
-            NotificationService.errorToast('Erro ao carregar dados');
+            console.error('❌ [FRONTEND DEBUG] Erro geral:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    const carregarClientes = async () => {
-        try {
-            const response = await api.get('/clientes');
-            console.log('🔥 CLIENTES RESPONSE:', response.data);
-            
-            if (response.data.success && Array.isArray(response.data.data)) {
-                setClientes(response.data.data);
-                console.log('🔥 CLIENTES DEFINIDOS:', response.data.data.length, 'clientes');
-            } else {
-                console.error('🔥 ERRO: Resposta inválida de clientes:', response.data);
-                throw new Error('Clientes: resposta inválida');
-            }
-        } catch (error) {
-            console.error('🔥 ERRO ao carregar clientes:', error);
-            throw error;
-        }
-    };
-
-    const carregarEstados = async () => {
-        const response = await api.get('/estados-projeto');
-        if (response.data.success && Array.isArray(response.data.data)) {
-            setEstadosProjeto(response.data.data);
-        }
-    };
-
-    const carregarServicos = async () => {
-        const response = await api.get('/servicos');
-        if (response.data.success && Array.isArray(response.data.data)) {
-            setServicos(response.data.data);
-        }
-    };
-
-    const carregarProjetos = async () => {
-        try {
-            const response = await api.get('/projetos');
-            console.log('🔥 PROJETOS RESPONSE:', response.data);
-            
-            if (response.data.success && Array.isArray(response.data.data)) {
-                setProjetos(response.data.data);
-                console.log('🔥 PROJETOS DEFINIDOS:', response.data.data.length, 'projetos');
-            } else {
-                console.error('🔥 ERRO: Resposta inválida de projetos:', response.data);
-            }
-        } catch (error) {
-            console.error('🔥 ERRO ao carregar projetos:', error);
-        }
-    };
-    //////
-
-    // 🔥🔥🔥 FUNÇÃO COMPLETAMENTE NOVA PARA NOME DO CLIENTE 🔥🔥🔥
-    const getClienteNome = (projeto) => {
-        console.log('🔥 getClienteNome chamada para projeto:', projeto?.nomeProjeto);
-        console.log('🔥 Array clientes tem:', clientes.length, 'elementos');
-        console.log('🔥 Projeto.idCliente:', projeto?.idCliente);
-        console.log('🔥 Projeto.cliente:', projeto?.cliente);
-
-        // Verificações básicas
-        if (!projeto) {
-            console.log('🔥 RETORNO: Projeto inválido');
-            return '🔥 Projeto inválido';
-        }
-
-        if (!Array.isArray(clientes)) {
-            console.log('🔥 RETORNO: Clientes não é array');
-            return '🔥 Clientes não carregados';
-        }
-
-        if (clientes.length === 0) {
-            console.log('🔥 RETORNO: Array clientes vazio');
-            return '🔥 A carregar clientes...';
-        }
-
-        // Estratégia 1: Objeto cliente aninhado do backend
-        if (projeto.cliente && 
-            typeof projeto.cliente === 'object' && 
-            projeto.cliente.nome && 
-            projeto.cliente.nome.trim() !== '') {
-            console.log('🔥 RETORNO: Nome do objeto aninhado:', projeto.cliente.nome);
-            return '🔥 ' + projeto.cliente.nome;
-        }
-
-        // Estratégia 2: Procurar na lista de clientes
-        if (projeto.idCliente) {
-            console.log('🔥 Procurando cliente com ID:', projeto.idCliente);
-            console.log('🔥 Lista de clientes:', clientes.map(c => ({ id: c.idCliente, nome: c.nome })));
-            
-            const clienteEncontrado = clientes.find(cliente => {
-                const match = cliente && 
-                             cliente.idCliente && 
-                             parseInt(cliente.idCliente) === parseInt(projeto.idCliente);
-                console.log(`🔥 Comparando ${cliente?.idCliente} === ${projeto.idCliente} = ${match}`);
-                return match;
-            });
-            
-            if (clienteEncontrado && clienteEncontrado.nome && clienteEncontrado.nome.trim() !== '') {
-                console.log('🔥 RETORNO: Cliente encontrado na lista:', clienteEncontrado.nome);
-                return '🔥 ' + clienteEncontrado.nome;
-            } else {
-                console.log('🔥 RETORNO: Cliente não encontrado na lista');
-                return `🔥 ID:${projeto.idCliente} (não encontrado)`;
-            }
-        }
-
-        console.log('🔥 RETORNO: N/A (sem ID)');
-        return '🔥 N/A';
-    };
-
-    const getEstadoNome = (projeto) => {
-        if (!projeto || !Array.isArray(estadosProjeto)) return 'N/A';
-        
-        if (projeto.estado && projeto.estado.designacaoEstado_Projeto) {
-            return projeto.estado.designacaoEstado_Projeto;
-        }
-        
-        if (projeto.idEstado_Projeto) {
-            const estado = estadosProjeto.find(e => 
-                e && parseInt(e.idEstado_Projeto) === parseInt(projeto.idEstado_Projeto)
-            );
-            if (estado && estado.designacaoEstado_Projeto) {
-                return estado.designacaoEstado_Projeto;
-            }
-        }
-        
-        return 'N/A';
-    };
-
-    // Filtros
-    const filteredProjetos = projetos.filter(projeto => {
-        if (!projeto) return false;
-
-        if (searchTerm) {
-            const termo = searchTerm.toLowerCase();
-            const nome = projeto.nomeProjeto ? projeto.nomeProjeto.toLowerCase() : '';
-            const descricao = projeto.descricaoProjeto ? projeto.descricaoProjeto.toLowerCase() : '';
-            const clienteNome = getClienteNome(projeto).toLowerCase();
-            
-            if (!nome.includes(termo) && 
-                !descricao.includes(termo) && 
-                !clienteNome.includes(termo)) {
-                return false;
-            }
-        }
-
-        if (filterCliente && projeto.idCliente) {
-            if (parseInt(projeto.idCliente) !== parseInt(filterCliente)) {
-                return false;
-            }
-        }
-
-        if (filterEstado && projeto.idEstado_Projeto) {
-            if (parseInt(projeto.idEstado_Projeto) !== parseInt(filterEstado)) {
-                return false;
-            }
-        }
-
-        if (filterStatus) {
-            if (filterStatus === 'ativo' && !projeto.ativo) return false;
-            if (filterStatus === 'inativo' && projeto.ativo) return false;
-        }
-
-        return true;
-    });
+    useEffect(() => {
+        initData();
+    }, []);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -237,13 +155,21 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
-        
-        if (errors[name]) {
-            setErrors(prev => ({ ...prev, [name]: '' }));
-        }
     };
 
-    const resetForm = () => {
+    const handleServicoChange = (servicoId) => {
+        setSelectedServicos(prev => {
+            if (prev.includes(servicoId)) {
+                return prev.filter(id => id !== servicoId);
+            } else {
+                return [...prev, servicoId];
+            }
+        });
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setEditingProject(null);
         setFormData({
             nomeProjeto: '',
             descricaoProjeto: '',
@@ -257,58 +183,147 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             ativo: true
         });
         setSelectedServicos([]);
-        setEditingProject(null);
         setErrors({});
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        
+        if (!formData.nomeProjeto.trim()) {
+            NotificationService.error('Erro!', 'Nome do projeto é obrigatório');
+            return;
+        }
+
+        try {
+            const projetoData = {
+                ...formData,
+                servicos: selectedServicos
+            };
+
+            let response;
+            if (editingProject) {
+                response = await api.put(`/projetos/${editingProject.idProjeto}`, projetoData);
+            } else {
+                response = await api.post('/projetos', projetoData);
+            }
+
+            if (response.data.success) {
+                if (editingProject) {
+                    NotificationService.success('Sucesso!', 'Projeto atualizado com sucesso');
+                } else {
+                    NotificationService.success('Sucesso!', 'Projeto criado com sucesso');
+                }
+
+                handleCloseModal();
+                await initData();
+                if (onStatsUpdate) onStatsUpdate();
+            }
+        } catch (error) {
+            console.error('Erro ao guardar projeto:', error);
+            NotificationService.error('Erro!', 'Erro ao guardar projeto');
+        }
+    };
+
+    const handleEdit = async (projeto) => {
+        setEditingProject(projeto);
+        setFormData({
+            nomeProjeto: projeto.nomeProjeto || '',
+            descricaoProjeto: projeto.descricaoProjeto || '',
+            dataInicio: projeto.dataInicio ? projeto.dataInicio.split('T')[0] : '',
+            dataPrevista_Fim: projeto.dataPrevista_Fim ? projeto.dataPrevista_Fim.split('T')[0] : '',
+            dataFim: projeto.dataFim ? projeto.dataFim.split('T')[0] : '',
+            orcamentoTotal: projeto.orcamentoTotal || 0,
+            notas: projeto.notas || '',
+            idCliente: projeto.idCliente || '',
+            idEstado_Projeto: projeto.idEstado_Projeto || '',
+            ativo: projeto.ativo !== undefined ? projeto.ativo : true
+        });
+
+        try {
+            const response = await api.get(`/projetos-servicos/projeto/${projeto.idProjeto}`);
+            if (response.data.success) {
+                const servicosAssociados = response.data.data.map(ps => ps.idServico);
+                setSelectedServicos(servicosAssociados);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar serviços do projeto:', error);
+            setSelectedServicos([]);
+        }
+
+        setShowModal(true);
+    };
+
+    const handleToggleStatus = async (projeto) => {
+        const novoStatus = !projeto.ativo;
+        
+        try {
+            const response = await api.put(`/projetos/${projeto.idProjeto}`, {
+                ...projeto,
+                ativo: novoStatus
+            });
+
+            if (response.data.success) {
+                NotificationService.success('Sucesso!', `Projeto ${novoStatus ? 'ativado' : 'desativado'} com sucesso`);
+                await initData();
+                if (onStatsUpdate) onStatsUpdate();
+            }
+        } catch (error) {
+            console.error('Erro ao alterar status:', error);
+            NotificationService.error('Erro!', 'Erro ao alterar status do projeto');
+        }
+    };
+
+    // Filtrar projetos
+    const filteredProjetos = projetos.filter(projeto => {
+        const matchSearch = projeto.nomeProjeto.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           getClienteNome(projeto).toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const matchStatus = filterStatus === '' || 
+                           (filterStatus === 'ativo' && projeto.ativo) ||
+                           (filterStatus === 'inativo' && !projeto.ativo);
+        
+        const matchCliente = filterCliente === '' || projeto.idCliente == filterCliente;
+        
+        const matchEstado = filterEstado === '' || projeto.idEstado_Projeto == filterEstado;
+        
+        return matchSearch && matchStatus && matchCliente && matchEstado;
+    });
+
     return (
         <div className="container-fluid">
-            {/* 🔥🔥🔥 HEADER IMPOSSÍVEL DE IGNORAR 🔥🔥🔥 */}
-            <div className="alert alert-danger mb-4" style={{ border: '3px solid red', fontSize: '16px' }}>
-                <h4>🔥🔥🔥 NOVA VERSÃO CARREGADA - {BUILD_TIME} 🔥🔥🔥</h4>
-                <div><strong>📊 STATUS ACTUAL:</strong></div>
-                <div>• Clientes carregados: <span className="badge bg-primary">{clientes.length}</span></div>
-                <div>• Projetos carregados: <span className="badge bg-success">{projetos.length}</span></div>
-                <div>• A carregar: <span className="badge bg-warning">{loading ? 'SIM' : 'NÃO'}</span></div>
-                <div><strong>🔍 TESTE:</strong> Se vês este alert, a nova versão está a funcionar!</div>
-            </div>
-
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2 className="mb-0">
-                    🔥 Gestão de Projetos (NOVA VERSÃO)
-                </h2>
-                <button
+                <h2>Gestão de Projetos</h2>
+                <button 
                     className="btn btn-primary"
                     onClick={() => setShowModal(true)}
-                    disabled={loading}
                 >
-                    <i className="bi bi-plus-lg me-2"></i>
-                    🔥 Novo Projeto
+                    <i className="bi bi-plus-circle me-2"></i>
+                    Adicionar Projeto
                 </button>
             </div>
 
-            {/* Filtros com indicadores visuais */}
+            {/* Filtros */}
             <div className="row mb-4">
                 <div className="col-md-4">
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="🔍 Pesquisar projetos..."
+                        placeholder="Pesquisar por nome ou cliente..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <div className="col-md-3">
+                <div className="col-md-2">
                     <select
                         className="form-select"
                         value={filterCliente}
                         onChange={(e) => setFilterCliente(e.target.value)}
-                        style={{ border: '2px solid orange' }}
                     >
-                        <option value="">🔥 NOVO: Todos os Clientes ({clientes.length})</option>
-                        {clientes.map(cliente => (
+                        <option value="">Todos os Clientes</option>
+                        {/* ✅ CORRIGIDO: Verificar se clientes existe e tem length */}
+                        {clientes && clientes.length > 0 && clientes.map(cliente => (
                             <option key={cliente.idCliente} value={cliente.idCliente}>
-                                🔥 {cliente.nome}
+                                {cliente.nome}
                             </option>
                         ))}
                     </select>
@@ -343,17 +358,16 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             {/* Lista de Projetos */}
             {loading ? (
                 <div className="text-center p-5">
-                    <div className="spinner-border text-danger" role="status" style={{ width: '3rem', height: '3rem' }}>
+                    <div className="spinner-border text-primary" role="status">
                         <span className="visually-hidden">A carregar...</span>
                     </div>
-                    <h4 className="mt-3">🔥 A carregar nova versão...</h4>
                 </div>
             ) : (
-                <div className="card" style={{ border: '3px solid green' }}>
-                    <div className="card-header bg-success text-white">
+                <div className="card">
+                    <div className="card-header">
                         <h5 className="mb-0">
-                            🔥🔥🔥 Lista de Projetos (VERSÃO NOVA CONFIRMADA) 🔥🔥🔥
-                            <span className="badge bg-warning text-dark ms-2">{filteredProjetos.length}</span>
+                            Lista de Projetos
+                            <span className="badge bg-primary ms-2">{filteredProjetos.length}</span>
                         </h5>
                     </div>
                     <div className="card-body p-0">
@@ -361,77 +375,81 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                             <div className="text-center p-4">
                                 <i className="bi bi-folder-x fa-3x text-muted mb-3"></i>
                                 <p className="text-muted">
-                                    {searchTerm || filterCliente || filterEstado || filterStatus 
-                                        ? '🔥 Nenhum projeto encontrado (NOVA VERSÃO)' 
-                                        : '🔥 Ainda não tens projetos (NOVA VERSÃO)'}
+                                    {searchTerm || filterCliente || filterEstado || filterStatus ? 
+                                        'Nenhum projeto encontrado com os filtros aplicados.' : 
+                                        'Ainda não tem projetos registados.'}
                                 </p>
                             </div>
                         ) : (
                             <div className="table-responsive">
                                 <table className="table table-hover mb-0">
-                                    <thead className="table-danger">
+                                    <thead className="table-light">
                                         <tr>
-                                            <th>🔥 Projeto</th>
-                                            <th style={{ backgroundColor: 'yellow', color: 'black', fontWeight: 'bold' }}>
-                                                🔥🔥🔥 CLIENTE (VERSÃO NOVA) 🔥🔥🔥
-                                            </th>
-                                            <th>🔥 Estado</th>
-                                            <th>🔥 Data Início</th>
-                                            <th>🔥 Orçamento</th>
-                                            <th>🔥 Status</th>
-                                            <th width="120">🔥 Ações</th>
+                                            <th>Projeto</th>
+                                            <th>Cliente</th>
+                                            <th>Estado</th>
+                                            <th>Orçamento</th>
+                                            <th>Data Início</th>
+                                            <th>Data Prevista Fim</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {filteredProjetos.map(projeto => (
+                                        {filteredProjetos.map((projeto) => (
                                             <tr key={projeto.idProjeto}>
                                                 <td>
-                                                    <div>
-                                                        <div className="fw-semibold">🔥 {projeto.nomeProjeto}</div>
-                                                        {projeto.descricaoProjeto && (
-                                                            <small className="text-muted">
-                                                                {projeto.descricaoProjeto.length > 50 
-                                                                    ? projeto.descricaoProjeto.substring(0, 50) + '...' 
-                                                                    : projeto.descricaoProjeto}
-                                                            </small>
-                                                        )}
-                                                    </div>
+                                                    <strong>{projeto.nomeProjeto}</strong>
+                                                    {projeto.descricaoProjeto && (
+                                                        <small className="d-block text-muted">
+                                                            {projeto.descricaoProjeto.substring(0, 100)}...
+                                                        </small>
+                                                    )}
                                                 </td>
-                                                <td style={{ backgroundColor: 'lightgreen', fontWeight: 'bold' }}>
-                                                    <span className="badge bg-danger" style={{ fontSize: '14px', padding: '8px' }}>
+                                                <td>
+                                                    {/* ✅ CORRIGIDO: Usar função melhorada */}
+                                                    <span className="badge bg-info">
                                                         {getClienteNome(projeto)}
                                                     </span>
                                                 </td>
-                                                <td>🔥 {getEstadoNome(projeto)}</td>
                                                 <td>
-                                                    {projeto.dataInicio 
-                                                        ? new Date(projeto.dataInicio).toLocaleDateString('pt-PT')
-                                                        : 'N/A'}
+                                                    <span className="badge bg-secondary">
+                                                        {projeto.estado?.designacaoEstado_Projeto || 'Sem Estado'}
+                                                    </span>
+                                                </td>
+                                                <td>€{parseFloat(projeto.orcamentoTotal || 0).toFixed(2)}</td>
+                                                <td>
+                                                    {projeto.dataInicio ? 
+                                                        new Date(projeto.dataInicio).toLocaleDateString('pt-PT') : 
+                                                        'Não definida'}
                                                 </td>
                                                 <td>
-                                                    {projeto.orcamentoTotal 
-                                                        ? `€${parseFloat(projeto.orcamentoTotal).toFixed(2)}`
-                                                        : 'N/A'}
+                                                    {projeto.dataPrevista_Fim ? 
+                                                        new Date(projeto.dataPrevista_Fim).toLocaleDateString('pt-PT') : 
+                                                        'Não definida'}
                                                 </td>
                                                 <td>
-                                                    <span className={`badge ${projeto.ativo ? 'bg-success' : 'bg-secondary'}`}>
-                                                        🔥 {projeto.ativo ? 'Ativo' : 'Inativo'}
+                                                    <span className={`badge ${projeto.ativo ? 'bg-success' : 'bg-danger'}`}>
+                                                        {projeto.ativo ? 'Ativo' : 'Inativo'}
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <button
-                                                        className="btn btn-sm btn-outline-primary me-1"
-                                                        onClick={() => setShowModal(true)}
-                                                        title="🔥 Editar (Nova Versão)"
-                                                    >
-                                                        🔥 <i className="bi bi-pencil"></i>
-                                                    </button>
-                                                    <button
-                                                        className="btn btn-sm btn-outline-danger"
-                                                        title="🔥 Desativar (Nova Versão)"
-                                                    >
-                                                        🔥 <i className="bi bi-trash"></i>
-                                                    </button>
+                                                    <div className="btn-group" role="group">
+                                                        <button
+                                                            className="btn btn-outline-primary btn-sm"
+                                                            onClick={() => handleEdit(projeto)}
+                                                            title="Editar"
+                                                        >
+                                                            <i className="bi bi-pencil"></i>
+                                                        </button>
+                                                        <button
+                                                            className={`btn btn-outline-${projeto.ativo ? 'warning' : 'success'} btn-sm`}
+                                                            onClick={() => handleToggleStatus(projeto)}
+                                                            title={projeto.ativo ? 'Desativar' : 'Ativar'}
+                                                        >
+                                                            <i className={`bi bi-${projeto.ativo ? 'pause' : 'play'}`}></i>
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}
@@ -443,40 +461,190 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                 </div>
             )}
 
-            {/* Modal simplificado para teste */}
+            {/* Modal de Criação/Edição */}
             {showModal && (
-                <div className="modal show d-block" style={{ backgroundColor: 'rgba(255,0,0,0.8)' }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content" style={{ border: '5px solid red' }}>
-                            <div className="modal-header bg-danger text-white">
-                                <h5 className="modal-title">🔥🔥🔥 MODAL DA NOVA VERSÃO FUNCIONANDO! 🔥🔥🔥</h5>
-                                <button
-                                    type="button"
-                                    className="btn-close btn-close-white"
-                                    onClick={() => {
-                                        setShowModal(false);
-                                        resetForm();
-                                    }}
-                                ></button>
+                <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {editingProject ? 'Editar Projeto' : 'Criar Projeto'}
+                                </h5>
+                                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
                             </div>
-                            <div className="modal-body">
-                                <div className="alert alert-success">
-                                    <h6>✅ NOVA VERSÃO CONFIRMADA!</h6>
-                                    <p><strong>Build:</strong> {BUILD_TIME}</p>
-                                    <p><strong>Clientes carregados:</strong> {clientes.length}</p>
-                                    <p><strong>Projetos carregados:</strong> {projetos.length}</p>
+                            <form onSubmit={handleSubmit}>
+                                <div className="modal-body">
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label htmlFor="nomeProjeto" className="form-label">Nome do Projeto *</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    id="nomeProjeto"
+                                                    name="nomeProjeto"
+                                                    value={formData.nomeProjeto}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label htmlFor="idCliente" className="form-label">Cliente</label>
+                                                <select
+                                                    className="form-select"
+                                                    id="idCliente"
+                                                    name="idCliente"
+                                                    value={formData.idCliente}
+                                                    onChange={handleInputChange}
+                                                >
+                                                    <option value="">Selecionar Cliente</option>
+                                                    {clientes.map(cliente => (
+                                                        <option key={cliente.idCliente} value={cliente.idCliente}>
+                                                            {cliente.nome}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label htmlFor="descricaoProjeto" className="form-label">Descrição</label>
+                                        <textarea
+                                            className="form-control"
+                                            id="descricaoProjeto"
+                                            name="descricaoProjeto"
+                                            rows="3"
+                                            value={formData.descricaoProjeto}
+                                            onChange={handleInputChange}
+                                        ></textarea>
+                                    </div>
+
+                                    <div className="row">
+                                        <div className="col-md-4">
+                                            <div className="mb-3">
+                                                <label htmlFor="dataInicio" className="form-label">Data Início</label>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    id="dataInicio"
+                                                    name="dataInicio"
+                                                    value={formData.dataInicio}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-4">
+                                            <div className="mb-3">
+                                                <label htmlFor="dataPrevista_Fim" className="form-label">Data Prevista Fim</label>
+                                                <input
+                                                    type="date"
+                                                    className="form-control"
+                                                    id="dataPrevista_Fim"
+                                                    name="dataPrevista_Fim"
+                                                    value={formData.dataPrevista_Fim}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-4">
+                                            <div className="mb-3">
+                                                <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    className="form-control"
+                                                    id="orcamentoTotal"
+                                                    name="orcamentoTotal"
+                                                    value={formData.orcamentoTotal}
+                                                    onChange={handleInputChange}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label htmlFor="idEstado_Projeto" className="form-label">Estado</label>
+                                                <select
+                                                    className="form-select"
+                                                    id="idEstado_Projeto"
+                                                    name="idEstado_Projeto"
+                                                    value={formData.idEstado_Projeto}
+                                                    onChange={handleInputChange}
+                                                >
+                                                    <option value="">Selecionar Estado</option>
+                                                    {estadosProjeto.map(estado => (
+                                                        <option key={estado.idEstado_Projeto} value={estado.idEstado_Projeto}>
+                                                            {estado.designacaoEstado_Projeto}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3 d-flex align-items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    className="form-check-input me-2"
+                                                    id="ativo"
+                                                    name="ativo"
+                                                    checked={formData.ativo}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <label className="form-check-label" htmlFor="ativo">Projeto Ativo</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label htmlFor="notas" className="form-label">Notas</label>
+                                        <textarea
+                                            className="form-control"
+                                            id="notas"
+                                            name="notas"
+                                            rows="3"
+                                            value={formData.notas}
+                                            onChange={handleInputChange}
+                                        ></textarea>
+                                    </div>
+
+                                    {servicos.length > 0 && (
+                                        <div className="mb-3">
+                                            <label className="form-label">Serviços Associados</label>
+                                            <div className="row">
+                                                {servicos.map(servico => (
+                                                    <div key={servico.idServico} className="col-md-6">
+                                                        <div className="form-check">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                id={`servico-${servico.idServico}`}
+                                                                checked={selectedServicos.includes(servico.idServico)}
+                                                                onChange={() => handleServicoChange(servico.idServico)}
+                                                            />
+                                                            <label className="form-check-label" htmlFor={`servico-${servico.idServico}`}>
+                                                                {servico.nomeServico} - €{servico.preco_base_servico}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                                <p>Se vês este modal, a nova versão está definitivamente a funcionar!</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button
-                                    type="button"
-                                    className="btn btn-danger"
-                                    onClick={() => setShowModal(false)}
-                                >
-                                    🔥 Fechar Modal Novo
-                                </button>
-                            </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                                        Cancelar
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        {editingProject ? 'Atualizar' : 'Criar'} Projeto
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
