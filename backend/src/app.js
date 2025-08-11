@@ -81,7 +81,7 @@ app.use('/api/utilizadores', utilizadoresRoutes);
 app.use('/api/estados-projeto', estadosProjetoRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/init', initRoutes);
-app.use('/api/emergency', emergencySetup);
+//app.use('/api/emergency', emergencySetup);
 
 // Rota de teste
 app.get('/api/health', (req, res) => {
@@ -118,7 +118,7 @@ app.use('*', (req, res) => {
 
 // ADICIONA ESTAS LINHAS ANTES DE "const PORT = process.env.PORT || 3000;"
 
-// Endpoint para criar utilizador admin
+/* Endpoint para criar utilizador admin
 app.post('/api/emergency-create-admin', async (req, res) => {
     try {
         console.log('🚨 Criando utilizador admin...');
@@ -167,7 +167,7 @@ app.post('/api/emergency-create-admin', async (req, res) => {
             error: error.message
         });
     }
-});
+});*/
 
 // Endpoint para verificar se admin existe
 app.get('/api/emergency-check-admin', async (req, res) => {
