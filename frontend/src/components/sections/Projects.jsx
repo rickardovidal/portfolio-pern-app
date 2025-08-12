@@ -29,7 +29,7 @@ const projectsData = [
     {
         id: 3,
         title: 'Site EUNICE - Assembleia Geral Europeia',
-        description: 'Website institucional para evento da EUNICE (assembleia de politécnicos europeus). Interface responsiva com programa, palestrantes e inscrições.',
+        description: 'Website institucional para evento da EUNICE (assembleia de politécnicos europeus). Interface responsiva com programa, indicacoes de como viajar para o local, e principais locais de interesse na cidade de Viseu.',
         technologies: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design'],
         category: 'web',
         placeholder: 'Event Website',
@@ -40,7 +40,7 @@ const projectsData = [
     {
         id: 4,
         title: 'App Eventos Viseu - Protótipo',
-        description: 'Aplicação móvel para divulgação de eventos em Viseu. Interface intuitiva com filtros, mapa interativo, favoritos e notificações personalizadas.',
+        description: 'Aplicação móvel para divulgação de eventos em Viseu. Interface intuitiva com filtros, favoritos e notificações personalizadas.',
         technologies: ['Figma', 'UI Design', 'UX Research', 'Prototyping'],
         category: 'mobile',
         placeholder: 'Mobile App Prototype',
@@ -51,7 +51,7 @@ const projectsData = [
     {
         id: 5,
         title: 'Protótipo EUNICE - Interface de Evento',
-        description: 'Protótipo completo para website internacional da EUNICE. Inclui jornada do utilizador, wireframes, design system e fluxos de navegação.',
+        description: 'Protótipo completo para website de divulgação da Assembleia Geral da EUNICE. Inclui wireframes, design system e fluxos de navegação.',
         technologies: ['Figma', 'Design System', 'Wireframing', 'User Journey'],
         category: 'mobile',
         placeholder: 'UI/UX Prototype',
@@ -106,7 +106,7 @@ const projectsData = [
     {
         id: 9,
         title: 'Motion Design - Foguetão Espacial',
-        description: 'Animação 2D em After Effects explorando movimento e timing. Elementos dinâmicos com transições suaves e narrativa espacial envolvente.',
+        description: 'Animação 2D em After Effects explorando movimento e timing. Elementos dinâmicos com transições.',
         technologies: ['After Effects', 'Illustrator', 'Motion Graphics'],
         category: 'motion',
         placeholder: 'Animation Video',
@@ -133,7 +133,7 @@ const projectsData = [
     {
         id: 11,
         title: 'Motion Graphics - Adidas Brand',
-        description: 'Animação promocional inspirada na identidade Adidas. Exploração de movimento de marca com transições dinâmicas e elementos energéticos.',
+        description: 'Animação promocional inspirada na identidade Adidas. Exploração de movimento de marca com transições dinâmicas.',
         technologies: ['After Effects', 'Illustrator', 'Brand Animation'],
         category: 'motion',
         placeholder: 'Brand Animation',
@@ -147,7 +147,7 @@ const projectsData = [
     {
         id: 12,
         title: 'Curta-Metragem "My Brother"',
-        description: 'Curta-metragem experimental explorando relações familiares. Trabalho completo de edição, color grading e pós-produção.',
+        description: 'Curta-metragem experimental. Trabalho completo de edição, color grading e pós-produção.',
         technologies: ['Premiere Pro', 'After Effects', 'Color Grading'],
         category: 'motion',
         placeholder: 'Short Film',
@@ -161,7 +161,7 @@ const projectsData = [
     {
         id: 13,
         title: 'Book Fotográfico - Composição e Técnica',
-        description: 'Exploração artística através da fotografia, focando técnicas de composição, jogo de luzes e sombras com visão criativa.',
+        description: 'Exploração artística através da fotografia, focando técnicas de composição, jogo de luzes, sombras e movimento com visão criativa.',
         technologies: ['Adobe Lightroom', 'Fotografia Digital', 'Composição'],
         category: 'design',
         placeholder: 'Photography Book',
