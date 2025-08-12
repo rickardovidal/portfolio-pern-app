@@ -29,7 +29,7 @@ const projectsData = [
     {
         id: 3,
         title: 'Site EUNICE - Assembleia Geral Europeia',
-        description: 'Website institucional para evento da EUNICE (assembleia de politécnicos europeus). Interface responsiva com programa, indicacoes de como viajar para o local, e principais locais de interesse na cidade de Viseu.',
+        description: 'Website institucional para evento da EUNICE (assembleia de politécnicos europeus). Interface responsiva com programa, indicações de como viajar para o local, e principais locais de interesse na cidade de Viseu.',
         technologies: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design'],
         category: 'web',
         placeholder: 'Event Website',
