@@ -72,6 +72,9 @@ const Footer = () => {
                         <li><Link to="/cookies">Cookies</Link></li>
                     </ul>
                 </div>
+                <div>
+                    <a target="_blank" href="https://www.zaask.pt/user/ricardojmv95"><img src="https://www.zaask.pt/widget?user=984351&widget=pro-findme" alt="" /></a>
+                </div>
             </div>
         </footer>
     );
