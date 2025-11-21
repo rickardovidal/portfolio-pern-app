@@ -8,9 +8,22 @@ router.post('/create-admin', async (req, res) => {
     try {
         console.log('🚨 CRIAÇÃO DE EMERGÊNCIA DO ADMIN');
         
+        // Obter credenciais das variáveis de ambiente
+        const adminUsername = process.env.ADMIN_USERNAME;
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+
+        // Validar se as variáveis de ambiente estão configuradas
+        if (!adminUsername || !adminEmail || !adminPassword) {
+            return res.status(500).json({
+                success: false,
+                message: 'Variáveis de ambiente ADMIN_USERNAME, ADMIN_EMAIL e ADMIN_PASSWORD devem estar configuradas'
+            });
+        }
+
         // Verificar se já existe
         const existingAdmin = await Utilizador.findOne({
-            where: { username: 'admin' }
+            where: { username: adminUsername }
         });
         
         if (existingAdmin) {
@@ -27,9 +40,9 @@ router.post('/create-admin', async (req, res) => {
         
         // Criar admin
         const admin = await Utilizador.create({
-            username: 'admin',
-            email: 'admin@portfolio.com',
-            password: 'odracirladiv' // Será automaticamente hasheada pelo modelo
+            username: adminUsername,
+            email: adminEmail,
+            password: adminPassword // Será automaticamente hasheada pelo modelo
         });
         
         console.log('✅ Admin criado com sucesso!');
@@ -57,8 +70,10 @@ router.post('/create-admin', async (req, res) => {
 // Endpoint para verificar se admin existe
 router.get('/check-admin', async (req, res) => {
     try {
+        const adminUsername = process.env.ADMIN_USERNAME || 'admin';
+        
         const admin = await Utilizador.findOne({
-            where: { username: 'admin' }
+            where: { username: adminUsername }
         });
         
         res.json({
