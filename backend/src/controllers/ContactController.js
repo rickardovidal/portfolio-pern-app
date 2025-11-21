@@ -259,6 +259,9 @@ const contactController = {
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: process.env.SMTP_PORT || 587,
             secure: false,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
@@ -297,6 +300,9 @@ const contactController = {
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: process.env.SMTP_PORT || 587,
             secure: false,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
