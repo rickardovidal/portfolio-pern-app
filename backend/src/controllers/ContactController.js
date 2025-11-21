@@ -270,8 +270,7 @@ const contactController = {
                 <p><strong>Assunto:</strong> ${message.assunto}</p>
                 <p><strong>Mensagem:</strong></p>
                 <div style="border-left: 4px solid #0066cc; padding-left: 15px; margin: 15px 0;">
-                    ${message.mensagem.replace(/
-/g, '<br>')}
+                    ${message.mensagem}
                 </div>
                 <p><small>Recebida em: ${new Date(message.createdAt).toLocaleString('pt-PT')}</small></p>
             `
