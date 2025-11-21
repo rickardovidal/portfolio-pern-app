@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import styles from './About.module.css';
 
 const skillsData = [
@@ -56,17 +57,42 @@ const About = () => {
     return (
         <section className={styles.about} id="about">
             <div className={styles.aboutContainer}>
-                <div className={styles.aboutLabel}>Sobre</div>
+                <motion.div 
+                    className={styles.aboutLabel}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                    Sobre
+                </motion.div>
                 <div className={styles.aboutContent}>
-                    <h2>Soluções digitais que combinam design e tecnologia</h2>
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
+                        Soluções digitais que combinam design e tecnologia
+                    </motion.h2>
                     <div className={styles.aboutText}>
-                        <p>
+                        <motion.p
+                            initial={{ opacity: 0, y: 15 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
+                        >
                             O meu trabalho centra-se no desenvolvimento de projetos digitais que respondem a necessidades reais.
                             Combino competências em design e programação para criar desde interfaces web até aplicações, e outros produtos multimédia além do desenho e criação de bases de dados.
-                        </p>
-                        <p>
+                        </motion.p>
+                        <motion.p
+                            initial={{ opacity: 0, y: 15 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+                        >
                             Com experiência em prototipagem, desenvolvimento web e full-stack, concepção de produtos de design gráfico e design multimédia e gestão de projetos. Procuro sempre a solução mais adequada para cada desafio.
-                        </p>
+                        </motion.p>
                     </div>
                     <div className={styles.skillsList}>
                         {skillsData.map((skill, index) => (
