@@ -1,5 +1,6 @@
 // src/components/ui/WorkMosaic.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { showcaseWorks, projectsData } from '../../data/portfolioData';
 import ProjectModal from './ProjectModal';
 import VideoModal from './VideoModal';
@@ -133,6 +134,26 @@ const WorkMosaic = () => {
         );
     };
 
+
+    // Animation variants for mosaic items
+    const itemVariants = {
+        hidden: { 
+            opacity: 0, 
+            y: 15,
+            scale: 0.98
+        },
+        visible: (index) => ({
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: {
+                duration: 0.5,
+                delay: index * 0.08,
+                ease: [0.25, 0.1, 0.25, 1]
+            }
+        })
+    };
+
     const itemsByColumn = distributeItems();
 
     return (
@@ -145,7 +166,7 @@ const WorkMosaic = () => {
                     {itemsByColumn.map((columnItems, colIndex) => (
                         <div key={colIndex} className={styles.mosaicColumn}>
                             {columnItems.map((item) => (
-                                <div
+                                <motion.div
                                     key={item.id}
                                     className={styles.mosaicItem}
                                     onClick={() => handleItemClick(item)}
@@ -188,7 +209,7 @@ const WorkMosaic = () => {
                                             </svg>
                                         )}
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                     ))}

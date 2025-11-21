@@ -94,6 +94,18 @@
     transform: translateY(-2px);
 }
 
+/* Seta animada do CTA */
+.ctaArrow {
+    display: inline-block;
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.heroCta:hover .ctaArrow {
+    transform: translateX(4px);
+}
+
+
 /* Wrapper do mosaico com espaçamento adequado */
 .heroMosaicWrapper {
     position: relative;
