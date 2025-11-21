@@ -85,8 +85,7 @@ const Hero = () => {
                         className={styles.heroCta}
                         onClick={handleSmoothScroll}
                         variants={itemVariants}
-                        whileHover={{ x: 3 }}
-                        transition={{ duration: 0.2 }}
+                        
                     >
                         Ver trabalhos
                         <span className={styles.ctaArrow}>→</span>
