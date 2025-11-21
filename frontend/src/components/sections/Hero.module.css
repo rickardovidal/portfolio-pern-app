@@ -97,12 +97,13 @@
 /* Seta animada do CTA */
 .ctaArrow {
     display: inline-block;
-    margin-left: 0.5rem;
+    margin-left: 0.4rem;
     transition: transform 0.3s ease;
+    font-size: 0.85em;
 }
 
 .heroCta:hover .ctaArrow {
-    transform: translateX(4px);
+    transform: translateX(2px);
 }
 
 
