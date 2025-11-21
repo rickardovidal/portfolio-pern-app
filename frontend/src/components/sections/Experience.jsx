@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import styles from './Experience.module.css';
 
 const experienceData = [
@@ -59,9 +60,44 @@ const experienceData = [
     
 ];
 
-const ExperienceItem = ({ experience }) => {
+// Animation variants
+const itemVariants = {
+    hidden: { 
+        opacity: 0, 
+        x: -20 
+    },
+    visible: {
+        opacity: 1,
+        x: 0,
+        transition: {
+            duration: 0.5,
+            ease: [0.25, 0.1, 0.25, 1]
+        }
+    }
+};
+
+const bulletVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i) => ({
+        opacity: 1,
+        x: 0,
+        transition: {
+            duration: 0.3,
+            delay: i * 0.05,
+            ease: [0.25, 0.1, 0.25, 1]
+        }
+    })
+};
+
+const ExperienceItem = ({ experience, index }) => {
     return (
-        <div className={styles.experienceItem}>
+        <motion.div 
+            className={styles.experienceItem}
+            variants={itemVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-50px" }}
+        >
             <div className={styles.experiencePeriod}>{experience.period}</div>
             <div className={styles.experienceTitle}>{experience.title}</div>
             <div className={styles.experienceOrg}>{experience.organization}</div>
@@ -69,12 +105,21 @@ const ExperienceItem = ({ experience }) => {
             {experience.bullets && (
                 <ul className={styles.experienceBullets}>
                     {experience.bullets.map((bullet, i) => (
-                        <li key={i}>{bullet}</li>
+                        <motion.li 
+                            key={i}
+                            variants={bulletVariants}
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            custom={i}
+                        >
+                            {bullet}
+                        </motion.li>
                     ))}
                 </ul>
             )}
 
-        </div>
+        </motion.div>
     );
 };
 
@@ -82,12 +127,27 @@ const Experience = () => {
     return (
         <section className={styles.experience} id="experience">
             <div className={styles.experienceContainer}>
-                <div className={styles.experienceLabel}>Percurso</div>
+                <motion.div 
+                    className={styles.experienceLabel}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                >
+                    Percurso
+                </motion.div>
                 <div className={styles.experienceContent}>
-                    <h2>Formação académica e desenvolvimento de competências</h2>
+                    <motion.h2
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
+                    >
+                        Formação académica e desenvolvimento de competências
+                    </motion.h2>
                     <div className={styles.timeline}>
                         {experienceData.map((experience, index) => (
-                            <ExperienceItem key={index} experience={experience} />
+                            <ExperienceItem key={index} experience={experience} index={index} />
                         ))}
                     </div>
                 </div>
