@@ -15,10 +15,12 @@ const initController = {
     checkDatabase: async (req, res) => {
         try {
             console.log('🔍 Verificando estado da base de dados...');
+
+            const adminUsername = process.env.ADMIN_USERNAME || 'admin';
             
             // Verificar se existe utilizador admin
             const adminUser = await Utilizador.findOne({
-                where: { username: 'admin' }
+                where: { username: adminUsername }
             });
 
             const userCount = await Utilizador.count();
@@ -52,6 +54,19 @@ const initController = {
         try {
             console.log('🚀 Iniciando inicialização da base de dados...');
 
+            // Obter credenciais das variáveis de ambiente
+            const adminUsername = process.env.ADMIN_USERNAME;
+            const adminEmail = process.env.ADMIN_EMAIL;
+            const adminPassword = process.env.ADMIN_PASSWORD;
+
+            // Validar se as variáveis de ambiente estão configuradas
+            if (!adminUsername || !adminEmail || !adminPassword) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Variáveis de ambiente ADMIN_USERNAME, ADMIN_EMAIL e ADMIN_PASSWORD devem estar configuradas'
+                });
+            }
+
             // Definir associações
             defineAssociations();
 
@@ -61,7 +76,7 @@ const initController = {
 
             // Verificar se já existe admin
             const existingAdmin = await Utilizador.findOne({
-                where: { username: 'admin' }
+                where: { username: adminUsername }
             });
 
             if (existingAdmin) {
@@ -77,9 +92,9 @@ const initController = {
 
             // Criar utilizador admin
             const admin = await Utilizador.create({
-                username: 'admin',
-                email: 'admin@portfolio.com',
-                password: 'odracirladiv'
+                username: adminUsername,
+                email: adminEmail,
+                password: adminPassword
             });
             console.log('✅ Utilizador admin criado');
 
@@ -171,8 +186,19 @@ const initController = {
         try {
             console.log('🔧 Resetting admin password...');
 
+            const adminUsername = process.env.ADMIN_USERNAME;
+            const adminPassword = process.env.ADMIN_PASSWORD;
+
+            // Validar se as variáveis de ambiente estão configuradas
+            if (!adminUsername || !adminPassword) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Variáveis de ambiente ADMIN_USERNAME e ADMIN_PASSWORD devem estar configuradas'
+                });
+            }
+
             const admin = await Utilizador.findOne({
-                where: { username: 'admin' }
+                where: { username: adminUsername }
             });
 
             if (!admin) {
@@ -184,12 +210,12 @@ const initController = {
 
             // Actualizar password
             await admin.update({
-                password: 'odracirladiv'
+                password: adminPassword
             });
 
             res.json({
                 success: true,
-                message: 'Password do admin redefinida para: odracirladiv'
+                message: 'Password do admin redefinida com sucesso'
             });
 
         } catch (error) {

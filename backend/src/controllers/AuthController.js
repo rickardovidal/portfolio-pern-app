@@ -38,6 +38,15 @@ const authController = {
                 });
             }
 
+            // Verificar se JWT_SECRET está configurado
+            if (!process.env.JWT_SECRET) {
+                console.error('JWT_SECRET não está configurado nas variáveis de ambiente');
+                return res.status(500).json({
+                    success: false,
+                    message: 'Erro de configuração do servidor'
+                });
+            }
+
             // Gerar JWT token
             const token = jwt.sign(
                 { 
@@ -45,7 +54,7 @@ const authController = {
                     username: user.username,
                     email: user.email 
                 },
-                process.env.JWT_SECRET || 'sua_chave_secreta_aqui',
+                process.env.JWT_SECRET,
                 { expiresIn: '24h' }
             );
 
@@ -81,7 +90,16 @@ const authController = {
                 });
             }
 
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'sua_chave_secreta_aqui');
+            // Verificar se JWT_SECRET está configurado
+            if (!process.env.JWT_SECRET) {
+                console.error('JWT_SECRET não está configurado nas variáveis de ambiente');
+                return res.status(500).json({
+                    success: false,
+                    message: 'Erro de configuração do servidor'
+                });
+            }
+
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             
             // Verificar se o utilizador ainda existe
             const user = await Utilizador.findByPk(decoded.id);

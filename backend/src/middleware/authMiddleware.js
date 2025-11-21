@@ -15,7 +15,7 @@ const authenticateToken = async (req, res, next) => {
         }
 
         // Verificar e descodificar o token
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'sua_chave_secreta_aqui');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
         // Verificar se o utilizador ainda existe
         const user = await Utilizador.findByPk(decoded.id);
@@ -64,7 +64,7 @@ const optionalAuth = async (req, res, next) => {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
 
-        if (token) {
+        if (token && process.env.JWT_SECRET) {
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'sua_chave_secreta_aqui');
             const user = await Utilizador.findByPk(decoded.id);
             
