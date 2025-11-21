@@ -1,6 +1,6 @@
 // src/controllers/ContactController.js  
 const ContactMessages = require('../models/ContactMessages');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 const contactController = {
 
@@ -250,27 +250,16 @@ const contactController = {
 
     // Função auxiliar para enviar email de notificação
     enviarEmailNotificacao: async (message) => {
-        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-            console.warn('Configurações SMTP não definidas');
+        if (!process.env.RESEND_API_KEY) {
+            console.warn('RESEND_API_KEY não definida');
             return;
         }
 
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 465,
-            secure: true,
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 10000,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
+        const resend = new Resend(process.env.RESEND_API_KEY);
 
-        const mailOptions = {
-            from: process.env.SMTP_USER,
-            to: process.env.CONTACT_EMAIL || process.env.SMTP_USER,
+        await resend.emails.send({
+            from: 'Portfolio <onboarding@resend.dev>',
+            to: process.env.CONTACT_EMAIL || 'ricardojmv95@gmail.com',
             subject: `Nova mensagem de contacto: ${message.assunto}`,
             html: `
                 <h2>Nova mensagem de contacto recebida</h2>
@@ -281,51 +270,36 @@ const contactController = {
                 <p><strong>Assunto:</strong> ${message.assunto}</p>
                 <p><strong>Mensagem:</strong></p>
                 <div style="border-left: 4px solid #0066cc; padding-left: 15px; margin: 15px 0;">
-                    ${message.mensagem.replace(/\n/g, '<br>')}
+                    ${message.mensagem.replace(/
+/g, '<br>')}
                 </div>
                 <p><small>Recebida em: ${new Date(message.createdAt).toLocaleString('pt-PT')}</small></p>
             `
-        };
-
-        await transporter.sendMail(mailOptions);
+        });
     },
 
     // Função auxiliar para enviar email de confirmação
     enviarEmailConfirmacao: async (email, nome) => {
-        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        if (!process.env.RESEND_API_KEY) {
             return;
         }
 
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: process.env.SMTP_PORT || 465,
-            secure: true,
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 10000,
-            auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            }
-        });
+        const resend = new Resend(process.env.RESEND_API_KEY);
 
-        const mailOptions = {
-            from: process.env.SMTP_USER,
+        await resend.emails.send({
+            from: 'Ricardo Vidal <onboarding@resend.dev>',
             to: email,
-            subject: 'Mensagem recebida - Ricardo Vidal',
+            subject: 'Mensagem recebida - Ricardo Vidal Portfolio',
             html: `
-                <h2>Olá ${nome},</h2>
-                <p>Obrigado por entrares em contacto comigo!</p>
-                <p>Recebi a tua mensagem e entrarei em contacto contigo brevemente.</p>
-                <p>Cumprimentos,<br>
-                <strong>Ricardo Vidal</strong><br>
-                Designer Multimédia & Desenvolvedor</p>
-                <hr>
-                <p><small>Esta é uma mensagem automática, por favor não respondas a este email.</small></p>
+                <h2>Olá ${nome}!</h2>
+                <p>Obrigado por entrar em contacto.</p>
+                <p>Recebi a sua mensagem e entrarei em contacto brevemente.</p>
+                <br>
+                <p>Cumprimentos,</p>
+                <p><strong>Ricardo Vidal</strong></p>
+                <p>Designer Multimédia & Desenvolvedor</p>
             `
-        };
-
-        await transporter.sendMail(mailOptions);
+        });
     }
 };
 
