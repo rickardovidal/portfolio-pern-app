@@ -9,6 +9,9 @@ const Utilizador = require('./models/Utilizador');
 
 const app = express();
 
+// Trust proxy for Render and other reverse proxies
+app.set('trust proxy', 1);
+
 // Middlewares básicos
 app.use(cors());
 app.use(express.json());
