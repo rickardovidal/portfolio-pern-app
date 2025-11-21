@@ -44,20 +44,14 @@ const skillItemVariants = {
 };
 
 const techTagVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: (i) => ({
+    hidden: { opacity: 0, y: 8 },
+    visible: {
         opacity: 1,
-        scale: 1,
+        y: 0,
         transition: {
-            duration: 0.25,
-            delay: i * 0.04,
+            duration: 0.3,
             ease: [0.25, 0.1, 0.25, 1]
         }
-    }),
-    exit: { 
-        opacity: 0, 
-        scale: 0.9,
-        transition: { duration: 0.15 }
     }
 };
 
@@ -91,11 +85,13 @@ const SkillItem = ({ skill, index }) => {
                                 <motion.span 
                                     key={i} 
                                     className={styles.techTag}
-                                    variants={techTagVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    custom={i}
+                                    initial={{ opacity: 0, y: 6 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ 
+                                        duration: 0.25, 
+                                        delay: i * 0.03,
+                                        ease: [0.25, 0.1, 0.25, 1] 
+                                    }}
                                 >
                                     {tech}
                                 </motion.span>
