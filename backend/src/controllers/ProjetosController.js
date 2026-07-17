@@ -115,8 +115,16 @@ const projetosController = {
                 dataFim,
                 notas,
                 idCliente,
+                horasEstimadas,
+                custoHora,
                 servicos = [] // Array de serviços selecionados
             } = req.body;
+
+            // Horas e custo/hora são opcionais; valores inválidos ficam null
+            const horasValidas = Number.isInteger(parseInt(horasEstimadas, 10)) && parseInt(horasEstimadas, 10) >= 0
+                ? parseInt(horasEstimadas, 10) : null;
+            const custoHoraValido = !isNaN(parseFloat(custoHora)) && parseFloat(custoHora) >= 0
+                ? parseFloat(custoHora) : null;
 
             // Validação obrigatória
             if (!nomeProjeto || !idCliente) {
@@ -170,6 +178,8 @@ const projetosController = {
                 dataPrevista_Fim: dataPrevista_Fim || null,
                 dataFim: dataFim || null,
                 orcamentoTotal: orcamentoTotal,
+                horasEstimadas: horasValidas,
+                custoHora: custoHoraValido,
                 notas,
                 idCliente,
                 idEstado_Projeto: estadoPendente.idEstado_Projeto,
@@ -236,6 +246,8 @@ const projetosController = {
                 idCliente,
                 idEstado_Projeto,
                 ativo,
+                horasEstimadas,
+                custoHora,
                 servicos // Array de serviços selecionados (pode ser undefined, array vazio, ou com IDs)
             } = req.body;
 
@@ -283,6 +295,12 @@ const projetosController = {
                 dataPrevista_Fim: dataPrevista_Fim || projeto.dataPrevista_Fim,
                 dataFim: dataFim || projeto.dataFim,
                 orcamentoTotal: orcamentoTotal,
+                horasEstimadas: horasEstimadas !== undefined
+                    ? (Number.isInteger(parseInt(horasEstimadas, 10)) && parseInt(horasEstimadas, 10) >= 0 ? parseInt(horasEstimadas, 10) : null)
+                    : projeto.horasEstimadas,
+                custoHora: custoHora !== undefined
+                    ? (!isNaN(parseFloat(custoHora)) && parseFloat(custoHora) >= 0 ? parseFloat(custoHora) : null)
+                    : projeto.custoHora,
                 notas: notas !== undefined ? notas : projeto.notas,
                 idCliente: idCliente || projeto.idCliente,
                 idEstado_Projeto: idEstado_Projeto || projeto.idEstado_Projeto,

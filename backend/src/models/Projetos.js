@@ -50,6 +50,22 @@ var Projetos = sequelize.define('projetos', {
             notEmpty: true
         }
     },
+    horasEstimadas: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        validate: {
+            min: 0,
+            isInt: true
+        }
+    },
+    custoHora: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: true,
+        validate: {
+            min: 0,
+            isDecimal: true
+        }
+    },
     //ver se este campo ainda faz sentido tendo em conta os estados do projeto
     ativo: {
         type: Sequelize.BOOLEAN,
