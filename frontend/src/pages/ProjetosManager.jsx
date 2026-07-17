@@ -35,7 +35,34 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const [selectedServicos, setSelectedServicos] = useState([]);
     const [showTabelaPrecos, setShowTabelaPrecos] = useState(false);
+    const [wizardStep, setWizardStep] = useState(1);
     const [errors, setErrors] = useState({});
+
+    const WIZARD_PASSOS = [
+        { numero: 1, titulo: 'Projeto', descricao: 'O quê e para quem' },
+        { numero: 2, titulo: 'Orçamento', descricao: 'O que o cliente paga' },
+        { numero: 3, titulo: 'Rentabilidade', descricao: 'Só para ti' }
+    ];
+
+    // O backend exige nome e cliente — validar antes de deixar avançar
+    const validarPasso1 = () => {
+        const novosErros = {};
+        if (!formData.nomeProjeto.trim()) {
+            novosErros.nomeProjeto = 'Dá um nome ao projeto';
+        }
+        if (!formData.idCliente) {
+            novosErros.idCliente = 'Escolhe o cliente deste projeto';
+        }
+        setErrors(novosErros);
+        return Object.keys(novosErros).length === 0;
+    };
+
+    const avancarPasso = () => {
+        if (wizardStep === 1 && !validarPasso1()) return;
+        setWizardStep(passo => Math.min(passo + 1, 3));
+    };
+
+    const recuarPasso = () => setWizardStep(passo => Math.max(passo - 1, 1));
 
     const IVA_TAXA = 0.23;
 
@@ -210,14 +237,22 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         setEditingProject(null);
         setFormData(formDataInicial);
         setSelectedServicos([]);
+        setWizardStep(1);
         setErrors({});
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (!formData.nomeProjeto.trim()) {
-            NotificationService.error('Erro!', 'Nome do projeto é obrigatório');
+        // Enter num campo dos passos 1-2 avança em vez de submeter
+        if (wizardStep < 3) {
+            avancarPasso();
+            return;
+        }
+
+        if (!validarPasso1()) {
+            setWizardStep(1);
+            NotificationService.error('Erro!', 'Preenche o nome do projeto e o cliente');
             return;
         }
 
@@ -253,6 +288,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const handleEdit = async (projeto) => {
         setEditingProject(projeto);
+        setWizardStep(1);
         setFormData({
             nomeProjeto: projeto.nomeProjeto || '',
             descricaoProjeto: projeto.descricaoProjeto || '',
@@ -566,27 +602,57 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                             </div>
                             <form onSubmit={handleSubmit}>
                                 <div className="modal-body">
-                                    <h6 className="text-uppercase text-muted small fw-bold mb-3">Informação Básica</h6>
+                                    {/* Indicador de passos do wizard */}
+                                    <div className="d-flex justify-content-between mb-4 border-bottom pb-3">
+                                        {WIZARD_PASSOS.map(passo => (
+                                            <button
+                                                key={passo.numero}
+                                                type="button"
+                                                onClick={() => {
+                                                    if (passo.numero === 1 || validarPasso1()) setWizardStep(passo.numero);
+                                                }}
+                                                className="btn btn-link text-decoration-none flex-fill text-center p-0 border-0"
+                                            >
+                                                <span
+                                                    className={`d-inline-flex align-items-center justify-content-center rounded-circle me-2 ${wizardStep === passo.numero
+                                                        ? 'bg-primary text-white'
+                                                        : wizardStep > passo.numero
+                                                            ? 'bg-success text-white'
+                                                            : 'bg-secondary-subtle text-muted'}`}
+                                                    style={{ width: '28px', height: '28px', fontSize: '0.85rem' }}
+                                                >
+                                                    {wizardStep > passo.numero ? <i className="bi bi-check"></i> : passo.numero}
+                                                </span>
+                                                <span className={`small ${wizardStep === passo.numero ? 'fw-bold text-body' : 'text-muted'}`}>
+                                                    {passo.titulo}
+                                                    <span className="d-none d-md-inline text-muted fw-normal"> — {passo.descricao}</span>
+                                                </span>
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    {wizardStep === 1 && (<>
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-3">
                                                 <label htmlFor="nomeProjeto" className="form-label">Nome do Projeto *</label>
                                                 <input
                                                     type="text"
-                                                    className="form-control"
+                                                    className={`form-control ${errors.nomeProjeto ? 'is-invalid' : ''}`}
                                                     id="nomeProjeto"
                                                     name="nomeProjeto"
                                                     value={formData.nomeProjeto}
                                                     onChange={handleInputChange}
-                                                    required
+                                                    placeholder="ex.: Website Restaurante Silva"
                                                 />
+                                                {errors.nomeProjeto && <div className="invalid-feedback">{errors.nomeProjeto}</div>}
                                             </div>
                                         </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">
-                                                <label htmlFor="idCliente" className="form-label">Cliente</label>
+                                                <label htmlFor="idCliente" className="form-label">Cliente *</label>
                                                 <select
-                                                    className="form-select"
+                                                    className={`form-select ${errors.idCliente ? 'is-invalid' : ''}`}
                                                     id="idCliente"
                                                     name="idCliente"
                                                     value={formData.idCliente}
@@ -599,6 +665,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                         </option>
                                                     ))}
                                                 </select>
+                                                {errors.idCliente && <div className="invalid-feedback">{errors.idCliente}</div>}
                                             </div>
                                         </div>
                                     </div>
@@ -675,9 +742,14 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         />
                                         <label className="form-check-label" htmlFor="ativo">Projeto Ativo</label>
                                     </div>
+                                    </>)}
 
-                                    <hr className="my-4" />
-                                    <h6 className="text-uppercase text-muted small fw-bold mb-3">Serviços e Orçamento</h6>
+                                    {wizardStep === 2 && (<>
+                                    <p className="text-muted small mb-3">
+                                        <i className="bi bi-info-circle me-1"></i>
+                                        Os preços dos serviços são pacotes fechados — já incluem o teu trabalho.
+                                        Seleciona o que este projeto inclui.
+                                    </p>
                                     {servicos.length > 0 && (
                                         <div className="mb-3">
                                             <div className="row">
@@ -717,7 +789,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                     placeholder="0"
                                                 />
                                                 <small className="text-muted">
-                                                    Só para pedidos fora do catálogo, à taxa de €{parseFloat(formData.custoHora || 0).toFixed(2)}/h.
+                                                    Pedidos fora do catálogo, cobrados a €{parseFloat(formData.custoHora || 0).toFixed(2)}/h. Deixa a 0 se não se aplicar.
                                                 </small>
                                             </div>
                                         </div>
@@ -772,15 +844,18 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         </div>
                                     </div>
 
-                                    <hr className="my-4" />
-                                    <h6 className="text-uppercase text-muted small fw-bold mb-1">Controlo Interno</h6>
-                                    <p className="text-muted small mb-3">
-                                        Não afeta o preço — serve para veres se o orçamento compensa o teu tempo.
-                                    </p>
+                                    </>)}
+
+                                    {wizardStep === 3 && (<>
+                                    <div className="alert alert-light border small mb-3">
+                                        <i className="bi bi-eye-slash me-1"></i>
+                                        <strong>Só tu vês isto.</strong> Este passo não muda o preço do cliente —
+                                        responde à pergunta: <em>"vale a pena fazer este projeto por este valor?"</em>
+                                    </div>
                                     <div className="row align-items-end">
                                         <div className="col-md-4">
                                             <div className="mb-3">
-                                                <label htmlFor="horasEstimadas" className="form-label">Horas Estimadas (totais)</label>
+                                                <label htmlFor="horasEstimadas" className="form-label">Quantas horas vais gastar?</label>
                                                 <input
                                                     type="number"
                                                     min="0"
@@ -790,13 +865,16 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                     name="horasEstimadas"
                                                     value={formData.horasEstimadas}
                                                     onChange={handleInputChange}
-                                                    placeholder="0"
+                                                    placeholder="ex.: 40"
                                                 />
+                                                <small className="text-muted">
+                                                    Estimativa honesta do trabalho total, do início à entrega.
+                                                </small>
                                             </div>
                                         </div>
                                         <div className="col-md-4">
                                             <div className="mb-3">
-                                                <label htmlFor="custoHora" className="form-label">Taxa-Alvo (€/h)</label>
+                                                <label htmlFor="custoHora" className="form-label">Quanto queres ganhar por hora?</label>
                                                 <input
                                                     type="number"
                                                     min="0"
@@ -822,24 +900,25 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             {(() => {
                                                 const taxa = calcularTaxaEfetiva();
                                                 if (taxa === null) return (
-                                                    <p className="text-muted small mb-3">
-                                                        Define horas e orçamento para veres a taxa efetiva.
-                                                    </p>
+                                                    <div className="border rounded p-2 small mb-3 bg-light text-muted">
+                                                        <i className="bi bi-calculator me-1"></i>
+                                                        Preenche as horas para saberes quanto ganhas por hora neste projeto.
+                                                    </div>
                                                 );
                                                 const alvo = parseFloat(formData.custoHora) || 0;
                                                 const saudavel = taxa >= alvo;
                                                 return (
                                                     <div className={`border rounded p-2 small mb-3 ${saudavel ? 'border-success bg-success-subtle' : 'border-danger bg-danger-subtle'}`}>
                                                         <div className="d-flex justify-content-between align-items-center">
-                                                            <span>Taxa efetiva:</span>
+                                                            <span>Vais ganhar:</span>
                                                             <strong className={saudavel ? 'text-success' : 'text-danger'}>
                                                                 €{taxa.toFixed(2)}/h
                                                             </strong>
                                                         </div>
                                                         <small className={saudavel ? 'text-success' : 'text-danger'}>
                                                             {saudavel
-                                                                ? 'Acima da taxa-alvo — orçamento saudável.'
-                                                                : 'Abaixo da taxa-alvo — considera subir o preço ou reduzir o âmbito.'}
+                                                                ? `✓ Acima do teu objetivo de €${alvo.toFixed(2)}/h — bom orçamento.`
+                                                                : `⚠ Abaixo do teu objetivo de €${alvo.toFixed(2)}/h — sobe o preço ou reduz o trabalho incluído.`}
                                                         </small>
                                                     </div>
                                                 );
@@ -847,27 +926,43 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         </div>
                                     </div>
 
-                                    <hr className="my-4" />
-                                    <h6 className="text-uppercase text-muted small fw-bold mb-3">Notas</h6>
                                     <div className="mb-3">
+                                        <label htmlFor="notas" className="form-label">Notas internas</label>
                                         <textarea
                                             className="form-control"
                                             id="notas"
                                             name="notas"
-                                            rows="3"
+                                            rows="2"
                                             value={formData.notas}
                                             onChange={handleInputChange}
-                                            placeholder="Notas internas do projeto (opcional)"
+                                            placeholder="Lembretes, acordos com o cliente, links... (opcional)"
                                         ></textarea>
                                     </div>
+                                    </>)}
                                 </div>
-                                <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                                <div className="modal-footer justify-content-between">
+                                    <button type="button" className="btn btn-outline-secondary" onClick={handleCloseModal}>
                                         Cancelar
                                     </button>
-                                    <button type="submit" className="btn btn-primary">
-                                        {editingProject ? 'Atualizar' : 'Criar'} Projeto
-                                    </button>
+                                    <div>
+                                        {wizardStep > 1 && (
+                                            <button type="button" className="btn btn-secondary me-2" onClick={recuarPasso}>
+                                                <i className="bi bi-arrow-left me-1"></i>
+                                                Voltar
+                                            </button>
+                                        )}
+                                        {wizardStep < 3 ? (
+                                            <button type="button" className="btn btn-primary" onClick={avancarPasso}>
+                                                Seguinte
+                                                <i className="bi bi-arrow-right ms-1"></i>
+                                            </button>
+                                        ) : (
+                                            <button type="submit" className="btn btn-primary">
+                                                <i className="bi bi-check-lg me-1"></i>
+                                                {editingProject ? 'Atualizar' : 'Criar'} Projeto
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </form>
                         </div>
