@@ -25,6 +25,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         orcamentoTotal: '',
         horasEstimadas: '',
         custoHora: String(CUSTO_HORA_PADRAO),
+        horasExtra: '',
         notas: '',
         idCliente: '',
         idEstado_Projeto: '',
@@ -38,16 +39,25 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const IVA_TAXA = 0.23;
 
-    // Orçamento sugerido: serviços + (horas estimadas × custo/hora), com IVA a 23%
-    const calcularOrcamento = (servicoIds, horas, custoHr) => {
+    // Orçamento por pacotes: os preços dos serviços já incluem a mão de obra.
+    // "Trabalho extra" (horas × taxa) é só para pedidos fora do catálogo.
+    const calcularOrcamento = (servicoIds, horasExtra, custoHr) => {
         const subtotalServicos = servicoIds.reduce((total, id) => {
             const servico = servicos.find(s => s.idServico === id);
             return total + parseFloat(servico?.preco_base_servico || 0);
         }, 0);
-        const maoDeObra = (parseFloat(horas) || 0) * (parseFloat(custoHr) || 0);
-        const subtotal = subtotalServicos + maoDeObra;
+        const trabalhoExtra = (parseFloat(horasExtra) || 0) * (parseFloat(custoHr) || 0);
+        const subtotal = subtotalServicos + trabalhoExtra;
         const iva = subtotal * IVA_TAXA;
-        return { subtotalServicos, maoDeObra, iva, total: subtotal + iva };
+        return { subtotalServicos, trabalhoExtra, iva, total: subtotal + iva };
+    };
+
+    // Métrica interna: quanto estou realmente a ganhar por hora neste orçamento
+    const calcularTaxaEfetiva = () => {
+        const horas = parseFloat(formData.horasEstimadas);
+        const total = parseFloat(formData.orcamentoTotal);
+        if (!horas || horas <= 0 || !total || total <= 0) return null;
+        return (total / (1 + IVA_TAXA)) / horas;
     };
 
     // ✅ CORRIGIDO: Função melhorada para obter nome do cliente
@@ -175,11 +185,12 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             [name]: type === 'checkbox' ? checked : value
         }));
 
-        // Horas ou custo/hora alterados: recalcular o orçamento sugerido
-        if (name === 'horasEstimadas' || name === 'custoHora') {
-            const horas = name === 'horasEstimadas' ? value : formData.horasEstimadas;
+        // Trabalho extra ou taxa alterados: recalcular o orçamento sugerido
+        // (as horas estimadas são métrica interna e não afetam o preço)
+        if (name === 'horasExtra' || name === 'custoHora') {
+            const horasExtra = name === 'horasExtra' ? value : formData.horasExtra;
             const custoHr = name === 'custoHora' ? value : formData.custoHora;
-            const { total } = calcularOrcamento(selectedServicos, horas, custoHr);
+            const { total } = calcularOrcamento(selectedServicos, horasExtra, custoHr);
             setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
         }
     };
@@ -190,7 +201,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             : [...selectedServicos, servicoId];
         setSelectedServicos(atualizados);
 
-        const { total } = calcularOrcamento(atualizados, formData.horasEstimadas, formData.custoHora);
+        const { total } = calcularOrcamento(atualizados, formData.horasExtra, formData.custoHora);
         setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
     };
 
@@ -251,6 +262,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             orcamentoTotal: projeto.orcamentoTotal || 0,
             horasEstimadas: projeto.horasEstimadas ?? '',
             custoHora: projeto.custoHora ?? String(CUSTO_HORA_PADRAO),
+            horasExtra: '',
             notas: projeto.notas || '',
             idCliente: projeto.idCliente || '',
             idEstado_Projeto: projeto.idEstado_Projeto || '',
@@ -330,7 +342,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             </div>
 
             {showTabelaPrecos && (
-                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setShowTabelaPrecos(false)}>
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1070 }} onClick={() => setShowTabelaPrecos(false)}>
                     <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-content">
                             <div className="modal-header">
@@ -689,10 +701,86 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         </div>
                                     )}
 
-                                    <div className="row align-items-start">
-                                        <div className="col-md-3">
+                                    <div className="row align-items-end">
+                                        <div className="col-md-4">
                                             <div className="mb-3">
-                                                <label htmlFor="horasEstimadas" className="form-label">Horas Estimadas</label>
+                                                <label htmlFor="horasExtra" className="form-label">Trabalho extra (horas)</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className="form-control"
+                                                    id="horasExtra"
+                                                    name="horasExtra"
+                                                    value={formData.horasExtra}
+                                                    onChange={handleInputChange}
+                                                    placeholder="0"
+                                                />
+                                                <small className="text-muted">
+                                                    Só para pedidos fora do catálogo, à taxa de €{parseFloat(formData.custoHora || 0).toFixed(2)}/h.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-4">
+                                            <div className="mb-3">
+                                                <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total (€)</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    className="form-control"
+                                                    id="orcamentoTotal"
+                                                    name="orcamentoTotal"
+                                                    value={formData.orcamentoTotal}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <small className="text-muted">
+                                                    Automático; podes ajustar.
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-4">
+                                            {(() => {
+                                                const resumo = calcularOrcamento(selectedServicos, formData.horasExtra, formData.custoHora);
+                                                if (resumo.total <= 0) return (
+                                                    <p className="text-muted small mb-3">
+                                                        Seleciona serviços para calcular o orçamento.
+                                                    </p>
+                                                );
+                                                return (
+                                                    <div className="border rounded p-2 bg-light small mb-3">
+                                                        <div className="d-flex justify-content-between">
+                                                            <span>Serviços ({selectedServicos.length}):</span>
+                                                            <span>€{resumo.subtotalServicos.toFixed(2)}</span>
+                                                        </div>
+                                                        {resumo.trabalhoExtra > 0 && (
+                                                            <div className="d-flex justify-content-between">
+                                                                <span>Extra ({formData.horasExtra}h):</span>
+                                                                <span>€{resumo.trabalhoExtra.toFixed(2)}</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="d-flex justify-content-between">
+                                                            <span>IVA (23%):</span>
+                                                            <span>€{resumo.iva.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="d-flex justify-content-between fw-bold border-top mt-1 pt-1">
+                                                            <span>Total c/ IVA:</span>
+                                                            <span>€{resumo.total.toFixed(2)}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+
+                                    <hr className="my-4" />
+                                    <h6 className="text-uppercase text-muted small fw-bold mb-1">Controlo Interno</h6>
+                                    <p className="text-muted small mb-3">
+                                        Não afeta o preço — serve para veres se o orçamento compensa o teu tempo.
+                                    </p>
+                                    <div className="row align-items-end">
+                                        <div className="col-md-4">
+                                            <div className="mb-3">
+                                                <label htmlFor="horasEstimadas" className="form-label">Horas Estimadas (totais)</label>
                                                 <input
                                                     type="number"
                                                     min="0"
@@ -706,9 +794,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="col-md-3">
+                                        <div className="col-md-4">
                                             <div className="mb-3">
-                                                <label htmlFor="custoHora" className="form-label">Custo/Hora (€)</label>
+                                                <label htmlFor="custoHora" className="form-label">Taxa-Alvo (€/h)</label>
                                                 <input
                                                     type="number"
                                                     min="0"
@@ -730,55 +818,32 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                 </small>
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
+                                        <div className="col-md-4">
                                             {(() => {
-                                                const resumo = calcularOrcamento(selectedServicos, formData.horasEstimadas, formData.custoHora);
-                                                if (resumo.total <= 0) return (
-                                                    <p className="text-muted small mt-md-4 mb-0">
-                                                        Seleciona serviços e/ou define horas para calcular o orçamento.
+                                                const taxa = calcularTaxaEfetiva();
+                                                if (taxa === null) return (
+                                                    <p className="text-muted small mb-3">
+                                                        Define horas e orçamento para veres a taxa efetiva.
                                                     </p>
                                                 );
+                                                const alvo = parseFloat(formData.custoHora) || 0;
+                                                const saudavel = taxa >= alvo;
                                                 return (
-                                                    <div className="border rounded p-2 bg-light small">
-                                                        <div className="d-flex justify-content-between">
-                                                            <span>Serviços ({selectedServicos.length}):</span>
-                                                            <span>€{resumo.subtotalServicos.toFixed(2)}</span>
+                                                    <div className={`border rounded p-2 small mb-3 ${saudavel ? 'border-success bg-success-subtle' : 'border-danger bg-danger-subtle'}`}>
+                                                        <div className="d-flex justify-content-between align-items-center">
+                                                            <span>Taxa efetiva:</span>
+                                                            <strong className={saudavel ? 'text-success' : 'text-danger'}>
+                                                                €{taxa.toFixed(2)}/h
+                                                            </strong>
                                                         </div>
-                                                        <div className="d-flex justify-content-between">
-                                                            <span>Mão de obra ({formData.horasEstimadas || 0}h × €{parseFloat(formData.custoHora || 0).toFixed(2)}):</span>
-                                                            <span>€{resumo.maoDeObra.toFixed(2)}</span>
-                                                        </div>
-                                                        <div className="d-flex justify-content-between">
-                                                            <span>IVA (23%):</span>
-                                                            <span>€{resumo.iva.toFixed(2)}</span>
-                                                        </div>
-                                                        <div className="d-flex justify-content-between fw-bold border-top mt-1 pt-1">
-                                                            <span>Total c/ IVA:</span>
-                                                            <span>€{resumo.total.toFixed(2)}</span>
-                                                        </div>
+                                                        <small className={saudavel ? 'text-success' : 'text-danger'}>
+                                                            {saudavel
+                                                                ? 'Acima da taxa-alvo — orçamento saudável.'
+                                                                : 'Abaixo da taxa-alvo — considera subir o preço ou reduzir o âmbito.'}
+                                                        </small>
                                                     </div>
                                                 );
                                             })()}
-                                        </div>
-                                    </div>
-
-                                    <div className="row">
-                                        <div className="col-md-4">
-                                            <div className="mb-3">
-                                                <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total (€)</label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    className="form-control"
-                                                    id="orcamentoTotal"
-                                                    name="orcamentoTotal"
-                                                    value={formData.orcamentoTotal}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <small className="text-muted">
-                                                    Calculado automaticamente; podes ajustar.
-                                                </small>
-                                            </div>
                                         </div>
                                     </div>
 
