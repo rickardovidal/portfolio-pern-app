@@ -47,10 +47,21 @@ const EstatisticasManager = () => {
             const estadosProjeto = estadosProjetoRes.data.data || [];
             const projetosServicos = projetosServicosRes.data.data || [];
 
-            // Calcular estatísticas gerais
+            // Calcular estatísticas gerais (a eliminação de projetos é soft delete: ativo passa a false,
+            // por isso os projetos eliminados não podem entrar nos totais financeiros)
             const projetosAtivos = projetos.filter(p => p.ativo === true);
-            const receitaTotal = projetos.reduce((total, p) => total + parseFloat(p.orcamentoTotal || 0), 0);
-            const custoTotal = servicos.reduce((total, s) => total + parseFloat(s.custo_servico || 0), 0);
+            const receitaTotal = projetosAtivos.reduce((total, p) => total + parseFloat(p.orcamentoTotal || 0), 0);
+
+            // Custo real: serviços efetivamente associados a projetos ativos (quantidade × custo unitário),
+            // e não a soma do custo de todos os serviços do catálogo
+            const idsProjetosAtivos = new Set(projetosAtivos.map(p => p.idProjeto));
+            const custoTotal = projetosServicos
+                .filter(ps => idsProjetosAtivos.has(ps.idProjeto))
+                .reduce((total, ps) => {
+                    const servico = servicos.find(s => s.idServico == ps.idServico);
+                    const custoUnitario = parseFloat(servico?.custo_servico || 0);
+                    return total + custoUnitario * parseInt(ps.quantidade || 1, 10);
+                }, 0);
             const lucroTotal = receitaTotal - custoTotal;
 
             // Serviços mais populares
@@ -88,8 +99,8 @@ const EstatisticasManager = () => {
                 cor: tipo.idTipo_Cliente == 1 ? '#28a745' : '#007bff'
             })).filter(item => item.count > 0);
 
-            // Receita por mês (últimos 12 meses)
-            const receitaPorMes = calcularReceitaPorMes(projetos);
+            // Receita por mês (últimos 12 meses, apenas projetos ativos)
+            const receitaPorMes = calcularReceitaPorMes(projetosAtivos);
 
             // Serviços por tipo
             const servicosPorTipo = await calcularServicosPorTipo(servicos);
@@ -140,10 +151,12 @@ const EstatisticasManager = () => {
 
             const receitaMes = projetos
                 .filter(p => {
-                    if (!p.dataInicio) return false;
-                    const dataInicio = new Date(p.dataInicio);
-                    return dataInicio.getMonth() === data.getMonth() &&
-                        dataInicio.getFullYear() === data.getFullYear();
+                    // Sem dataInicio, usar a data de criação para o projeto não desaparecer do gráfico
+                    const referencia = p.dataInicio || p.createdAt;
+                    if (!referencia) return false;
+                    const dataReferencia = new Date(referencia);
+                    return dataReferencia.getMonth() === data.getMonth() &&
+                        dataReferencia.getFullYear() === data.getFullYear();
                 })
                 .reduce((total, p) => total + parseFloat(p.orcamentoTotal || 0), 0);
 
@@ -162,7 +175,7 @@ const EstatisticasManager = () => {
             const tiposServico = response.data.data || [];
 
             return tiposServico.map(tipo => ({
-                nome: tipo.designacao_TipoServico,
+                nome: tipo.designacao,
                 count: servicos.filter(s => s.idTipo_Servico == tipo.idTipo_Servico).length,
                 cor: `hsl(${tipo.idTipo_Servico * 60}, 70%, 50%)`
             })).filter(item => item.count > 0);
@@ -220,36 +233,40 @@ const EstatisticasManager = () => {
                 <h6 className="mb-0">{titulo}</h6>
             </div>
             <div className="card-body">
-                {dados.length === 0 ? (
-                    <p className="text-muted text-center">Sem dados para exibir</p>
+                {dados.length === 0 || dados.every(d => d.receita === 0) ? (
+                    <p className="text-muted text-center mb-0">
+                        Sem receita registada nos últimos 12 meses
+                    </p>
                 ) : (
-                    <div>
-                        <div className="row mb-2">
-                            {dados.slice(-6).map((item, index) => (
-                                <div key={index} className="col text-center">
-                                    <small className="text-muted d-block">{item.mes}</small>
-                                    <strong className="text-primary">€{item.receita.toFixed(0)}</strong>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="d-flex align-items-end" style={{ height: '100px' }}>
-                            {dados.slice(-6).map((item, index) => {
-                                const maxValue = Math.max(...dados.map(d => d.receita));
-                                const height = maxValue > 0 ? (item.receita / maxValue) * 80 : 0;
+                    <div className="overflow-auto">
+                        <div style={{ minWidth: '640px' }}>
+                            <div className="d-flex mb-2">
+                                {dados.map((item, index) => (
+                                    <div key={index} className="flex-fill text-center">
+                                        <small className="text-muted d-block">{item.mes}</small>
+                                        <strong className="text-primary">€{item.receita.toFixed(0)}</strong>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="d-flex align-items-end" style={{ height: '100px' }}>
+                                {dados.map((item, index) => {
+                                    const maxValue = Math.max(...dados.map(d => d.receita));
+                                    const height = maxValue > 0 ? (item.receita / maxValue) * 80 : 0;
 
-                                return (
-                                    <div
-                                        key={index}
-                                        className="bg-primary mx-1 flex-fill"
-                                        style={{
-                                            height: `${height}px`,
-                                            minHeight: '2px',
-                                            opacity: 0.8
-                                        }}
-                                        title={`${item.mes}: €${item.receita.toFixed(2)}`}
-                                    ></div>
-                                );
-                            })}
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="bg-primary mx-1 flex-fill"
+                                            style={{
+                                                height: `${height}px`,
+                                                minHeight: '2px',
+                                                opacity: 0.8
+                                            }}
+                                            title={`${item.mes}: €${item.receita.toFixed(2)}`}
+                                        ></div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -284,8 +301,8 @@ const EstatisticasManager = () => {
                 </div>
             </div>
 
-            {/* Tabs */}
-            <ul className="nav nav-tabs mb-4">
+            {/* Tabs (com scroll horizontal em ecrãs pequenos) */}
+            <ul className="nav nav-tabs mb-4 flex-nowrap overflow-auto text-nowrap">
                 <li className="nav-item">
                     <button
                         className={`nav-link ${activeTab === 'geral' ? 'active' : ''}`}
@@ -498,7 +515,7 @@ const EstatisticasManager = () => {
                                 <hr />
                                 <div className="mb-3">
                                     <div className="d-flex justify-content-between">
-                                        <span>Taxa de Sucesso:</span>
+                                        <span>Taxa de Projetos Ativos:</span>
                                         <strong className="text-info">
                                             {stats.geral.totalProjetos > 0
                                                 ? ((stats.geral.projetosAtivos / stats.geral.totalProjetos) * 100).toFixed(1)
@@ -581,8 +598,8 @@ const EstatisticasManager = () => {
                                     <div className="mb-3">
                                         <small className="text-muted">Ticket Médio por Projeto</small>
                                         <h5 className="text-primary">
-                                            €{stats.geral.totalProjetos > 0
-                                                ? (stats.geral.receitaTotal / stats.geral.totalProjetos).toFixed(2)
+                                            €{stats.geral.projetosAtivos > 0
+                                                ? (stats.geral.receitaTotal / stats.geral.projetosAtivos).toFixed(2)
                                                 : '0.00'
                                             }
                                         </h5>
