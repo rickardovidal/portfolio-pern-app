@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 const Navbar = lazy(() => import('./components/layout/Navbar'));
 const Footer = lazy(() => import('./components/layout/Footer'));
 const BackToTopButton = lazy(() => import('./components/ui/BackToTopButton'));
+const WhatsAppButton = lazy(() => import('./components/ui/WhatsAppButton'));
 const AdminTrigger = lazy(() => import('./components/ui/AdminTrigger'));
 const AdminLogin = lazy(() => import('./pages/AdminLogin'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
@@ -60,6 +61,7 @@ const PortfolioLayout = ({ children }) => (
             {children}
             <Footer />
             <BackToTopButton />
+            <WhatsAppButton />
             <AdminTrigger />
         </Suspense>
     </div>
@@ -73,6 +75,7 @@ const LegalLayout = ({ children }) => (
             {children}
             <Footer />
             <BackToTopButton />
+            <WhatsAppButton />
         </Suspense>
     </div>
 );
