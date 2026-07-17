@@ -41,6 +41,7 @@ const documentosRoutes = require('./routes/documentosRoutes');
 const utilizadoresRoutes = require('./routes/utilizadoresRoutes');
 const estadosProjetoRoutes = require('./routes/estadosProjetoRoutes');
 const contactRoutes = require('./routes/contactRoutes');
+const estatisticasRoutes = require('./routes/estatisticasRoutes');
 
 // NOVA ROTA: Rota base para /api
 app.get('/api', (req, res) => {
@@ -65,6 +66,7 @@ app.get('/api', (req, res) => {
             utilizadores: '/api/utilizadores',
             'estados-projeto': '/api/estados-projeto',
             contact: '/api/contact',
+            estatisticas: '/api/estatisticas',
         },
         author: 'Ricardo Vidal',
         institution: 'Instituto Politécnico de Viseu - ESTGV',
@@ -87,6 +89,7 @@ app.use('/api/documentos', documentosRoutes);
 app.use('/api/utilizadores', utilizadoresRoutes);
 app.use('/api/estados-projeto', estadosProjetoRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/estatisticas', estatisticasRoutes);
 
 // Rota de teste
 app.get('/api/health', (req, res) => {
