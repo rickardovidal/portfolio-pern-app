@@ -85,10 +85,11 @@ const Hero = () => {
                         className={styles.heroCta}
                         onClick={handleSmoothScroll}
                         variants={itemVariants}
-                        
                     >
-                        Ver trabalhos
-                        <span className={styles.ctaArrow}>→</span>
+                        <span className={styles.heroCtaText}>Ver trabalhos</span>
+                        <span className={styles.heroCtaIcon}>
+                            <i className="bi bi-arrow-up-right"></i>
+                        </span>
                     </motion.a>
                 </motion.div>
                 <motion.div 
