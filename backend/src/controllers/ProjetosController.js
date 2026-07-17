@@ -147,13 +147,17 @@ const projetosController = {
                 });
             }
 
-            // Calcular orçamento total baseado nos serviços selecionados
-            let orcamentoTotal = 0;
-            if (servicos && servicos.length > 0) {
-                for (const servicoId of servicos) {
-                    const servico = await require('../models/Servicos').findByPk(servicoId);
-                    if (servico) {
-                        orcamentoTotal += parseFloat(servico.preco_base_servico);
+            // Orçamento: respeitar o valor enviado pelo frontend (já inclui mão de obra e IVA);
+            // sem valor válido, calcular a partir dos serviços selecionados
+            let orcamentoTotal = parseFloat(req.body.orcamentoTotal);
+            if (isNaN(orcamentoTotal) || orcamentoTotal < 0) {
+                orcamentoTotal = 0;
+                if (servicos && servicos.length > 0) {
+                    for (const servicoId of servicos) {
+                        const servico = await require('../models/Servicos').findByPk(servicoId);
+                        if (servico) {
+                            orcamentoTotal += parseFloat(servico.preco_base_servico);
+                        }
                     }
                 }
             }
@@ -246,9 +250,14 @@ const projetosController = {
                 });
             }
 
-            // Calcular orçamento baseado nos serviços selecionados
-            let orcamentoTotal = projeto.orcamentoTotal;
-            if (servicos !== undefined) { // ✅ CORREÇÃO: Verificar se servicos foi enviado
+            // Orçamento: respeitar o valor enviado pelo frontend (já inclui mão de obra e IVA);
+            // sem valor válido, manter o comportamento antigo de recalcular pelos serviços
+            let orcamentoTotal = parseFloat(req.body.orcamentoTotal);
+            const orcamentoManualValido = !isNaN(orcamentoTotal) && orcamentoTotal >= 0;
+            if (!orcamentoManualValido) {
+                orcamentoTotal = projeto.orcamentoTotal;
+            }
+            if (!orcamentoManualValido && servicos !== undefined) {
                 orcamentoTotal = 0;
                 if (servicos.length > 0) {
                     const Servicos = require('../models/Servicos');
