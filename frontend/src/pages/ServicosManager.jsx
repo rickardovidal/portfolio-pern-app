@@ -513,7 +513,6 @@ const ServicosManager = ({ onStatsUpdate }) => {
                                                     <th>Preço</th>
                                                     <th>Custo</th>
                                                     <th>Margem</th>
-                                                    <th>Horas Est.</th>
                                                     <th>Estado</th>
                                                     <th className="text-center">Ações</th>
                                                 </tr>
@@ -555,12 +554,6 @@ const ServicosManager = ({ onStatsUpdate }) => {
                                                             <small className="text-info">
                                                                 {getMargemLucro(servico.preco_base_servico, servico.custo_servico)}
                                                             </small>
-                                                        </td>
-                                                        <td>
-                                                            {servico.horas_estimadas ?
-                                                                `${servico.horas_estimadas}h` :
-                                                                <span className="text-muted">-</span>
-                                                            }
                                                         </td>
                                                         <td>
                                                             <span className={`badge ${servico.ativo ? 'bg-success' : 'bg-danger'}`}>
@@ -777,21 +770,7 @@ const ServicosManager = ({ onStatsUpdate }) => {
                                             />
                                             {errors.custo_servico && <div className="invalid-feedback">{errors.custo_servico}</div>}
                                         </div>
-                                        <div className="col-md-4 mb-3">
-                                            <label htmlFor="horas_estimadas" className="form-label">Horas Estimadas</label>
-                                            <input
-                                                type="number"
-                                                step="0.5"
-                                                min="0"
-                                                className={`form-control ${errors.horas_estimadas ? 'is-invalid' : ''}`}
-                                                id="horas_estimadas"
-                                                name="horas_estimadas"
-                                                value={servicoFormData.horas_estimadas}
-                                                onChange={handleServicoInputChange}
-                                                placeholder="0.0"
-                                            />
-                                            {errors.horas_estimadas && <div className="invalid-feedback">{errors.horas_estimadas}</div>}
-                                        </div>
+                                        {/* Horas estimadas saíram do catálogo: passaram a definir-se em cada projeto */}
                                     </div>
                                 </div>
                                 <div className="modal-footer">

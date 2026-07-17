@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api.js';
 import NotificationService from '../services/NotificationService';
+import { tabelaReferenciaPrecos, fontesPesquisa, DATA_PESQUISA, CUSTO_HORA_PADRAO } from '../data/tabelaReferenciaPrecos';
 
 const ProjetosManager = ({ onStatsUpdate }) => {
     const [projetos, setProjetos] = useState([]);
@@ -15,35 +16,38 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     const [filterCliente, setFilterCliente] = useState('');
     const [filterEstado, setFilterEstado] = useState('');
 
-    const [formData, setFormData] = useState({
+    const formDataInicial = {
         nomeProjeto: '',
         descricaoProjeto: '',
         dataInicio: '',
         dataPrevista_Fim: '',
         dataFim: '',
         orcamentoTotal: '',
+        horasEstimadas: '',
+        custoHora: String(CUSTO_HORA_PADRAO),
         notas: '',
         idCliente: '',
         idEstado_Projeto: '',
         ativo: true
-    });
+    };
+    const [formData, setFormData] = useState(formDataInicial);
 
     const [selectedServicos, setSelectedServicos] = useState([]);
-    const [maoDeObra, setMaoDeObra] = useState('');
+    const [showTabelaPrecos, setShowTabelaPrecos] = useState(false);
     const [errors, setErrors] = useState({});
 
     const IVA_TAXA = 0.23;
 
-    // Orçamento sugerido: serviços selecionados + mão de obra, com IVA a 23%
-    const calcularOrcamento = (servicoIds, maoDeObraValor) => {
+    // Orçamento sugerido: serviços + (horas estimadas × custo/hora), com IVA a 23%
+    const calcularOrcamento = (servicoIds, horas, custoHr) => {
         const subtotalServicos = servicoIds.reduce((total, id) => {
             const servico = servicos.find(s => s.idServico === id);
             return total + parseFloat(servico?.preco_base_servico || 0);
         }, 0);
-        const valorMaoDeObra = parseFloat(maoDeObraValor) || 0;
-        const subtotal = subtotalServicos + valorMaoDeObra;
+        const maoDeObra = (parseFloat(horas) || 0) * (parseFloat(custoHr) || 0);
+        const subtotal = subtotalServicos + maoDeObra;
         const iva = subtotal * IVA_TAXA;
-        return { subtotalServicos, maoDeObra: valorMaoDeObra, iva, total: subtotal + iva };
+        return { subtotalServicos, maoDeObra, iva, total: subtotal + iva };
     };
 
     // ✅ CORRIGIDO: Função melhorada para obter nome do cliente
@@ -170,6 +174,14 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
+
+        // Horas ou custo/hora alterados: recalcular o orçamento sugerido
+        if (name === 'horasEstimadas' || name === 'custoHora') {
+            const horas = name === 'horasEstimadas' ? value : formData.horasEstimadas;
+            const custoHr = name === 'custoHora' ? value : formData.custoHora;
+            const { total } = calcularOrcamento(selectedServicos, horas, custoHr);
+            setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
+        }
     };
 
     const handleServicoChange = (servicoId) => {
@@ -178,35 +190,15 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             : [...selectedServicos, servicoId];
         setSelectedServicos(atualizados);
 
-        const { total } = calcularOrcamento(atualizados, maoDeObra);
-        setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
-    };
-
-    const handleMaoDeObraChange = (e) => {
-        const valor = e.target.value;
-        setMaoDeObra(valor);
-
-        const { total } = calcularOrcamento(selectedServicos, valor);
+        const { total } = calcularOrcamento(atualizados, formData.horasEstimadas, formData.custoHora);
         setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
         setEditingProject(null);
-        setFormData({
-            nomeProjeto: '',
-            descricaoProjeto: '',
-            dataInicio: '',
-            dataPrevista_Fim: '',
-            dataFim: '',
-            orcamentoTotal: '',
-            notas: '',
-            idCliente: '',
-            idEstado_Projeto: '',
-            ativo: true
-        });
+        setFormData(formDataInicial);
         setSelectedServicos([]);
-        setMaoDeObra('');
         setErrors({});
     };
 
@@ -257,14 +249,13 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             dataPrevista_Fim: projeto.dataPrevista_Fim ? projeto.dataPrevista_Fim.split('T')[0] : '',
             dataFim: projeto.dataFim ? projeto.dataFim.split('T')[0] : '',
             orcamentoTotal: projeto.orcamentoTotal || 0,
+            horasEstimadas: projeto.horasEstimadas ?? '',
+            custoHora: projeto.custoHora ?? String(CUSTO_HORA_PADRAO),
             notas: projeto.notas || '',
             idCliente: projeto.idCliente || '',
             idEstado_Projeto: projeto.idEstado_Projeto || '',
             ativo: projeto.ativo !== undefined ? projeto.ativo : true
         });
-        // A mão de obra não é guardada em separado (apenas o total), por isso começa vazia na edição;
-        // o orçamento só é recalculado se os serviços ou a mão de obra forem alterados
-        setMaoDeObra('');
 
         try {
             const response = await api.get(`/projetos-servicos/projeto/${projeto.idProjeto}`);
@@ -327,7 +318,69 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                     <i className="bi bi-plus-circle me-2"></i>
                     Adicionar Projeto
                 </button>
+                <button
+                    type="button"
+                    className="btn btn-outline-secondary ms-2"
+                    onClick={() => setShowTabelaPrecos(true)}
+                    title="Tabela de referência de preços/hora"
+                >
+                    <i className="bi bi-currency-euro me-1"></i>
+                    €/h Referência
+                </button>
             </div>
+
+            {showTabelaPrecos && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setShowTabelaPrecos(false)}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    <i className="bi bi-currency-euro me-2"></i>
+                                    Tabela de Referência — Preços/Hora (Júnior, Portugal)
+                                </h5>
+                                <button type="button" className="btn-close" onClick={() => setShowTabelaPrecos(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="table-responsive">
+                                    <table className="table table-hover align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th>Área</th>
+                                                <th className="text-end">Mínimo</th>
+                                                <th className="text-end">Máximo</th>
+                                                <th>Notas de mercado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {tabelaReferenciaPrecos.map(linha => (
+                                                <tr key={linha.area}>
+                                                    <td className="fw-bold">{linha.area}</td>
+                                                    <td className="text-end">€{linha.minimo}/h</td>
+                                                    <td className="text-end">€{linha.maximo}/h</td>
+                                                    <td className="small text-muted">{linha.notas}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p className="small text-muted mb-1">
+                                    <i className="bi bi-info-circle me-1"></i>
+                                    Valores indicativos para freelancers juniores — pesquisa de {DATA_PESQUISA}.
+                                    Ajusta conforme a complexidade do projeto e o cliente.
+                                </p>
+                                <p className="small text-muted mb-0">
+                                    Fontes: {fontesPesquisa.map((fonte, i) => (
+                                        <span key={fonte.url}>
+                                            {i > 0 && ' · '}
+                                            <a href={fonte.url} target="_blank" rel="noopener noreferrer">{fonte.nome}</a>
+                                        </span>
+                                    ))}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Filtros */}
             <div className="row mb-4">
@@ -501,6 +554,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                             </div>
                             <form onSubmit={handleSubmit}>
                                 <div className="modal-body">
+                                    <h6 className="text-uppercase text-muted small fw-bold mb-3">Informação Básica</h6>
                                     <div className="row">
                                         <div className="col-md-6">
                                             <div className="mb-3">
@@ -549,6 +603,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         ></textarea>
                                     </div>
 
+                                    <hr className="my-4" />
+                                    <h6 className="text-uppercase text-muted small fw-bold mb-3">Prazos e Estado</h6>
                                     <div className="row">
                                         <div className="col-md-4">
                                             <div className="mb-3">
@@ -578,26 +634,6 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                         </div>
                                         <div className="col-md-4">
                                             <div className="mb-3">
-                                                <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total</label>
-                                                <input
-                                                    type="number"
-                                                    step="0.01"
-                                                    className="form-control"
-                                                    id="orcamentoTotal"
-                                                    name="orcamentoTotal"
-                                                    value={formData.orcamentoTotal}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <small className="text-muted">
-                                                    Preenchido automaticamente (serviços + mão de obra + IVA 23%). Podes ajustar.
-                                                </small>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
                                                 <label htmlFor="idEstado_Projeto" className="form-label">Estado</label>
                                                 <select
                                                     className="form-select"
@@ -615,36 +651,23 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                 </select>
                                             </div>
                                         </div>
-                                        <div className="col-md-6">
-                                            <div className="mb-3 d-flex align-items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    className="form-check-input me-2"
-                                                    id="ativo"
-                                                    name="ativo"
-                                                    checked={formData.ativo}
-                                                    onChange={handleInputChange}
-                                                />
-                                                <label className="form-check-label" htmlFor="ativo">Projeto Ativo</label>
-                                            </div>
-                                        </div>
                                     </div>
-
-                                    <div className="mb-3">
-                                        <label htmlFor="notas" className="form-label">Notas</label>
-                                        <textarea
-                                            className="form-control"
-                                            id="notas"
-                                            name="notas"
-                                            rows="3"
-                                            value={formData.notas}
+                                    <div className="form-check mb-1">
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            id="ativo"
+                                            name="ativo"
+                                            checked={formData.ativo}
                                             onChange={handleInputChange}
-                                        ></textarea>
+                                        />
+                                        <label className="form-check-label" htmlFor="ativo">Projeto Ativo</label>
                                     </div>
 
+                                    <hr className="my-4" />
+                                    <h6 className="text-uppercase text-muted small fw-bold mb-3">Serviços e Orçamento</h6>
                                     {servicos.length > 0 && (
                                         <div className="mb-3">
-                                            <label className="form-label">Serviços Associados</label>
                                             <div className="row">
                                                 {servicos.map(servico => (
                                                     <div key={servico.idServico} className="col-md-6">
@@ -663,53 +686,115 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                     </div>
                                                 ))}
                                             </div>
-
-                                            <div className="row mt-3 align-items-start">
-                                                <div className="col-md-5">
-                                                    <label htmlFor="maoDeObra" className="form-label">Mão de Obra (€)</label>
-                                                    <input
-                                                        type="number"
-                                                        min="0"
-                                                        step="0.01"
-                                                        className="form-control"
-                                                        id="maoDeObra"
-                                                        value={maoDeObra}
-                                                        onChange={handleMaoDeObraChange}
-                                                        placeholder="0.00"
-                                                    />
-                                                    <small className="text-muted">
-                                                        Somada aos serviços antes do IVA; entra apenas no total.
-                                                    </small>
-                                                </div>
-                                                <div className="col-md-7">
-                                                    {(() => {
-                                                        const resumo = calcularOrcamento(selectedServicos, maoDeObra);
-                                                        if (resumo.total <= 0) return null;
-                                                        return (
-                                                            <div className="border rounded p-2 bg-light small mt-md-0 mt-2">
-                                                                <div className="d-flex justify-content-between">
-                                                                    <span>Serviços ({selectedServicos.length}):</span>
-                                                                    <span>€{resumo.subtotalServicos.toFixed(2)}</span>
-                                                                </div>
-                                                                <div className="d-flex justify-content-between">
-                                                                    <span>Mão de obra:</span>
-                                                                    <span>€{resumo.maoDeObra.toFixed(2)}</span>
-                                                                </div>
-                                                                <div className="d-flex justify-content-between">
-                                                                    <span>IVA (23%):</span>
-                                                                    <span>€{resumo.iva.toFixed(2)}</span>
-                                                                </div>
-                                                                <div className="d-flex justify-content-between fw-bold border-top mt-1 pt-1">
-                                                                    <span>Total c/ IVA:</span>
-                                                                    <span>€{resumo.total.toFixed(2)}</span>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })()}
-                                                </div>
-                                            </div>
                                         </div>
                                     )}
+
+                                    <div className="row align-items-start">
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label htmlFor="horasEstimadas" className="form-label">Horas Estimadas</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className="form-control"
+                                                    id="horasEstimadas"
+                                                    name="horasEstimadas"
+                                                    value={formData.horasEstimadas}
+                                                    onChange={handleInputChange}
+                                                    placeholder="0"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-3">
+                                            <div className="mb-3">
+                                                <label htmlFor="custoHora" className="form-label">Custo/Hora (€)</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.50"
+                                                    className="form-control"
+                                                    id="custoHora"
+                                                    name="custoHora"
+                                                    value={formData.custoHora}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <small>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-link btn-sm p-0 text-decoration-none"
+                                                        onClick={() => setShowTabelaPrecos(true)}
+                                                    >
+                                                        Ver tabela de referência
+                                                    </button>
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            {(() => {
+                                                const resumo = calcularOrcamento(selectedServicos, formData.horasEstimadas, formData.custoHora);
+                                                if (resumo.total <= 0) return (
+                                                    <p className="text-muted small mt-md-4 mb-0">
+                                                        Seleciona serviços e/ou define horas para calcular o orçamento.
+                                                    </p>
+                                                );
+                                                return (
+                                                    <div className="border rounded p-2 bg-light small">
+                                                        <div className="d-flex justify-content-between">
+                                                            <span>Serviços ({selectedServicos.length}):</span>
+                                                            <span>€{resumo.subtotalServicos.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="d-flex justify-content-between">
+                                                            <span>Mão de obra ({formData.horasEstimadas || 0}h × €{parseFloat(formData.custoHora || 0).toFixed(2)}):</span>
+                                                            <span>€{resumo.maoDeObra.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="d-flex justify-content-between">
+                                                            <span>IVA (23%):</span>
+                                                            <span>€{resumo.iva.toFixed(2)}</span>
+                                                        </div>
+                                                        <div className="d-flex justify-content-between fw-bold border-top mt-1 pt-1">
+                                                            <span>Total c/ IVA:</span>
+                                                            <span>€{resumo.total.toFixed(2)}</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })()}
+                                        </div>
+                                    </div>
+
+                                    <div className="row">
+                                        <div className="col-md-4">
+                                            <div className="mb-3">
+                                                <label htmlFor="orcamentoTotal" className="form-label">Orçamento Total (€)</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    className="form-control"
+                                                    id="orcamentoTotal"
+                                                    name="orcamentoTotal"
+                                                    value={formData.orcamentoTotal}
+                                                    onChange={handleInputChange}
+                                                />
+                                                <small className="text-muted">
+                                                    Calculado automaticamente; podes ajustar.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr className="my-4" />
+                                    <h6 className="text-uppercase text-muted small fw-bold mb-3">Notas</h6>
+                                    <div className="mb-3">
+                                        <textarea
+                                            className="form-control"
+                                            id="notas"
+                                            name="notas"
+                                            rows="3"
+                                            value={formData.notas}
+                                            onChange={handleInputChange}
+                                            placeholder="Notas internas do projeto (opcional)"
+                                        ></textarea>
+                                    </div>
                                 </div>
                                 <div className="modal-footer">
                                     <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
