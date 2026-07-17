@@ -69,16 +69,16 @@ const DashboardGraphics = () => {
             };
         }).filter(item => item.count > 0);
 
-        // 3. Receita últimos 6 meses (simulado)
-        const receitaUltimos6Meses = gerarReceitaUltimos6Meses(projetos);
+        // 3. Receita últimos 6 meses (apenas projetos ativos - soft delete usa ativo: false)
+        const receitaUltimos6Meses = gerarReceitaUltimos6Meses(projetos.filter(p => p.ativo === true));
 
         // 4. Serviços mais usados (baseado em tipos)
         const servicosMaisUsados = tiposServicos.map(tipo => {
             const count = servicos.filter(s => s.idTipo_Servico == tipo.idTipo_Servico).length;
             return {
-                nome: tipo.designacao_TipoServico,
+                nome: tipo.designacao,
                 count,
-                cor: getCorTipoServico(tipo.designacao_TipoServico)
+                cor: getCorTipoServico(tipo.designacao)
             };
         }).filter(item => item.count > 0).sort((a, b) => b.count - a.count).slice(0, 5);
 
@@ -127,10 +127,12 @@ const DashboardGraphics = () => {
             
             // Calcular receita para o mês (simulado baseado em projetos)
             const projetosMes = projetos.filter(p => {
-                if (!p.dataInicio) return false;
-                const dataInicio = new Date(p.dataInicio);
-                return dataInicio.getMonth() === mes.getMonth() && 
-                       dataInicio.getFullYear() === mes.getFullYear();
+                // Sem dataInicio, usar a data de criação para o projeto não desaparecer do gráfico
+                const referencia = p.dataInicio || p.createdAt;
+                if (!referencia) return false;
+                const dataReferencia = new Date(referencia);
+                return dataReferencia.getMonth() === mes.getMonth() &&
+                       dataReferencia.getFullYear() === mes.getFullYear();
             });
             
             const receita = projetosMes.reduce((total, p) => total + parseFloat(p.orcamentoTotal || 0), 0);

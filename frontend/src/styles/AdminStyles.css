@@ -319,6 +319,14 @@
     font-weight: 600;
 }
 
+/* Cards coloridos (ex.: financeiro): o header herda a cor do card em vez do gradiente claro,
+   caso contrário o texto branco fica ilegível */
+.card.text-white .card-header {
+    background: rgba(0, 0, 0, 0.18);
+    border-bottom-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
 /* BOTÕES */
 .btn {
     border-radius: var(--border-radius);
