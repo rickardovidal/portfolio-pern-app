@@ -1,6 +1,19 @@
-// src/controllers/ContactController.js  
+// src/controllers/ContactController.js
 const ContactMessages = require('../models/ContactMessages');
 const { Resend } = require('resend');
+
+// Escapar HTML para prevenir injeção nos emails
+const escapeHtml = (value) => {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const contactController = {
 
@@ -96,6 +109,20 @@ const contactController = {
                 return res.status(400).json({
                     success: false,
                     message: 'Campos obrigatórios: nome, email, assunto e mensagem'
+                });
+            }
+
+            if (!EMAIL_REGEX.test(email)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Formato de email inválido'
+                });
+            }
+
+            if (nome.length > 100 || email.length > 255 || assunto.length > 200 || mensagem.length > 5000) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Um ou mais campos excedem o tamanho máximo permitido'
                 });
             }
 
@@ -260,17 +287,17 @@ const contactController = {
         await resend.emails.send({
             from: 'Portfolio <onboarding@resend.dev>',
             to: process.env.CONTACT_EMAIL || 'ricardojmv95@gmail.com',
-            subject: `Nova mensagem de contacto: ${message.assunto}`,
+            subject: `Nova mensagem de contacto: ${escapeHtml(message.assunto)}`,
             html: `
                 <h2>Nova mensagem de contacto recebida</h2>
-                <p><strong>Nome:</strong> ${message.nome}</p>
-                <p><strong>Email:</strong> ${message.email}</p>
-                ${message.telefone ? `<p><strong>Telefone:</strong> ${message.telefone}</p>` : ''}
-                ${message.empresa ? `<p><strong>Empresa:</strong> ${message.empresa}</p>` : ''}
-                <p><strong>Assunto:</strong> ${message.assunto}</p>
+                <p><strong>Nome:</strong> ${escapeHtml(message.nome)}</p>
+                <p><strong>Email:</strong> ${escapeHtml(message.email)}</p>
+                ${message.telefone ? `<p><strong>Telefone:</strong> ${escapeHtml(message.telefone)}</p>` : ''}
+                ${message.empresa ? `<p><strong>Empresa:</strong> ${escapeHtml(message.empresa)}</p>` : ''}
+                <p><strong>Assunto:</strong> ${escapeHtml(message.assunto)}</p>
                 <p><strong>Mensagem:</strong></p>
                 <div style="border-left: 4px solid #0066cc; padding-left: 15px; margin: 15px 0;">
-                    ${message.mensagem}
+                    ${escapeHtml(message.mensagem)}
                 </div>
                 <p><small>Recebida em: ${new Date(message.createdAt).toLocaleString('pt-PT')}</small></p>
             `
@@ -290,7 +317,7 @@ const contactController = {
             to: email,
             subject: 'Mensagem recebida - Ricardo Vidal Portfolio',
             html: `
-                <h2>Olá ${nome}!</h2>
+                <h2>Olá ${escapeHtml(nome)}!</h2>
                 <p>Obrigado por entrar em contacto.</p>
                 <p>Recebi a sua mensagem e entrarei em contacto brevemente.</p>
                 <br>

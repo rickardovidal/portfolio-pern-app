@@ -3,6 +3,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 const sequelize = require('./config/database');
 const defineAssociations = require('./models/associations');
 
@@ -17,6 +18,7 @@ const allowedOrigins = (process.env.CORS_ORIGINS ||
 ).split(',').map(origin => origin.trim());
 
 // Middlewares básicos
+app.use(helmet());
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
