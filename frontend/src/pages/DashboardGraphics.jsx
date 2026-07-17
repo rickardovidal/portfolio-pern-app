@@ -11,6 +11,7 @@ const DashboardGraphics = () => {
         tendencias: {}
     });
     const [loading, setLoading] = useState(true);
+    const [erro, setErro] = useState(false);
 
     useEffect(() => {
         loadStats();
@@ -19,144 +20,25 @@ const DashboardGraphics = () => {
     const loadStats = async () => {
         try {
             setLoading(true);
-            
-            const [projetosRes, clientesRes, servicosRes, tiposClientesRes, estadosRes, tiposServicosRes] = await Promise.all([
-                api.get('/projetos'),
-                api.get('/clientes'),
-                api.get('/servicos'),
-                api.get('/tipos-clientes'),
-                api.get('/estados-projeto'),
-                api.get('/tipos-servicos')
-            ]);
+            setErro(false);
 
-            const projetos = projetosRes.data.data || [];
-            const clientes = clientesRes.data.data || [];
-            const servicos = servicosRes.data.data || [];
-            const tiposClientes = tiposClientesRes.data.data || [];
-            const estados = estadosRes.data.data || [];
-            const tiposServicos = tiposServicosRes.data.data || [];
+            const response = await api.get('/estatisticas');
+            const data = response.data.data;
 
-            // Processar dados para gráficos
-            processStats(projetos, clientes, servicos, tiposClientes, estados, tiposServicos);
-            
+            setStats({
+                projetosPorEstado: data.projetosPorEstado,
+                clientesPorTipo: data.clientesPorTipo,
+                receitaUltimos6Meses: data.receitaPorMes.slice(-6),
+                servicosMaisUsados: data.servicosPorTipo.slice(0, 5),
+                tendencias: data.tendencias
+            });
+
         } catch (error) {
             console.error('Erro ao carregar estatísticas:', error);
+            setErro(true);
         } finally {
             setLoading(false);
         }
-    };
-
-    const processStats = (projetos, clientes, servicos, tiposClientes, estados, tiposServicos) => {
-        // 1. Projetos por estado
-        const projetosPorEstado = estados.map(estado => {
-            const count = projetos.filter(p => p.idEstado_Projeto == estado.idEstado_Projeto).length;
-            return {
-                nome: estado.designacaoEstado_Projeto,
-                count,
-                percentagem: projetos.length > 0 ? ((count / projetos.length) * 100).toFixed(1) : 0,
-                cor: getCorEstado(estado.designacaoEstado_Projeto)
-            };
-        }).filter(item => item.count > 0);
-
-        // 2. Clientes por tipo
-        const clientesPorTipo = tiposClientes.map(tipo => {
-            const count = clientes.filter(c => c.idTipo_Cliente == tipo.idTipo_Cliente).length;
-            return {
-                nome: tipo.designacaoTipo_cliente,
-                count,
-                percentagem: clientes.length > 0 ? ((count / clientes.length) * 100).toFixed(1) : 0,
-                cor: tipo.designacaoTipo_cliente.toLowerCase() === 'particular' ? '#17a2b8' : '#28a745'
-            };
-        }).filter(item => item.count > 0);
-
-        // 3. Receita últimos 6 meses (apenas projetos ativos - soft delete usa ativo: false)
-        const receitaUltimos6Meses = gerarReceitaUltimos6Meses(projetos.filter(p => p.ativo === true));
-
-        // 4. Serviços mais usados (baseado em tipos)
-        const servicosMaisUsados = tiposServicos.map(tipo => {
-            const count = servicos.filter(s => s.idTipo_Servico == tipo.idTipo_Servico).length;
-            return {
-                nome: tipo.designacao,
-                count,
-                cor: getCorTipoServico(tipo.designacao)
-            };
-        }).filter(item => item.count > 0).sort((a, b) => b.count - a.count).slice(0, 5);
-
-        // 5. Tendências
-        const tendencias = {
-            crescimentoClientes: calcularCrescimento(clientes),
-            crescimentoProjetos: calcularCrescimento(projetos),
-            eficienciaServicos: servicos.filter(s => s.ativo).length / servicos.length * 100
-        };
-
-        setStats({
-            projetosPorEstado,
-            clientesPorTipo,
-            receitaUltimos6Meses,
-            servicosMaisUsados,
-            tendencias
-        });
-    };
-
-    const getCorEstado = (nomeEstado) => {
-        switch (nomeEstado.toLowerCase()) {
-            case 'concluído': return '#28a745';
-            case 'em andamento': return '#007bff';
-            case 'pendente': return '#ffc107';
-            case 'desativado': return '#dc3545';
-            default: return '#6c757d';
-        }
-    };
-
-    const getCorTipoServico = (tipoNome) => {
-        const nome = tipoNome.toLowerCase();
-        if (nome.includes('design')) return '#dc3545';
-        if (nome.includes('desenvolvimento')) return '#007bff';
-        if (nome.includes('multimédia')) return '#ffc107';
-        if (nome.includes('consultoria')) return '#17a2b8';
-        return '#28a745';
-    };
-
-    const gerarReceitaUltimos6Meses = (projetos) => {
-        const meses = [];
-        const hoje = new Date();
-        
-        for (let i = 5; i >= 0; i--) {
-            const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
-            const nomeMes = mes.toLocaleDateString('pt-PT', { month: 'short', year: 'numeric' });
-            
-            // Calcular receita para o mês (simulado baseado em projetos)
-            const projetosMes = projetos.filter(p => {
-                // Sem dataInicio, usar a data de criação para o projeto não desaparecer do gráfico
-                const referencia = p.dataInicio || p.createdAt;
-                if (!referencia) return false;
-                const dataReferencia = new Date(referencia);
-                return dataReferencia.getMonth() === mes.getMonth() &&
-                       dataReferencia.getFullYear() === mes.getFullYear();
-            });
-            
-            const receita = projetosMes.reduce((total, p) => total + parseFloat(p.orcamentoTotal || 0), 0);
-            
-            meses.push({
-                mes: nomeMes,
-                receita: receita.toFixed(2),
-                projetos: projetosMes.length
-            });
-        }
-        
-        return meses;
-    };
-
-    const calcularCrescimento = (dados) => {
-        if (dados.length < 2) return 0;
-        
-        const hoje = new Date();
-        const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate());
-        
-        const recentes = dados.filter(item => new Date(item.createdAt) >= umMesAtras).length;
-        const antigos = dados.length - recentes;
-        
-        return antigos > 0 ? ((recentes / antigos) * 100).toFixed(1) : 0;
     };
 
     if (loading) {
@@ -165,6 +47,14 @@ const DashboardGraphics = () => {
                 <div className="spinner-border text-primary" role="status">
                     <span className="visually-hidden">A carregar estatísticas...</span>
                 </div>
+            </div>
+        );
+    }
+
+    if (erro) {
+        return (
+            <div className="alert alert-danger" role="alert">
+                Erro ao carregar estatísticas. Verifica a conexão com o servidor.
             </div>
         );
     }
@@ -255,13 +145,13 @@ const DashboardGraphics = () => {
                                 </thead>
                                 <tbody>
                                     {stats.receitaUltimos6Meses.map((item, index) => {
-                                        const maxReceita = Math.max(...stats.receitaUltimos6Meses.map(m => parseFloat(m.receita)));
-                                        const percentagem = maxReceita > 0 ? (parseFloat(item.receita) / maxReceita * 100) : 0;
+                                        const maxReceita = Math.max(...stats.receitaUltimos6Meses.map(m => m.receita));
+                                        const percentagem = maxReceita > 0 ? (item.receita / maxReceita * 100) : 0;
                                         
                                         return (
                                             <tr key={index}>
                                                 <td><strong>{item.mes}</strong></td>
-                                                <td>€{item.receita}</td>
+                                                <td>€{item.receita.toFixed(2)}</td>
                                                 <td>
                                                     <span className="badge bg-secondary">{item.projetos}</span>
                                                 </td>
