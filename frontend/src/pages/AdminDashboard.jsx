@@ -205,17 +205,17 @@ const AdminDashboard = () => {
                         <div className="col-xl-3 col-md-6 mb-4">
                             <div className="card border-start border-primary border-4 shadow h-100 py-2">
                                 <div className="card-body">
-                                    <div className="row no-gutters align-items-center">
-                                        <div className="col mr-2">
-                                            <div className="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    <div className="row g-0 align-items-center">
+                                        <div className="col me-2">
+                                            <div className="small fw-bold text-primary text-uppercase mb-1">
                                                 Total de Clientes
                                             </div>
-                                            <div className="h5 mb-0 font-weight-bold text-gray-800">
+                                            <div className="h5 mb-0 fw-bold">
                                                 {stats.totalClientes}
                                             </div>
                                         </div>
                                         <div className="col-auto">
-                                            <i className="bi bi-people fa-2x text-primary"></i>
+                                            <i className="bi bi-people fs-2 text-primary"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -225,17 +225,17 @@ const AdminDashboard = () => {
                         <div className="col-xl-3 col-md-6 mb-4">
                             <div className="card border-start border-success border-4 shadow h-100 py-2">
                                 <div className="card-body">
-                                    <div className="row no-gutters align-items-center">
-                                        <div className="col mr-2">
-                                            <div className="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    <div className="row g-0 align-items-center">
+                                        <div className="col me-2">
+                                            <div className="small fw-bold text-success text-uppercase mb-1">
                                                 Projetos Ativos
                                             </div>
-                                            <div className="h5 mb-0 font-weight-bold text-gray-800">
+                                            <div className="h5 mb-0 fw-bold">
                                                 {stats.projetosAtivos}
                                             </div>
                                         </div>
                                         <div className="col-auto">
-                                            <i className="bi bi-folder-check fa-2x text-success"></i>
+                                            <i className="bi bi-folder-check fs-2 text-success"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -245,17 +245,17 @@ const AdminDashboard = () => {
                         <div className="col-xl-3 col-md-6 mb-4">
                             <div className="card border-start border-info border-4 shadow h-100 py-2">
                                 <div className="card-body">
-                                    <div className="row no-gutters align-items-center">
-                                        <div className="col mr-2">
-                                            <div className="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    <div className="row g-0 align-items-center">
+                                        <div className="col me-2">
+                                            <div className="small fw-bold text-info text-uppercase mb-1">
                                                 Total Serviços
                                             </div>
-                                            <div className="h5 mb-0 font-weight-bold text-gray-800">
+                                            <div className="h5 mb-0 fw-bold">
                                                 {stats.totalServicos}
                                             </div>
                                         </div>
                                         <div className="col-auto">
-                                            <i className="bi bi-gear fa-2x text-info"></i>
+                                            <i className="bi bi-gear fs-2 text-info"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -265,17 +265,17 @@ const AdminDashboard = () => {
                         <div className="col-xl-3 col-md-6 mb-4">
                             <div className="card border-start border-warning border-4 shadow h-100 py-2">
                                 <div className="card-body">
-                                    <div className="row no-gutters align-items-center">
-                                        <div className="col mr-2">
-                                            <div className="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    <div className="row g-0 align-items-center">
+                                        <div className="col me-2">
+                                            <div className="small fw-bold text-warning text-uppercase mb-1">
                                                 Receita Total
                                             </div>
-                                            <div className="h5 mb-0 font-weight-bold text-gray-800">
+                                            <div className="h5 mb-0 fw-bold">
                                                 €{stats.receitaTotal.toFixed(2)}
                                             </div>
                                         </div>
                                         <div className="col-auto">
-                                            <i className="bi bi-currency-euro fa-2x text-warning"></i>
+                                            <i className="bi bi-currency-euro fs-2 text-warning"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -288,7 +288,7 @@ const AdminDashboard = () => {
                         <div className="col-lg-6">
                             <div className="card">
                                 <div className="card-header">
-                                    <h6 className="m-0 font-weight-bold text-primary">
+                                    <h6 className="m-0 fw-bold text-primary">
                                         <i className="bi bi-info-circle me-2"></i>
                                         Informações do Sistema
                                     </h6>
@@ -321,7 +321,7 @@ const AdminDashboard = () => {
                         <div className="col-lg-6">
                             <div className="card">
                                 <div className="card-header">
-                                    <h6 className="m-0 font-weight-bold text-primary">
+                                    <h6 className="m-0 fw-bold text-primary">
                                         <i className="bi bi-list-task me-2"></i>
                                         Ações Rápidas
                                     </h6>

@@ -173,7 +173,7 @@ const DashboardGraphics = () => {
             <div className="col-lg-6 mb-4">
                 <div className="card">
                     <div className="card-header">
-                        <h6 className="m-0 font-weight-bold text-primary">
+                        <h6 className="m-0 fw-bold text-primary">
                             <i className="bi bi-pie-chart me-2"></i>
                             Projetos por Estado
                         </h6>
@@ -182,8 +182,8 @@ const DashboardGraphics = () => {
                         {stats.projetosPorEstado.map((item, index) => (
                             <div key={index} className="mb-3">
                                 <div className="d-flex justify-content-between align-items-center mb-1">
-                                    <span className="text-sm font-weight-bold">{item.nome}</span>
-                                    <span className="text-sm text-muted">{item.count} ({item.percentagem}%)</span>
+                                    <span className="small fw-bold">{item.nome}</span>
+                                    <span className="small text-muted">{item.count} ({item.percentagem}%)</span>
                                 </div>
                                 <div className="progress" style={{ height: '8px' }}>
                                     <div 
@@ -204,7 +204,7 @@ const DashboardGraphics = () => {
             <div className="col-lg-6 mb-4">
                 <div className="card">
                     <div className="card-header">
-                        <h6 className="m-0 font-weight-bold text-primary">
+                        <h6 className="m-0 fw-bold text-primary">
                             <i className="bi bi-people me-2"></i>
                             Clientes por Tipo
                         </h6>
@@ -213,8 +213,8 @@ const DashboardGraphics = () => {
                         {stats.clientesPorTipo.map((item, index) => (
                             <div key={index} className="mb-3">
                                 <div className="d-flex justify-content-between align-items-center mb-1">
-                                    <span className="text-sm font-weight-bold">{item.nome}</span>
-                                    <span className="text-sm text-muted">{item.count} ({item.percentagem}%)</span>
+                                    <span className="small fw-bold">{item.nome}</span>
+                                    <span className="small text-muted">{item.count} ({item.percentagem}%)</span>
                                 </div>
                                 <div className="progress" style={{ height: '8px' }}>
                                     <div 
@@ -235,7 +235,7 @@ const DashboardGraphics = () => {
             <div className="col-lg-8 mb-4">
                 <div className="card">
                     <div className="card-header">
-                        <h6 className="m-0 font-weight-bold text-primary">
+                        <h6 className="m-0 fw-bold text-primary">
                             <i className="bi bi-graph-up me-2"></i>
                             Receita Últimos 6 Meses
                         </h6>
@@ -285,7 +285,7 @@ const DashboardGraphics = () => {
             <div className="col-lg-4 mb-4">
                 <div className="card">
                     <div className="card-header">
-                        <h6 className="m-0 font-weight-bold text-primary">
+                        <h6 className="m-0 fw-bold text-primary">
                             <i className="bi bi-gear me-2"></i>
                             Tipos de Serviços
                         </h6>
@@ -305,8 +305,8 @@ const DashboardGraphics = () => {
                                     <strong>{item.count}</strong>
                                 </div>
                                 <div>
-                                    <div className="font-weight-bold text-sm">{item.nome}</div>
-                                    <div className="text-muted text-xs">
+                                    <div className="fw-bold small">{item.nome}</div>
+                                    <div className="text-muted small">
                                         {item.count} serviço{item.count !== 1 ? 's' : ''}
                                     </div>
                                 </div>
@@ -320,7 +320,7 @@ const DashboardGraphics = () => {
             <div className="col-12 mb-4">
                 <div className="card">
                     <div className="card-header">
-                        <h6 className="m-0 font-weight-bold text-primary">
+                        <h6 className="m-0 fw-bold text-primary">
                             <i className="bi bi-trending-up me-2"></i>
                             Tendências e Insights
                         </h6>
@@ -329,28 +329,28 @@ const DashboardGraphics = () => {
                         <div className="row text-center">
                             <div className="col-md-4">
                                 <div className="border-end">
-                                    <div className="h4 font-weight-bold text-success">
+                                    <div className="h4 fw-bold text-success">
                                         +{stats.tendencias.crescimentoClientes}%
                                     </div>
                                     <div className="text-muted">Crescimento de Clientes</div>
-                                    <small className="text-xs text-muted">Último mês vs anterior</small>
+                                    <small className="small text-muted">Último mês vs anterior</small>
                                 </div>
                             </div>
                             <div className="col-md-4">
                                 <div className="border-end">
-                                    <div className="h4 font-weight-bold text-info">
+                                    <div className="h4 fw-bold text-info">
                                         +{stats.tendencias.crescimentoProjetos}%
                                     </div>
                                     <div className="text-muted">Crescimento de Projetos</div>
-                                    <small className="text-xs text-muted">Último mês vs anterior</small>
+                                    <small className="small text-muted">Último mês vs anterior</small>
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="h4 font-weight-bold text-warning">
+                                <div className="h4 fw-bold text-warning">
                                     {stats.tendencias.eficienciaServicos.toFixed(1)}%
                                 </div>
                                 <div className="text-muted">Serviços Ativos</div>
-                                <small className="text-xs text-muted">Eficiência do catálogo</small>
+                                <small className="small text-muted">Eficiência do catálogo</small>
                             </div>
                         </div>
                     </div>
