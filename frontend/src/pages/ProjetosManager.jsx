@@ -44,7 +44,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         { numero: 3, titulo: 'Rentabilidade', descricao: 'Só para ti' }
     ];
 
-    // O backend exige nome e cliente — validar antes de deixar avançar
+    // O backend exige nome e cliente, validar antes de deixar avançar
     const validarPasso1 = () => {
         const novosErros = {};
         if (!formData.nomeProjeto.trim()) {
@@ -384,7 +384,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                             <div className="modal-header">
                                 <h5 className="modal-title">
                                     <i className="bi bi-currency-euro me-2"></i>
-                                    Tabela de Referência — Preços/Hora (Júnior, Portugal)
+                                    Tabela de Referência: Preços/Hora (Júnior, Portugal)
                                 </h5>
                                 <button type="button" className="btn-close" onClick={() => setShowTabelaPrecos(false)}></button>
                             </div>
@@ -413,7 +413,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                 </div>
                                 <p className="small text-muted mb-1">
                                     <i className="bi bi-info-circle me-1"></i>
-                                    Valores indicativos para freelancers juniores — pesquisa de {DATA_PESQUISA}.
+                                    Valores indicativos para freelancers juniores, pesquisa de {DATA_PESQUISA}.
                                     Ajusta conforme a complexidade do projeto e o cliente.
                                 </p>
                                 <p className="small text-muted mb-0">
@@ -625,7 +625,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                 </span>
                                                 <span className={`small ${wizardStep === passo.numero ? 'fw-bold text-body' : 'text-muted'}`}>
                                                     {passo.titulo}
-                                                    <span className="d-none d-md-inline text-muted fw-normal"> — {passo.descricao}</span>
+                                                    <span className="d-none d-md-inline text-muted fw-normal"> ({passo.descricao})</span>
                                                 </span>
                                             </button>
                                         ))}
@@ -747,7 +747,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                     {wizardStep === 2 && (<>
                                     <p className="text-muted small mb-3">
                                         <i className="bi bi-info-circle me-1"></i>
-                                        Os preços dos serviços são pacotes fechados — já incluem o teu trabalho.
+                                        Os preços dos serviços são pacotes fechados, já incluem o teu trabalho.
                                         Seleciona o que este projeto inclui.
                                     </p>
                                     {servicos.length > 0 && (
@@ -849,7 +849,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                     {wizardStep === 3 && (<>
                                     <div className="alert alert-light border small mb-3">
                                         <i className="bi bi-eye-slash me-1"></i>
-                                        <strong>Só tu vês isto.</strong> Este passo não muda o preço do cliente —
+                                        <strong>Só tu vês isto.</strong> Este passo não muda o preço do cliente,
                                         responde à pergunta: <em>"vale a pena fazer este projeto por este valor?"</em>
                                     </div>
                                     <div className="row align-items-end">
@@ -917,8 +917,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                         </div>
                                                         <small className={saudavel ? 'text-success' : 'text-danger'}>
                                                             {saudavel
-                                                                ? `✓ Acima do teu objetivo de €${alvo.toFixed(2)}/h — bom orçamento.`
-                                                                : `⚠ Abaixo do teu objetivo de €${alvo.toFixed(2)}/h — sobe o preço ou reduz o trabalho incluído.`}
+                                                                ? `✓ Acima do teu objetivo de €${alvo.toFixed(2)}/h, bom orçamento.`
+                                                                : `⚠ Abaixo do teu objetivo de €${alvo.toFixed(2)}/h, sobe o preço ou reduz o trabalho incluído.`}
                                                         </small>
                                                     </div>
                                                 );

@@ -28,9 +28,9 @@ export const tabelaReferenciaPrecos = [
 ];
 
 export const fontesPesquisa = [
-    { nome: 'Zaask — criação de websites', url: 'https://www.zaask.pt/quanto-custa/criacao-de-websites' },
-    { nome: 'Zaask — design gráfico', url: 'https://www.zaask.pt/quanto-custa/design-grafico' },
-    { nome: 'Zaask — motion design', url: 'https://www.zaask.pt/quanto-custa/motion-design' },
-    { nome: 'Fixando — preços design gráfico', url: 'https://www.fixando.pt/en/servico-design-grafico/preco' },
-    { nome: 'Indeed — salários freelancer PT', url: 'https://pt.indeed.com/career/freelancer/salaries' }
+    { nome: 'Zaask: criação de websites', url: 'https://www.zaask.pt/quanto-custa/criacao-de-websites' },
+    { nome: 'Zaask: design gráfico', url: 'https://www.zaask.pt/quanto-custa/design-grafico' },
+    { nome: 'Zaask: motion design', url: 'https://www.zaask.pt/quanto-custa/motion-design' },
+    { nome: 'Fixando: preços design gráfico', url: 'https://www.fixando.pt/en/servico-design-grafico/preco' },
+    { nome: 'Indeed: salários freelancer PT', url: 'https://pt.indeed.com/career/freelancer/salaries' }
 ];
