@@ -29,7 +29,22 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     });
 
     const [selectedServicos, setSelectedServicos] = useState([]);
+    const [maoDeObra, setMaoDeObra] = useState('');
     const [errors, setErrors] = useState({});
+
+    const IVA_TAXA = 0.23;
+
+    // Orçamento sugerido: serviços selecionados + mão de obra, com IVA a 23%
+    const calcularOrcamento = (servicoIds, maoDeObraValor) => {
+        const subtotalServicos = servicoIds.reduce((total, id) => {
+            const servico = servicos.find(s => s.idServico === id);
+            return total + parseFloat(servico?.preco_base_servico || 0);
+        }, 0);
+        const valorMaoDeObra = parseFloat(maoDeObraValor) || 0;
+        const subtotal = subtotalServicos + valorMaoDeObra;
+        const iva = subtotal * IVA_TAXA;
+        return { subtotalServicos, maoDeObra: valorMaoDeObra, iva, total: subtotal + iva };
+    };
 
     // ✅ CORRIGIDO: Função melhorada para obter nome do cliente
     const getClienteNome = (projeto) => {
@@ -158,13 +173,21 @@ const ProjetosManager = ({ onStatsUpdate }) => {
     };
 
     const handleServicoChange = (servicoId) => {
-        setSelectedServicos(prev => {
-            if (prev.includes(servicoId)) {
-                return prev.filter(id => id !== servicoId);
-            } else {
-                return [...prev, servicoId];
-            }
-        });
+        const atualizados = selectedServicos.includes(servicoId)
+            ? selectedServicos.filter(id => id !== servicoId)
+            : [...selectedServicos, servicoId];
+        setSelectedServicos(atualizados);
+
+        const { total } = calcularOrcamento(atualizados, maoDeObra);
+        setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
+    };
+
+    const handleMaoDeObraChange = (e) => {
+        const valor = e.target.value;
+        setMaoDeObra(valor);
+
+        const { total } = calcularOrcamento(selectedServicos, valor);
+        setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
     };
 
     const handleCloseModal = () => {
@@ -183,6 +206,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             ativo: true
         });
         setSelectedServicos([]);
+        setMaoDeObra('');
         setErrors({});
     };
 
@@ -238,6 +262,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             idEstado_Projeto: projeto.idEstado_Projeto || '',
             ativo: projeto.ativo !== undefined ? projeto.ativo : true
         });
+        // A mão de obra não é guardada em separado (apenas o total), por isso começa vazia na edição;
+        // o orçamento só é recalculado se os serviços ou a mão de obra forem alterados
+        setMaoDeObra('');
 
         try {
             const response = await api.get(`/projetos-servicos/projeto/${projeto.idProjeto}`);
@@ -561,6 +588,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                     value={formData.orcamentoTotal}
                                                     onChange={handleInputChange}
                                                 />
+                                                <small className="text-muted">
+                                                    Preenchido automaticamente (serviços + mão de obra + IVA 23%). Podes ajustar.
+                                                </small>
                                             </div>
                                         </div>
                                     </div>
@@ -627,11 +657,56 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                                 onChange={() => handleServicoChange(servico.idServico)}
                                                             />
                                                             <label className="form-check-label" htmlFor={`servico-${servico.idServico}`}>
-                                                                {servico.nomeServico} - €{servico.preco_base_servico}
+                                                                {servico.designacao_servico} - €{parseFloat(servico.preco_base_servico || 0).toFixed(2)}
                                                             </label>
                                                         </div>
                                                     </div>
                                                 ))}
+                                            </div>
+
+                                            <div className="row mt-3 align-items-start">
+                                                <div className="col-md-5">
+                                                    <label htmlFor="maoDeObra" className="form-label">Mão de Obra (€)</label>
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        step="0.01"
+                                                        className="form-control"
+                                                        id="maoDeObra"
+                                                        value={maoDeObra}
+                                                        onChange={handleMaoDeObraChange}
+                                                        placeholder="0.00"
+                                                    />
+                                                    <small className="text-muted">
+                                                        Somada aos serviços antes do IVA; entra apenas no total.
+                                                    </small>
+                                                </div>
+                                                <div className="col-md-7">
+                                                    {(() => {
+                                                        const resumo = calcularOrcamento(selectedServicos, maoDeObra);
+                                                        if (resumo.total <= 0) return null;
+                                                        return (
+                                                            <div className="border rounded p-2 bg-light small mt-md-0 mt-2">
+                                                                <div className="d-flex justify-content-between">
+                                                                    <span>Serviços ({selectedServicos.length}):</span>
+                                                                    <span>€{resumo.subtotalServicos.toFixed(2)}</span>
+                                                                </div>
+                                                                <div className="d-flex justify-content-between">
+                                                                    <span>Mão de obra:</span>
+                                                                    <span>€{resumo.maoDeObra.toFixed(2)}</span>
+                                                                </div>
+                                                                <div className="d-flex justify-content-between">
+                                                                    <span>IVA (23%):</span>
+                                                                    <span>€{resumo.iva.toFixed(2)}</span>
+                                                                </div>
+                                                                <div className="d-flex justify-content-between fw-bold border-top mt-1 pt-1">
+                                                                    <span>Total c/ IVA:</span>
+                                                                    <span>€{resumo.total.toFixed(2)}</span>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
