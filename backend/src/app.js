@@ -5,15 +5,19 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/database');
 const defineAssociations = require('./models/associations');
-const Utilizador = require('./models/Utilizador');
 
 const app = express();
 
 // Trust proxy for Render and other reverse proxies
 app.set('trust proxy', 1);
 
+// CORS restrito às origens do frontend (configurável via CORS_ORIGINS, separadas por vírgula)
+const allowedOrigins = (process.env.CORS_ORIGINS ||
+    'https://byrvidal.digital,https://www.byrvidal.digital,http://localhost:5173,http://localhost:4173'
+).split(',').map(origin => origin.trim());
+
 // Middlewares básicos
-app.use(cors());
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,8 +39,6 @@ const documentosRoutes = require('./routes/documentosRoutes');
 const utilizadoresRoutes = require('./routes/utilizadoresRoutes');
 const estadosProjetoRoutes = require('./routes/estadosProjetoRoutes');
 const contactRoutes = require('./routes/contactRoutes');
-const initRoutes = require('./routes/initRoutes');
-const emergencySetup = require('./routes/emergencySetup');
 
 // NOVA ROTA: Rota base para /api
 app.get('/api', (req, res) => {
@@ -83,8 +85,6 @@ app.use('/api/documentos', documentosRoutes);
 app.use('/api/utilizadores', utilizadoresRoutes);
 app.use('/api/estados-projeto', estadosProjetoRoutes);
 app.use('/api/contact', contactRoutes);
-app.use('/api/init', initRoutes);
-
 
 // Rota de teste
 app.get('/api/health', (req, res) => {
@@ -119,35 +119,6 @@ app.use('*', (req, res) => {
     });
 });
 
-
-// Endpoint para verificar se admin existe
-app.get('/api/emergency-check-admin', async (req, res) => {
-    try {
-        const admin = await Utilizador.findOne({
-            where: { username: 'admin' }
-        });
-        
-        const userCount = await Utilizador.count();
-        
-        res.json({
-            success: true,
-            adminExists: admin !== null,
-            userCount: userCount,
-            admin: admin ? {
-                id: admin.idUtilizador,
-                username: admin.username,
-                email: admin.email
-            } : null
-        });
-        
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Erro ao verificar admin',
-            error: error.message
-        });
-    }
-});
 
 const PORT = process.env.PORT || 3000;
 

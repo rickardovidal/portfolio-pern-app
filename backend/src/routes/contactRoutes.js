@@ -4,17 +4,10 @@ const router = express.Router();
 const contactController = require('../controllers/ContactController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 
-// Rate limiting para prevenir spam (apenas instalamos se necessário)
-let rateLimit;
-try {
-    rateLimit = require('express-rate-limit');
-} catch (e) {
-    // Se não estiver instalado, funciona sem rate limiting
-    rateLimit = null;
-}
+const rateLimit = require('express-rate-limit');
 
 // Rate limiting para formulário de contacto (máximo 5 mensagens por hora por IP)
-const contactRateLimit = rateLimit ? rateLimit({
+const contactRateLimit = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hora
     max: 5, // máximo 5 requests por hora
     message: {
@@ -23,7 +16,7 @@ const contactRateLimit = rateLimit ? rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-}) : (req, res, next) => next(); // Se não tiver rate-limit, passa sem fazer nada
+});
 
 // ROTAS PÚBLICAS (sem autenticação)
 
