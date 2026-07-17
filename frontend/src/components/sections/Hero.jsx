@@ -7,7 +7,7 @@ import styles from './Hero.module.css';
 const Hero = () => {
     const handleSmoothScroll = (e) => {
         e.preventDefault();
-        const target = document.querySelector(e.target.getAttribute('href'));
+        const target = document.querySelector(e.currentTarget.getAttribute('href'));
         if (target) {
             target.scrollIntoView({
                 behavior: 'smooth',
