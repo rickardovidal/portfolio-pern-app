@@ -20,7 +20,7 @@
     display: grid;
     grid-template-columns: 450px 1fr;
     gap: 8rem;
-    align-items: center;
+    align-items: flex-start;
     position: relative;
     /* CORREÇÃO: Remover z-index que pode interferir */
     z-index: auto;
