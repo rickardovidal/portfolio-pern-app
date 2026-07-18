@@ -86,17 +86,6 @@ export const showcaseWorks = [
         description: 'Animação 2D criada em After Effects com elementos dinâmicos e transições suaves.',
         technologies: ['After Effects', 'Illustrator']
     },
-     {
-        id: 7,
-        type: 'web',
-        title: 'E-commerce Platform',
-        category: 'Desenvolvimento Web',
-        aspectRatio: '16:9',
-        media: '/portfolio/web/ecommerce-preview.jpg',
-        thumbnail: '/portfolio/web/ecommerce-thumb.jpg',
-        action: 'external',
-        link: 'https://verdiaroma.shop'
-    },
     {
         id: 6,
         type: 'video',
@@ -111,8 +100,6 @@ export const showcaseWorks = [
         description: 'Curta-metragem experimental explorando relações familiares.',
         technologies: ['Premiere Pro', 'After Effects']
     },
-   
-   
 ];
 
 // Dados completos dos projetos (para a secção Projects)
@@ -206,17 +193,6 @@ export const projectsData = [
         video: '/portfolio/video/mybrother.mp4',
         description: 'Curta-metragem experimental explorando relações familiares.',
         technologies: ['Premiere Pro', 'After Effects']
-    },
-  {
-        id: 7,
-        type: 'web',
-        title: 'E-commerce Platform',
-        category: 'Desenvolvimento Web',
-        aspectRatio: '16:9',
-        media: '/portfolio/web/ecommerce-preview.jpg',
-        thumbnail: '/portfolio/web/ecommerce-thumb.jpg',
-        action: 'external',
-        link: 'https://verdiaroma.shop/'
     },
      {
         id: 8,

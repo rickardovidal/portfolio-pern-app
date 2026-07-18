@@ -4,9 +4,9 @@ import styles from './Experience.module.css';
 
 const experienceData = [
     {
-        period: '2023 — Presente',
+        period: '2023 - 2026',
         title: 'Licenciatura em Tecnologias e Design Multimédia',
-        organization: 'Instituto Politécnico de Viseu — Escola Superior de Tecnologia e Gestão de Viseu',
+        organization: 'Instituto Politécnico de Viseu - Escola Superior de Tecnologia e Gestão de Viseu',
         description: 'O ciclo de estudos da licenciatura em Tecnologias e Design de Multimédia (TDM) confere uma formação sólida. Através de uma metodologia prática e interdisciplinar que combina as áreas das Ciências Informáticas, Design e Multimédia, recorrendo a aprendizagem baseada em projeto. Licenciatura abrangente em desenvolvimento web, aplicações móveis, computação gráfica e gestão de projetos digitais e muito mais. Foco em tecnologias emergentes e metodologias ágeis de desenvolvimento.',
         bullets: [
             'Design de produtos multimédia',
@@ -47,7 +47,7 @@ const experienceData = [
     },
     {
         period: '2023',
-        title: 'Formação Certificada - 7855 - Plano de negócio – criação de pequenos e médios negócios (50 horas)',
+        title: 'Formação Certificada - 7855 - Plano de negócio - criação de pequenos e médios negócios (50 horas)',
         organization: 'Instituto de Emprego e Formação Profissional',
         description: 'Formação inicial de criação de uma marca e sua divulgação'
     },
