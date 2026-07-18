@@ -5,28 +5,6 @@ import styles from './Projects.module.css';
 
 const projectsData = [
     {
-        id: 1,
-        title: 'Verdiaroma - E-commerce de Velas Artesanais',
-        description: 'Loja online completa de velas aromáticas artesanais e produtos ecológicos portugueses. Sistema completo com pagamentos, cálculo de entregas, gestão de produtos e blog corporativo.',
-        technologies: ['WordPress', 'Elementor', 'WooCommerce', 'PHP'],
-        category: 'web',
-        placeholder: 'E-commerce Platform',
-        thumbnail: '/portfolio/web/ecommerce-thumb.jpg',
-        link: 'https://verdiaroma.shop/',
-        featured: true
-    },
-    {
-        id: 2,
-        title: 'JUMP - Plataforma de Gestão de Emprego',
-        description: 'Plataforma full-stack para alunos da ESTGV acederem a ofertas de emprego personalizadas. Sistema com autenticação, matching de competências e dashboard empresarial.',
-        technologies: ['React.js', 'Node.js', 'Express.js', 'PostgreSQL'],
-        category: 'web',
-        placeholder: 'Job Platform',
-        thumbnail: '/portfolio/web/jump-thumb.jpg',
-        link: 'https://jump-platform-frontend.onrender.com/',
-        featured: true
-    },
-    {
         id: 3,
         title: 'Site EUNICE - Assembleia Geral Europeia',
         description: 'Website institucional para evento da EUNICE (assembleia de politécnicos europeus). Interface responsiva com programa, indicações de como viajar para o local, e principais locais de interesse na cidade de Viseu.',
@@ -68,17 +46,6 @@ const projectsData = [
         placeholder: 'Unity Portfolio',
         thumbnail: '/portfolio/web/portfolio-unity-thumb.jpg',
         link: 'http://193.137.7.33/~aluno28368/Portfolio/',
-        featured: true
-    },
-    {
-        id: 7,
-        title: 'A Cozinha do Sponnie - App Educativa',
-        description: 'Aplicação lúdica para ensinar crianças sobre alimentação saudável. Contém 4 mini-jogos interativos com diferentes temas e níveis progressivos.',
-        technologies: ['Unity', 'C#', 'Game Design', 'Educational Games'],
-        category: '3d',
-        placeholder: 'Educational Game',
-        thumbnail: '/portfolio/unity/sponnie-thumb.jpg',
-        link: 'http://193.137.7.33/~aluno28368/CIT2_Final/CIpqp/',
         featured: true
     },
     {
