@@ -361,9 +361,6 @@ const Projects = () => {
             <div className={styles.projectsContainer}>
                 <div className={styles.projectsHeader}>
                     <div className={styles.projectsLabel}>Projetos Selecionados</div>
-                    <h2 className={styles.projectsTitle}>
-                        Trabalhos que demonstram a evolução das minhas competências técnicas e criativas
-                    </h2>
                 </div>
 
                 {/* Filtros Subtis */}

@@ -274,7 +274,7 @@ const ContactForm = () => {
 
                         {submitStatus === 'error' && (
                             <div className={styles.statusMessage + ' ' + styles.statusError}>
-                                ❌ Erro ao enviar mensagem. Tenta novamente ou contacta-me directamente.
+                                ❌ Erro ao enviar mensagem. Tente novamente ou contacte-me directamente.
                             </div>
                         )}
 

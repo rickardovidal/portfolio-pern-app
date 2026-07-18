@@ -264,10 +264,6 @@
 
 /* Responsividade */
 @media (max-width: 1024px) {
-    .skills {
-        padding: 6rem 2rem;
-    }
-
     .skillsHeader {
         margin-bottom: 4rem;
     }
@@ -302,7 +298,7 @@
 
 @media (max-width: 768px) {
     .skills {
-        padding: 4rem 2rem;
+        padding: 6rem 2rem;
     }
 
     .skillsTitle {
@@ -351,6 +347,10 @@
 }
 
 @media (max-width: 480px) {
+    .skills {
+        padding: 4rem 1.5rem;
+    }
+
     .skillsTrack {
         animation: scroll 30s linear infinite;
     }
