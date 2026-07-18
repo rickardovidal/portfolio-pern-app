@@ -19,7 +19,7 @@ const Navbar = () => {
 
     // Active section detection
     useEffect(() => {
-        const sections = ['home', 'about', 'skills', 'projects', 'experience', 'contact-form', 'contact'];
+        const sections = ['home', 'about', 'services', 'projects', 'experience', 'contact-form', 'contact'];
         const observerOptions = { 
             rootMargin: '-40% 0px -40% 0px',
             threshold: 0.2
@@ -79,7 +79,7 @@ const Navbar = () => {
 
     const navLinks = [
         { href: '#about', label: 'Sobre' },
-        { href: '#skills', label: 'Skills' },
+        { href: '#services', label: 'Serviços' },
         { href: '#projects', label: 'Projetos' },
         { href: '#experience', label: 'Percurso' },
         { href: '#contact-form', label: 'Contacto' }
