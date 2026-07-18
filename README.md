@@ -5,8 +5,7 @@ Aplicação web full-stack desenvolvida com stack PERN (PostgreSQL, Express.js, 
 
 ## Desenvolvedor
 **Ricardo Vidal**  
-Estudante de Tecnologias e Design Multimédia  
-Instituto Politécnico de Viseu - Escola Superior de Tecnologia e Gestão de Viseu
+Designer Multimédia & Desenvolvedor
 
 ## Tecnologias Utilizadas
 
@@ -68,7 +67,7 @@ PORTFOLIO/
 - Frontend: Vercel
 
 ## Licença
-Projeto académico desenvolvido no âmbito do curso de Tecnologias e Design Multimédia.
+Todos os direitos reservados © Ricardo Vidal.
 
 ## Contacto
 Para questões sobre este projeto, contactar: ricardojmv95@gmail.com
