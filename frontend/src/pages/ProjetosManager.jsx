@@ -516,7 +516,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                             <th>Projeto</th>
                                             <th>Cliente</th>
                                             <th>Estado</th>
-                                            <th>Orçamento</th>
+                                            <th>Orçamento (sem IVA)</th>
+                                            <th>Orçamento (com IVA)</th>
                                             <th>Data Início</th>
                                             <th>Data Prevista Fim</th>
                                             <th>Status</th>
@@ -545,9 +546,10 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                         {projeto.estado?.designacaoEstado_Projeto || 'Sem Estado'}
                                                     </span>
                                                 </td>
+                                                <td>€{(parseFloat(projeto.orcamentoTotal || 0) / (1 + IVA_TAXA)).toFixed(2)}</td>
                                                 <td>€{parseFloat(projeto.orcamentoTotal || 0).toFixed(2)}</td>
                                                 <td>
-                                                    {projeto.dataInicio ? 
+                                                    {projeto.dataInicio ?
                                                         new Date(projeto.dataInicio).toLocaleDateString('pt-PT') : 
                                                         'Não definida'}
                                                 </td>
