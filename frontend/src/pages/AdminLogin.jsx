@@ -5,10 +5,11 @@ import styles from './AdminLogin.module.css';
 
 const AdminLogin = () => {
     // Estados principais - CREDENCIAIS REMOVIDAS POR SEGURANÇA
-    const [username, setUsername] = useState(''); 
-    const [password, setPassword] = useState(''); 
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [mostrarPassword, setMostrarPassword] = useState(false);
 
     // Verificar se já existe token válido ao carregar a página
     useEffect(() => {
@@ -130,17 +131,28 @@ const AdminLogin = () => {
                         <label htmlFor="password" className="form-label">
                             Palavra-passe
                         </label>
-                        <input 
-                            type="password" 
-                            id="password"
-                            className="form-control"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Insere a tua palavra-passe"
-                            required
-                            disabled={loading}
-                            autoComplete="current-password"
-                        />
+                        <div className="input-group">
+                            <input
+                                type={mostrarPassword ? 'text' : 'password'}
+                                id="password"
+                                className="form-control"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Insere a tua palavra-passe"
+                                required
+                                disabled={loading}
+                                autoComplete="current-password"
+                            />
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={() => setMostrarPassword(!mostrarPassword)}
+                                tabIndex={-1}
+                                aria-label={mostrarPassword ? 'Ocultar password' : 'Mostrar password'}
+                            >
+                                <i className={`bi ${mostrarPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                            </button>
+                        </div>
                     </div>
                     
                     {/* Botão de submit */}
