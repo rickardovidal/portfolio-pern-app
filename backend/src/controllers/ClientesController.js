@@ -81,9 +81,9 @@ const clientesController = {
             const novoCliente = await Clientes.create({
                 nome,
                 email,
-                telefone,
+                telefone: telefone || null,
                 empresa,
-                nif,
+                nif: nif || null,
                 morada,
                 notas,
                 idTipo_Cliente,
@@ -128,9 +128,9 @@ const clientesController = {
             await cliente.update({
                 nome,
                 email,
-                telefone,
+                telefone: telefone || null,
                 empresa,
-                nif,
+                nif: nif || null,
                 morada,
                 notas,
                 idTipo_Cliente

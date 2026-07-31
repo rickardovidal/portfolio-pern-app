@@ -90,7 +90,7 @@ const servicosController = {
                 descricao_Servico,
                 preco_base_servico,
                 custo_servico,
-                horas_estimadas,
+                horas_estimadas: horas_estimadas || null,
                 idTipo_Servico,
                 ativo: true
             });
@@ -142,7 +142,7 @@ const servicosController = {
                 descricao_Servico,
                 preco_base_servico,
                 custo_servico,
-                horas_estimadas,
+                horas_estimadas: horas_estimadas || null,
                 idTipo_Servico
             });
 

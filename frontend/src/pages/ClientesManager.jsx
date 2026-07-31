@@ -96,6 +96,10 @@ const ClientesManager = ({ onStatsUpdate }) => {
             newErrors.telefone = 'Telefone deve ter pelo menos 9 dígitos';
         }
 
+        if (!formData.morada.trim()) {
+            newErrors.morada = 'Morada é obrigatória';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -483,16 +487,19 @@ const ClientesManager = ({ onStatsUpdate }) => {
                                     </div>
 
                                     <div className="mb-3">
-                                        <label htmlFor="morada" className="form-label">Morada</label>
+                                        <label htmlFor="morada" className="form-label">
+                                            Morada <span className="text-danger">*</span>
+                                        </label>
                                         <textarea
-                                            className="form-control"
+                                            className={`form-control ${errors.morada ? 'is-invalid' : ''}`}
                                             id="morada"
                                             name="morada"
                                             rows="2"
                                             value={formData.morada}
                                             onChange={handleInputChange}
-                                            placeholder="Morada completa (opcional)"
+                                            placeholder="Morada completa"
                                         ></textarea>
+                                        {errors.morada && <div className="invalid-feedback">{errors.morada}</div>}
                                     </div>
 
                                     <div className="mb-3">
