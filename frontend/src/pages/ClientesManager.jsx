@@ -33,17 +33,13 @@ const ClientesManager = ({ onStatsUpdate }) => {
     const loadClientes = async () => {
     try {
         setLoading(true);
-        NotificationService.loading('A carregar clientes...');
-        
+
         const response = await api.get('/clientes');
         if (response.data.success) {
             setClientes(response.data.data || []);
-            NotificationService.closeLoading();
-            NotificationService.successToast('Clientes carregados!');
         }
     } catch (error) {
         console.error('Erro ao carregar clientes:', error);
-        NotificationService.closeLoading();
         NotificationService.errorToast('Erro ao carregar clientes');
     } finally {
         setLoading(false);

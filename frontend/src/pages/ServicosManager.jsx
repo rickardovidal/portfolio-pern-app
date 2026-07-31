@@ -38,14 +38,13 @@ const ServicosManager = ({ onStatsUpdate }) => {
         loadTiposServico();
     }, []);
 
-    // ✅ CORRIGIDO - Carregamento simples com toast
+    // Carregamento simples, sem toasts a cada refresh
     const loadServicos = async () => {
         try {
             setLoading(true);
             const response = await api.get('/servicos');
             if (response.data.success) {
                 setServicos(response.data.data || []);
-                NotificationService.successToast('Serviços carregados!');
             }
         } catch (error) {
             console.error('Erro ao carregar serviços:', error);
@@ -55,13 +54,12 @@ const ServicosManager = ({ onStatsUpdate }) => {
         }
     };
 
-    // ✅ CORRIGIDO - Carregamento simples com toast
+    // Carregamento simples, sem toasts a cada refresh
     const loadTiposServico = async () => {
         try {
             const response = await api.get('/tipos-servicos');
             if (response.data.success) {
                 setTiposServico(response.data.data || []);
-                NotificationService.successToast('Tipos carregados!');
             }
         } catch (error) {
             console.error('Erro ao carregar tipos de serviço:', error);
