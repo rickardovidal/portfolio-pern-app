@@ -10,6 +10,7 @@ import ClientesManager from './ClientesManager';
 import ProjetosManager from './ProjetosManager';
 import ServicosManager from './ServicosManager';
 import EstatisticasManager from './EstatisticasManager';
+import AlterarPassword from './AlterarPassword';
 
 const AdminDashboard = () => {
     const [activeSection, setActiveSection] = useState('dashboard');
@@ -120,7 +121,8 @@ const AdminDashboard = () => {
             { id: 'clientes', icon: 'bi-people', label: 'Clientes' },
             { id: 'projetos', icon: 'bi-folder', label: 'Projetos' },
             { id: 'servicos', icon: 'bi-gear', label: 'Serviços' },
-            { id: 'estatisticas', icon: 'bi-graph-up', label: 'Estatísticas' }
+            { id: 'estatisticas', icon: 'bi-graph-up', label: 'Estatísticas' },
+            { id: 'password', icon: 'bi-key', label: 'Alterar Password' }
         ];
 
         return (
@@ -376,6 +378,8 @@ const AdminDashboard = () => {
                 return <ServicosManager onStatsUpdate={loadDashboardStats} />;
             case 'estatisticas':
                 return <EstatisticasManager />;
+            case 'password':
+                return <AlterarPassword />;
             default:
                 return renderDashboardOverview();
         }
