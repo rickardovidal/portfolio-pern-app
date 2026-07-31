@@ -7,6 +7,7 @@ const clientesController = {
     listar: async (req, res) => {
         try {
             const clientes = await Clientes.findAll({
+                where: { ativo: true },
                 include: [{
                     model: Tipos_Clientes,
                     as: "tipo"
