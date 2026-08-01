@@ -1,13 +1,46 @@
 const Projetos = require('../models/Projetos');
 const Clientes = require('../models/Clientes');
 const Estados_Projeto = require('../models/Estados_Projeto');
+const Servicos = require('../models/Servicos');
+
+const IVA_TAXA = 0.23;
+
+// Soma o preço atual dos serviços indicados + trabalho extra, com IVA
+const calcularOrcamentoAuto = async (servicosIds, horasExtra, custoHora) => {
+    let subtotalServicos = 0;
+    if (servicosIds && servicosIds.length > 0) {
+        for (const servicoId of servicosIds) {
+            const servico = await Servicos.findByPk(servicoId);
+            if (servico) {
+                subtotalServicos += parseFloat(servico.preco_base_servico || 0);
+            }
+        }
+    }
+    const trabalhoExtra = (parseFloat(horasExtra) || 0) * (parseFloat(custoHora) || 0);
+    const subtotal = subtotalServicos + trabalhoExtra;
+    return subtotal + subtotal * IVA_TAXA;
+};
+
+// Projetos não fixados manualmente seguem sempre o preço atual do catálogo
+const aplicarOrcamentoAoVivo = (projeto) => {
+    const projetoJson = projeto.toJSON ? projeto.toJSON() : projeto;
+    if (!projetoJson.orcamentoManual && projetoJson.servicos) {
+        const subtotalServicos = projetoJson.servicos.reduce(
+            (soma, servico) => soma + parseFloat(servico.preco_base_servico || 0), 0
+        );
+        const trabalhoExtra = (parseFloat(projetoJson.horasExtra) || 0) * (parseFloat(projetoJson.custoHora) || 0);
+        const subtotal = subtotalServicos + trabalhoExtra;
+        projetoJson.orcamentoTotal = subtotal + subtotal * IVA_TAXA;
+    }
+    return projetoJson;
+};
 
 const projetosController = {
 
     listar: async (req, res) => {
         try {
             console.log('🔍 [DEBUG] Iniciando listagem de projetos...');
-            
+
             const projetos = await Projetos.findAll({
                 include: [
                     {
@@ -17,6 +50,11 @@ const projetosController = {
                     {
                         model: Estados_Projeto,
                         as: 'estado'
+                    },
+                    {
+                        model: Servicos,
+                        as: 'servicos',
+                        through: { attributes: [] }
                     }
                 ],
                 order: [
@@ -49,7 +87,7 @@ const projetosController = {
 
             res.json({
                 success: true,
-                data: projetos
+                data: projetos.map(aplicarOrcamentoAoVivo)
             });
 
         } catch (error) {
@@ -79,6 +117,11 @@ const projetosController = {
                     {
                         model: Estados_Projeto,
                         as: 'estado'
+                    },
+                    {
+                        model: Servicos,
+                        as: 'servicos',
+                        through: { attributes: [] }
                     }
                 ]
             });
@@ -92,7 +135,7 @@ const projetosController = {
 
             res.json({
                 success: true,
-                data: projeto
+                data: aplicarOrcamentoAoVivo(projeto)
             });
 
         } catch (error) {
@@ -117,6 +160,8 @@ const projetosController = {
                 idCliente,
                 horasEstimadas,
                 custoHora,
+                horasExtra,
+                orcamentoManual,
                 servicos = [] // Array de serviços selecionados
             } = req.body;
 
@@ -125,6 +170,8 @@ const projetosController = {
                 ? parseInt(horasEstimadas, 10) : null;
             const custoHoraValido = !isNaN(parseFloat(custoHora)) && parseFloat(custoHora) >= 0
                 ? parseFloat(custoHora) : null;
+            const horasExtraValida = Number.isInteger(parseInt(horasExtra, 10)) && parseInt(horasExtra, 10) >= 0
+                ? parseInt(horasExtra, 10) : null;
 
             // Validação obrigatória
             if (!nomeProjeto || !idCliente) {
@@ -155,19 +202,16 @@ const projetosController = {
                 });
             }
 
-            // Orçamento: respeitar o valor enviado pelo frontend (já inclui mão de obra e IVA);
-            // sem valor válido, calcular a partir dos serviços selecionados
-            let orcamentoTotal = parseFloat(req.body.orcamentoTotal);
-            if (isNaN(orcamentoTotal) || orcamentoTotal < 0) {
-                orcamentoTotal = 0;
-                if (servicos && servicos.length > 0) {
-                    for (const servicoId of servicos) {
-                        const servico = await require('../models/Servicos').findByPk(servicoId);
-                        if (servico) {
-                            orcamentoTotal += parseFloat(servico.preco_base_servico);
-                        }
-                    }
-                }
+            // Orçamento: se não for fixado manualmente, calcula sempre a partir do preço atual dos serviços
+            const isOrcamentoManual = orcamentoManual === true;
+            let orcamentoTotal;
+            if (isOrcamentoManual) {
+                const valorManual = parseFloat(req.body.orcamentoTotal);
+                orcamentoTotal = (!isNaN(valorManual) && valorManual >= 0)
+                    ? valorManual
+                    : await calcularOrcamentoAuto(servicos, horasExtraValida, custoHoraValido);
+            } else {
+                orcamentoTotal = await calcularOrcamentoAuto(servicos, horasExtraValida, custoHoraValido);
             }
 
             // Criar projeto com estado padrão "Pendente"
@@ -180,6 +224,8 @@ const projetosController = {
                 orcamentoTotal: orcamentoTotal,
                 horasEstimadas: horasValidas,
                 custoHora: custoHoraValido,
+                horasExtra: horasExtraValida,
+                orcamentoManual: isOrcamentoManual,
                 notas,
                 idCliente,
                 idEstado_Projeto: estadoPendente.idEstado_Projeto,
@@ -248,6 +294,8 @@ const projetosController = {
                 ativo,
                 horasEstimadas,
                 custoHora,
+                horasExtra,
+                orcamentoManual,
                 servicos // Array de serviços selecionados (pode ser undefined, array vazio, ou com IDs)
             } = req.body;
 
@@ -262,29 +310,25 @@ const projetosController = {
                 });
             }
 
-            // Orçamento: respeitar o valor enviado pelo frontend (já inclui mão de obra e IVA);
-            // sem valor válido, manter o comportamento antigo de recalcular pelos serviços
-            let orcamentoTotal = parseFloat(req.body.orcamentoTotal);
-            const orcamentoManualValido = !isNaN(orcamentoTotal) && orcamentoTotal >= 0;
-            if (!orcamentoManualValido) {
-                orcamentoTotal = projeto.orcamentoTotal;
-            }
-            if (!orcamentoManualValido && servicos !== undefined) {
-                orcamentoTotal = 0;
-                if (servicos.length > 0) {
-                    const Servicos = require('../models/Servicos');
-                    for (const servicoId of servicos) {
-                        try {
-                            const servico = await Servicos.findByPk(servicoId);
-                            if (servico) {
-                                orcamentoTotal += parseFloat(servico.preco_base_servico || 0);
-                            }
-                        } catch (servicoError) {
-                            console.error(`Erro ao buscar serviço ${servicoId}:`, servicoError);
-                        }
-                    }
-                }
-                console.log('Novo orçamento calculado:', orcamentoTotal);
+            // Horas extra: se não vier no pedido, mantém o valor guardado
+            const horasExtraValida = horasExtra !== undefined
+                ? (Number.isInteger(parseInt(horasExtra, 10)) && parseInt(horasExtra, 10) >= 0 ? parseInt(horasExtra, 10) : null)
+                : projeto.horasExtra;
+            const custoHoraValido = custoHora !== undefined
+                ? (!isNaN(parseFloat(custoHora)) && parseFloat(custoHora) >= 0 ? parseFloat(custoHora) : null)
+                : projeto.custoHora;
+
+            // Orçamento: se não for fixado manualmente, segue sempre o preço atual dos serviços selecionados
+            const isOrcamentoManual = orcamentoManual !== undefined ? orcamentoManual === true : projeto.orcamentoManual;
+            let orcamentoTotal;
+            if (isOrcamentoManual) {
+                const valorManual = parseFloat(req.body.orcamentoTotal);
+                orcamentoTotal = (!isNaN(valorManual) && valorManual >= 0) ? valorManual : projeto.orcamentoTotal;
+            } else {
+                const servicosParaCalculo = servicos !== undefined
+                    ? servicos
+                    : (await projeto.getServicos()).map(s => s.idServico);
+                orcamentoTotal = await calcularOrcamentoAuto(servicosParaCalculo, horasExtraValida, custoHoraValido);
             }
 
             // Atualizar dados do projeto
@@ -298,9 +342,9 @@ const projetosController = {
                 horasEstimadas: horasEstimadas !== undefined
                     ? (Number.isInteger(parseInt(horasEstimadas, 10)) && parseInt(horasEstimadas, 10) >= 0 ? parseInt(horasEstimadas, 10) : null)
                     : projeto.horasEstimadas,
-                custoHora: custoHora !== undefined
-                    ? (!isNaN(parseFloat(custoHora)) && parseFloat(custoHora) >= 0 ? parseFloat(custoHora) : null)
-                    : projeto.custoHora,
+                custoHora: custoHoraValido,
+                horasExtra: horasExtraValida,
+                orcamentoManual: isOrcamentoManual,
                 notas: notas !== undefined ? notas : projeto.notas,
                 idCliente: idCliente || projeto.idCliente,
                 idEstado_Projeto: idEstado_Projeto || projeto.idEstado_Projeto,

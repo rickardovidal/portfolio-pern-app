@@ -66,6 +66,21 @@ var Projetos = sequelize.define('projetos', {
             isDecimal: true
         }
     },
+    horasExtra: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        validate: {
+            min: 0,
+            isInt: true
+        }
+    },
+    // Se false, o orçamento é recalculado a partir do preço atual dos serviços sempre que o projeto é consultado.
+    // Se true, o orçamento foi ajustado manualmente e fica fixo até o utilizador voltar a editá-lo.
+    orcamentoManual: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
     //ver se este campo ainda faz sentido tendo em conta os estados do projeto
     ativo: {
         type: Sequelize.BOOLEAN,
