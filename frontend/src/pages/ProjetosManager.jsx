@@ -26,6 +26,7 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         horasEstimadas: '',
         custoHora: String(CUSTO_HORA_PADRAO),
         horasExtra: '',
+        orcamentoManual: false,
         notas: '',
         idCliente: '',
         idEstado_Projeto: '',
@@ -212,9 +213,14 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             [name]: type === 'checkbox' ? checked : value
         }));
 
-        // Trabalho extra ou taxa alterados: recalcular o orçamento sugerido
+        // Orçamento editado à mão: fica fixo e deixa de seguir o preço do catálogo
+        if (name === 'orcamentoTotal') {
+            setFormData(prev => ({ ...prev, orcamentoManual: true }));
+        }
+
+        // Trabalho extra ou taxa alterados: recalcular o orçamento sugerido, exceto se foi fixado à mão
         // (as horas estimadas são métrica interna e não afetam o preço)
-        if (name === 'horasExtra' || name === 'custoHora') {
+        if ((name === 'horasExtra' || name === 'custoHora') && !formData.orcamentoManual) {
             const horasExtra = name === 'horasExtra' ? value : formData.horasExtra;
             const custoHr = name === 'custoHora' ? value : formData.custoHora;
             const { total } = calcularOrcamento(selectedServicos, horasExtra, custoHr);
@@ -222,11 +228,19 @@ const ProjetosManager = ({ onStatsUpdate }) => {
         }
     };
 
+    // Volta a seguir automaticamente o preço atual dos serviços selecionados
+    const handleReporOrcamentoAutomatico = () => {
+        const { total } = calcularOrcamento(selectedServicos, formData.horasExtra, formData.custoHora);
+        setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '', orcamentoManual: false }));
+    };
+
     const handleServicoChange = (servicoId) => {
         const atualizados = selectedServicos.includes(servicoId)
             ? selectedServicos.filter(id => id !== servicoId)
             : [...selectedServicos, servicoId];
         setSelectedServicos(atualizados);
+
+        if (formData.orcamentoManual) return;
 
         const { total } = calcularOrcamento(atualizados, formData.horasExtra, formData.custoHora);
         setFormData(prev => ({ ...prev, orcamentoTotal: total > 0 ? total.toFixed(2) : '' }));
@@ -298,7 +312,8 @@ const ProjetosManager = ({ onStatsUpdate }) => {
             orcamentoTotal: projeto.orcamentoTotal || 0,
             horasEstimadas: projeto.horasEstimadas ?? '',
             custoHora: projeto.custoHora ?? String(CUSTO_HORA_PADRAO),
-            horasExtra: '',
+            horasExtra: projeto.horasExtra ?? '',
+            orcamentoManual: projeto.orcamentoManual || false,
             notas: projeto.notas || '',
             idCliente: projeto.idCliente || '',
             idEstado_Projeto: projeto.idEstado_Projeto || '',
@@ -321,10 +336,9 @@ const ProjetosManager = ({ onStatsUpdate }) => {
 
     const handleToggleStatus = async (projeto) => {
         const novoStatus = !projeto.ativo;
-        
+
         try {
             const response = await api.put(`/projetos/${projeto.idProjeto}`, {
-                ...projeto,
                 ativo: novoStatus
             });
 
@@ -547,7 +561,14 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                     </span>
                                                 </td>
                                                 <td>€{(parseFloat(projeto.orcamentoTotal || 0) / (1 + IVA_TAXA)).toFixed(2)}</td>
-                                                <td>€{parseFloat(projeto.orcamentoTotal || 0).toFixed(2)}</td>
+                                                <td>
+                                                    €{parseFloat(projeto.orcamentoTotal || 0).toFixed(2)}
+                                                    {projeto.orcamentoManual ? (
+                                                        <i className="bi bi-lock-fill text-warning ms-1" title="Fixado à mão"></i>
+                                                    ) : (
+                                                        <i className="bi bi-arrow-repeat text-muted ms-1" title="Automático, segue o catálogo"></i>
+                                                    )}
+                                                </td>
                                                 <td>
                                                     {projeto.dataInicio ?
                                                         new Date(projeto.dataInicio).toLocaleDateString('pt-PT') : 
@@ -807,9 +828,23 @@ const ProjetosManager = ({ onStatsUpdate }) => {
                                                     value={formData.orcamentoTotal}
                                                     onChange={handleInputChange}
                                                 />
-                                                <small className="text-muted">
-                                                    Automático; podes ajustar.
-                                                </small>
+                                                {formData.orcamentoManual ? (
+                                                    <small className="text-warning">
+                                                        <i className="bi bi-lock-fill me-1"></i>
+                                                        Fixado à mão, já não segue o preço do catálogo.{' '}
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-link btn-sm p-0 align-baseline"
+                                                            onClick={handleReporOrcamentoAutomatico}
+                                                        >
+                                                            Voltar ao automático
+                                                        </button>
+                                                    </small>
+                                                ) : (
+                                                    <small className="text-muted">
+                                                        Automático, segue sempre o preço atual dos serviços. Podes ajustar à mão.
+                                                    </small>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="col-md-4">
