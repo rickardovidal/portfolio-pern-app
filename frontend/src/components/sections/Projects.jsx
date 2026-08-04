@@ -138,7 +138,7 @@ const projectsData = [
     },
     {
         id: 15,
-        title: 'Pata Azul — site para clínica veterinária',
+        title: 'Pata Azul - site para clínica veterinária',
         description: 'Site de demonstração de serviço: React + Tailwind, com sistema de marca e identidade visual próprios, formulário de contacto funcional, consentimento de cookies e animações de scroll. Pensado como modelo replicável para negócio de veterinária/pet care.',
         technologies: ['React', 'Tailwind CSS'],
         category: 'web',
