@@ -45,6 +45,7 @@ const projectsData = [
         category: 'web',
         placeholder: 'Unity Portfolio',
         thumbnail: '/portfolio/web/portfolio-unity-thumb.jpg',
+        thumbnailFit: 'contain',
         link: 'http://193.137.7.33/~aluno28368/Portfolio/',
         featured: true
     },
@@ -144,6 +145,7 @@ const projectsData = [
         category: 'web',
         placeholder: 'Veterinary Clinic Website',
         thumbnail: '/portfolio/web/pata-azul-thumb.png',
+        thumbnailFit: 'contain',
         link: 'https://pataazul.netlify.app/',
         featured: false
     },
@@ -191,10 +193,10 @@ const ProjectCard = ({ project, index, onProjectClick }) => {
             >
                 <div className={styles.projectImage}>
                     {project.thumbnail ? (
-                        <img 
-                            src={project.thumbnail} 
+                        <img
+                            src={project.thumbnail}
                             alt={project.title}
-                            className={styles.projectThumbnail}
+                            className={`${styles.projectThumbnail} ${project.thumbnailFit === 'contain' ? styles.projectThumbnailContain : ''}`}
                         />
                     ) : (
                         <div className={styles.projectPlaceholder}>
@@ -236,10 +238,10 @@ const ProjectCard = ({ project, index, onProjectClick }) => {
         >
             <div className={styles.projectImage}>
                 {project.thumbnail ? (
-                    <img 
-                        src={project.thumbnail} 
+                    <img
+                        src={project.thumbnail}
                         alt={project.title}
-                        className={styles.projectThumbnail}
+                        className={`${styles.projectThumbnail} ${project.thumbnailFit === 'contain' ? styles.projectThumbnailContain : ''}`}
                     />
                 ) : (
                     <div className={styles.projectPlaceholder}>
