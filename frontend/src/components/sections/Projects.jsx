@@ -236,7 +236,9 @@ const categories = [
     { id: '3d', name: 'Unity/Jogos', count: projectsData.filter(p => p.category === '3d').length },
     { id: 'motion', name: 'Motion Design', count: projectsData.filter(p => p.category === 'motion').length },
     { id: 'design', name: 'Design Gráfico', count: projectsData.filter(p => p.category === 'design').length }
-];
+]
+    .filter(category => category.count > 0)
+    .sort((a, b) => b.count - a.count);
 
 const ProjectCard = ({ project, index, onProjectClick }) => {
     const handleClick = (e) => {
