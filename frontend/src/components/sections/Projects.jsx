@@ -3,6 +3,14 @@ import ProjectModal from '../ui/ProjectModal'; // IMPORTAR MODAL
 import VideoModal from '../ui/VideoModal'; // IMPORTAR MODAL DE VÍDEO
 import styles from './Projects.module.css';
 
+const blocoNotasManualPages = Array.from({ length: 30 }, (_, i) =>
+    `/portfolio/design/manual-bloco-notas/page-${String(i + 1).padStart(2, '0')}.jpg`
+);
+
+const blocoLabManualPages = Array.from({ length: 32 }, (_, i) =>
+    `/portfolio/design/manual-bloco-lab/page-${String(i + 1).padStart(2, '0')}.jpg`
+);
+
 const projectsData = [
     {
         id: 3,
@@ -158,6 +166,62 @@ const projectsData = [
         placeholder: 'Event Poster',
         thumbnail: '/portfolio/design/origami-thumb.jpeg',
         gallery: ['/portfolio/design/origami-cartaz.jpeg'],
+        action: 'modal',
+        link: '#projects',
+        featured: false
+    },
+    {
+        id: 16,
+        title: 'Cartaz Promocional - Bloco de Notas & Bloco Lab',
+        description: 'Cartaz promocional do projeto dual-brand Bloco de Notas / Bloco Lab, desenhado em Figma. Destaca a identidade das duas marcas através de mockups desktop e mobile das plataformas.',
+        technologies: ['Figma', 'Photoshop'],
+        category: 'design',
+        placeholder: 'Promotional Poster',
+        thumbnail: '/portfolio/design/cartaz-dualbrand-thumb.png',
+        thumbnailFit: 'contain',
+        gallery: ['/portfolio/design/cartaz-dualbrand.png'],
+        action: 'modal',
+        link: '#projects',
+        featured: false
+    },
+    {
+        id: 17,
+        title: 'Vídeo Demonstração - Bloco de Notas & Bloco Lab',
+        description: 'Vídeo de demonstração do projeto dual-brand Bloco de Notas / Bloco Lab, com animações de scroll sobre mockups, motion graphics e transições produzidas em After Effects, e montagem final em Premiere Pro.',
+        technologies: ['After Effects', 'Premiere Pro', 'Photoshop'],
+        category: 'motion',
+        placeholder: 'Demo Video',
+        thumbnail: '/portfolio/motion/video-dualbrand-thumb.jpg',
+        video: '/portfolio/motion/video-dualbrand.mp4',
+        poster: '/portfolio/motion/video-dualbrand-poster.jpg',
+        action: 'video',
+        link: '#projects',
+        featured: false
+    },
+    {
+        id: 18,
+        title: 'Manual de Identidade Visual - Bloco de Notas',
+        description: 'Manual de identidade visual do redesign da marca Bloco de Notas, produzido em InDesign. Documenta o logótipo, a paleta restrita (verde esmeralda, navy e branco), a tipografia Inter e as normas de aplicação da marca.',
+        technologies: ['InDesign', 'Branding', 'Design Editorial'],
+        category: 'design',
+        placeholder: 'Brand Manual',
+        thumbnail: '/portfolio/design/manual-bloco-notas-thumb.jpg',
+        thumbnailFit: 'contain',
+        gallery: blocoNotasManualPages,
+        action: 'modal',
+        link: '#projects',
+        featured: false
+    },
+    {
+        id: 19,
+        title: 'Manual de Identidade Visual - Bloco Lab',
+        description: 'Manual de identidade visual da marca Bloco Lab, criada de raiz, produzido em InDesign. Documenta o logótipo, a paleta violeta e laranja âmbar, o sistema tipográfico (Space Grotesk, Inter e Epilogue) e as mascotes Robot e Codey.',
+        technologies: ['InDesign', 'Branding', 'Design Editorial'],
+        category: 'design',
+        placeholder: 'Brand Manual',
+        thumbnail: '/portfolio/design/manual-bloco-lab-thumb.jpg',
+        thumbnailFit: 'contain',
+        gallery: blocoLabManualPages,
         action: 'modal',
         link: '#projects',
         featured: false
