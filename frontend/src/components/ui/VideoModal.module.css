@@ -26,8 +26,14 @@
     height: auto;
     width: 100%;
     max-width: 1200px;
-    display: flex;
-    flex-direction: column;
+    /* CORREÇÃO: usar Grid em vez de flex-column. Um flex-item de
+       flex-basis:0 dentro de um contentor height:auto (limitado só por
+       max-height) não recebe uma altura definida de forma fiável — o
+       <video> caía no rácio intrínseco e ultrapassava o espaço real,
+       ficando cortado/sobreposto ao cabeçalho. Com grid-template-rows,
+       a linha "1fr" resolve corretamente contra o max-height do grid. */
+    display: grid;
+    grid-template-rows: auto 1fr auto;
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
     animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -104,14 +110,13 @@
 .videoContainer {
     position: relative;
     width: 100%;
+    height: 100%;
+    min-height: 0;
     background: black;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex: 1;
-    min-height: 0;
-    /* CORREÇÃO: Limitar altura */
-    max-height: calc(100vh - 250px); /* Deixar espaço para header e info */
+    overflow: hidden;
     /* CORREÇÃO: Garantir que eventos de clique passem para o vídeo */
     pointer-events: auto;
 }
@@ -119,7 +124,6 @@
 .video {
     width: 100%;
     height: 100%;
-    max-height: 100%;
     object-fit: contain;
     position: relative;
     /* CORREÇÃO: Garantir que o vídeo e seus controlos recebam eventos de clique */
@@ -257,14 +261,6 @@
         font-size: 1.15rem;
     }
     
-    .videoContainer {
-        max-height: calc(100vh - 220px);
-    }
-    
-    .video {
-        max-height: 100%;
-    }
-    
     .projectInfo {
         padding: 0.75rem 1.25rem;
         max-height: 130px;
@@ -306,10 +302,6 @@
     .closeButton svg {
         width: 18px;
         height: 18px;
-    }
-    
-    .videoContainer {
-        max-height: calc(100vh - 200px);
     }
     
     .projectInfo {
