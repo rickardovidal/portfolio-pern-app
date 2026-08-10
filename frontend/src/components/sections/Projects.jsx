@@ -192,6 +192,7 @@ const projectsData = [
         category: 'motion',
         placeholder: 'Demo Video',
         thumbnail: '/portfolio/motion/video-dualbrand-thumb.jpg',
+        thumbnailFit: 'contain',
         video: '/portfolio/motion/video-dualbrand.mp4',
         poster: '/portfolio/motion/video-dualbrand-poster.jpg',
         action: 'video',

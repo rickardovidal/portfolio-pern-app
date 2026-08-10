@@ -122,7 +122,7 @@ const ProjectModal = ({ project, isOpen, onClose }) => {
                                 }`}
                                 onClick={() => goToImage(index)}
                             >
-                                <img src={image} alt={`Thumbnail ${index + 1}`} />
+                                <img src={image} alt={`Thumbnail ${index + 1}`} loading="lazy" decoding="async" />
                             </button>
                         ))}
                     </div>
