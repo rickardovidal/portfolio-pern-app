@@ -25,7 +25,7 @@
     max-height: calc(100vh - 100px); /* Reduzido de 85vh para deixar espaço para o menu */
     height: auto;
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -102,9 +102,10 @@
     align-items: center;
     justify-content: center;
     background: #f8f9fa;
-    /* CORREÇÃO: Limitar altura máxima da imagem */
-    min-height: 250px; /* Reduzido de 400px */
-    max-height: 350px; /* Reduzido de 500px */
+    /* Área de imagem generosa: os documentos (manuais de identidade)
+       precisam de espaço real para se conseguir ler o detalhe */
+    min-height: 400px;
+    max-height: calc(100vh - 340px);
 }
 
 .mainImage {
@@ -316,8 +317,8 @@
     }
     
     .imageContainer {
-        min-height: 200px;
-        max-height: 300px;
+        min-height: 280px;
+        max-height: calc(100vh - 260px);
     }
     
     .modalHeader {
@@ -368,8 +369,8 @@
     }
     
     .imageContainer {
-        min-height: 180px;
-        max-height: 250px;
+        min-height: 220px;
+        max-height: calc(100vh - 220px);
     }
     
     .modalHeader {
