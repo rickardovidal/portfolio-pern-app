@@ -58,13 +58,13 @@
 }
 
 .filterButton:hover {
-    color: var(--highlight);
-    background: rgba(235, 71, 62, 0.05);
+    color: var(--accent);
+    background: rgba(0, 102, 204, 0.05);
 }
 
 .filterButton.active {
     color: var(--white);
-    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    background: linear-gradient(135deg, var(--black), var(--accent));
     transform: translateY(-1px);
 }
 
@@ -228,7 +228,7 @@
 
 .categoryTag {
     font-size: 0.7rem;
-    background: rgba(27, 100, 240, 0.1);
+    background: rgba(0, 102, 204, 0.1);
     color: var(--accent);
     padding: 0.3rem 0.8rem;
     border-radius: 15px;
@@ -250,7 +250,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem 2.5rem;
-    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+    background: linear-gradient(135deg, var(--black), var(--accent));
     color: var(--white);
     border: none;
     border-radius: 50px;
@@ -258,14 +258,14 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(27, 100, 240, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 102, 204, 0.3);
     position: relative;
     overflow: hidden;
 }
 
 .loadMoreButton:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(27, 100, 240, 0.4);
+    box-shadow: 0 6px 30px rgba(0, 102, 204, 0.4);
 }
 
 .loadMoreButton:disabled {

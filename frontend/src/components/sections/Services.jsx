@@ -80,7 +80,7 @@ const Services = () => {
                 <div className={styles.servicesHeader}>
                     <div className={styles.servicesLabel}>Serviços</div>
                     <h2 className={styles.servicesTitle}>
-                        Como podemos ajudar
+                        O que posso fazer por si
                     </h2>
                     <p className={styles.servicesSubtitle}>
                         Da conceção à entrega, um conjunto de serviços que cobre

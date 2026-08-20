@@ -82,11 +82,11 @@ const Skills = () => {
                 <div className={styles.skillsHeader}>
                     <div className={styles.skillsLabel}>Competências</div>
                     <h2 className={styles.skillsTitle}>
-                        Tecnologias e ferramentas de trabalho
+                        Tecnologias e ferramentas com que trabalho
                     </h2>
                     <p className={styles.skillsSubtitle}>
-                        Desde o desenvolvimento web até ao design multimédia,
-                        são utilizadas as mais recentes tecnologias do mercado.
+                        Desde o desenvolvimento web até ao design multimédia, 
+                        trabalho com as mais recentes tecnologias do mercado.
                     </p>
                 </div>
 

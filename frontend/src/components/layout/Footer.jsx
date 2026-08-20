@@ -14,8 +14,8 @@ const Footer = () => {
             <div className={styles.footerContainer}>
                 <div className={styles.footerContent}>
                     <div className={styles.footerSection}>
-                        <img src="/logo-dark-bg.svg" alt="Vidal Creative Studio" className={styles.footerLogo} />
-                        <p>Design multimédia e desenvolvimento especializados em criar experiências digitais inovadoras que combinam estética e funcionalidade.</p>
+                        <h4>Ricardo Vidal</h4>
+                        <p>Designer Multimédia e Desenvolvedor especializado em criar experiências digitais inovadoras que combinam estética e funcionalidade.</p>
                         <div className={styles.socialLinks}>
                             {socialLinks.map((link, index) => (
                                 <a 
@@ -35,7 +35,7 @@ const Footer = () => {
                     <div className={styles.footerSection}>
                         <h4>Projetos</h4>
                         <ul className={styles.footerLinks}>
-                            {['Design Gráfico', 'Motion Design', 'Web', 'Mobile/UI'].map((project, index) => (
+                            {['Portfólio Web', 'Aplicações Mobile', 'Animação 3D', 'UI/UX Design'].map((project, index) => (
                                 <li key={index}><a href="#projects">{project}</a></li>
                             ))}
                         </ul>
@@ -51,9 +51,10 @@ const Footer = () => {
                     </div>
 
                     <div className={styles.footerSection}>
+                        <h4>Contacto</h4>
                         <ul className={styles.footerLinks}>
                             {[
-                                { text: 'ricardojmv95@gmail.com', href: 'mailto:ricardojmv95@gmail.com' },
+                                { text: 'Email', href: 'mailto:ricardojmv95@gmail.com' },
                                 { text: 'Telefone', href: 'tel:+351123456789' },
                             ].map((contact, index) => (
                                 <li key={index}><a href={contact.href}>{contact.text}</a></li>
@@ -69,11 +70,6 @@ const Footer = () => {
                         <li><Link to="/privacidade">Privacidade</Link></li>
                         <li><Link to="/termos">Termos</Link></li>
                         <li><Link to="/cookies">Cookies</Link></li>
-                        <li>
-                            <a href="https://www.livroreclamacoes.pt/Inicio/" target="_blank" rel="noopener noreferrer">
-                                Livro de Reclamações
-                            </a>
-                        </li>
                     </ul>
                 </div>
                 <div>

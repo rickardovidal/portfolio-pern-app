@@ -7,6 +7,8 @@ import Projects from '../components/sections/Projects';
 import Experience from '../components/sections/Experience';
 import ContactForm from '../components/sections/ContactForm';
 import Contact from '../components/sections/Contact';
+import '../styles/variables.css';
+import '../styles/global.css'
 
 const Portfolio = () => {
   return (

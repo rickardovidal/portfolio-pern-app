@@ -13,7 +13,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(27, 100, 240, 0.05) 0%, rgba(10, 23, 41, 0.95) 100%);
+    background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(26, 26, 26, 0.95) 100%);
     pointer-events: none;
 }
 

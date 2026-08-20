@@ -17,11 +17,7 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             return 'vendor';
           }
-        },
-        // Nomes de chunk neutros (sem "privacy"/"cookie" no ficheiro) para evitar
-        // que bloqueadores de anúncios/privacidade rejeitem o pedido de rede
-        // (net::ERR_BLOCKED_BY_CLIENT) às páginas legais em produção.
-        chunkFileNames: 'assets/chunk-[hash].js'
+        }
       }
     }
   },

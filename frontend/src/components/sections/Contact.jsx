@@ -28,10 +28,10 @@ const Contact = () => {
         <section className={styles.contact} id="contact">
             <div className={styles.contactContainer}>
                 <div className={styles.contactText}>
-                    <h2>Interessado em colaborar ou saber mais sobre este trabalho?</h2>
+                    <h2>Interessado em colaborar ou saber mais sobre o meu trabalho?</h2>
                     <p className='col-sm-12 col-md-6'>
-                        Disponibilidade total para discutir novas oportunidades,
-                        projetos interessantes ou simplesmente uma conversa
+                        Estou sempre disponível para discutir novas oportunidades, 
+                        projetos interessantes ou simplesmente para uma conversa 
                         sobre design e tecnologia.
                     </p>
                 
