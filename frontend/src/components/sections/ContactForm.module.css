@@ -188,7 +188,7 @@
     padding: 1.25rem 2.5rem;
     font-size: 1rem;
     font-weight: 500;
-    border-radius: 8px;
+    border-radius: 9999px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
