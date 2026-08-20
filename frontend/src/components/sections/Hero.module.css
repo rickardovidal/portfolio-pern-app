@@ -46,7 +46,7 @@
 .heroTitle strong {
     font-weight: 600;
     position: relative;
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -68,7 +68,7 @@
     height: 42px;
     padding: 4px 3.5rem 4px 1.5rem;
     border-radius: 9999px;
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     color: var(--white);
     text-decoration: none;
     font-size: 0.95rem;
