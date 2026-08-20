@@ -14,7 +14,7 @@ const Footer = () => {
             <div className={styles.footerContainer}>
                 <div className={styles.footerContent}>
                     <div className={styles.footerSection}>
-                        <img src="/logo-dark-bg.png" alt="Vidal Creative Studio" className={styles.footerLogo} />
+                        <img src="/logo-dark-bg.svg" alt="Vidal Creative Studio" className={styles.footerLogo} />
                         <p>Designer Multimédia e Desenvolvedor especializado em criar experiências digitais inovadoras que combinam estética e funcionalidade.</p>
                         <div className={styles.socialLinks}>
                             {socialLinks.map((link, index) => (

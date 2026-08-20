@@ -94,7 +94,7 @@ const Navbar = () => {
                         className={styles.logo}
                         onClick={(e) => handleLinkClick(e, '#home')}
                     >
-                        <img src="/logo.png" alt="Vidal Creative Studio" className={styles.logoImg} />
+                        <img src="/logo.svg" alt="Vidal Creative Studio" className={styles.logoImg} />
                     </a>
                     
                     <button 
