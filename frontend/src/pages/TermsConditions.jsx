@@ -97,8 +97,8 @@ const TermsConditions = () => {
                     </ul>
                     <p>
                         A apresentação de serviços neste website não constitui, por si só, uma proposta
-                        contratual vinculativa. As condições específicas de cada serviço — nomeadamente
-                        preço, prazos, âmbito de trabalho e forma de pagamento — são definidas
+                        contratual vinculativa. As condições específicas de cada serviço, nomeadamente
+                        preço, prazos, âmbito de trabalho e forma de pagamento, são definidas
                         individualmente mediante proposta comercial e, sempre que aplicável, formalizadas
                         em contrato ou orçamento aceite por ambas as partes.
                     </p>
@@ -111,7 +111,7 @@ const TermsConditions = () => {
                         consumidor, aplica-se o regime previsto no Decreto-Lei n.º 24/2014, que confere
                         ao consumidor o direito de livre resolução do contrato no prazo de 14 dias
                         seguidos, sem necessidade de indicar qualquer motivo, salvo nas exceções previstas
-                        na lei — nomeadamente quando o serviço tenha sido integralmente prestado e o
+                        na lei, nomeadamente quando o serviço tenha sido integralmente prestado e o
                         consumidor tenha dado o seu acordo prévio e expresso ao início da execução antes
                         do termo desse prazo, com reconhecimento de que perde o direito de resolução após
                         a conclusão do serviço.
