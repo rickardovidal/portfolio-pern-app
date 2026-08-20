@@ -27,6 +27,13 @@
     letter-spacing: 0.02em;
 }
 
+.footerLogo {
+    height: 44px;
+    width: auto;
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
 .footerSection p {
     font-size: 0.9rem;
     line-height: 1.7;
