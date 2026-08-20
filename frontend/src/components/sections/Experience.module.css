@@ -46,7 +46,7 @@
     /* Ajuste para alinhar com o ponto */
     bottom: 10px;
     width: 2px;
-    background: linear-gradient(to bottom, var(--accent), rgba(0, 102, 204, 0.3));
+    background: linear-gradient(to bottom, var(--accent), rgba(27, 100, 240, 0.3));
 }
 
 .experienceItem {
