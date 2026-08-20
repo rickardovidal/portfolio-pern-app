@@ -78,7 +78,7 @@ const Hero = () => {
                         className={styles.heroSubtitle}
                         variants={itemVariants}
                     >
-                        Crio soluções digitais completas, da ideia à execução, com foco em experiências intuitivas e funcionais.
+                        Soluções digitais completas, da ideia à execução, com foco em experiências intuitivas e funcionais.
                     </motion.p>
                     <motion.a
                         href="#projects"
