@@ -32,11 +32,16 @@
 
 /* ===== LOGO ===== */
 .logo {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--black);
+    display: flex;
+    align-items: center;
     text-decoration: none;
     z-index: 51; /* Ajustado */
+}
+
+.logoImg {
+    height: 36px;
+    width: auto;
+    display: block;
 }
 
 /* ===== MENU DESKTOP ===== */

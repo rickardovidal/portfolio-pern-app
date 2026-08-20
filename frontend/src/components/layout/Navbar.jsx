@@ -89,12 +89,12 @@ const Navbar = () => {
         <>
             <nav className={`${styles.nav} ${isScrolled ? styles.scrolled : ''}`}>
                 <div className={styles.navContent}>
-                    <a 
-                        href="#home" 
+                    <a
+                        href="#home"
                         className={styles.logo}
                         onClick={(e) => handleLinkClick(e, '#home')}
                     >
-                        Ricardo Vidal
+                        <img src="/logo.png" alt="Vidal Creative Studio" className={styles.logoImg} />
                     </a>
                     
                     <button 
