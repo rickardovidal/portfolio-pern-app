@@ -1,22 +1,22 @@
 /* src/components/layout/Navbar.module.css */
 
-.nav { 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    right: 0; 
-    padding: 1.5rem 3rem; 
-    background: rgba(255, 255, 255, 0.85); 
-    backdrop-filter: blur(20px); 
-    -webkit-backdrop-filter: blur(20px); 
+.nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 0.875rem 3rem;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     /* CORREÇÃO: Z-index reduzido para permitir que modais fiquem por cima */
     z-index: 50; /* Alterado de 100 para 50 */
-    border-bottom: 1px solid rgba(10, 23, 41, 0.08); 
-    transition: all 0.3s ease; 
+    border-bottom: 1px solid rgba(10, 23, 41, 0.08);
+    transition: all 0.3s ease;
 }
 
 .nav.scrolled {
-    padding: 1rem 3rem;
+    padding: 0.375rem 3rem;
     background: rgba(255, 255, 255, 0.95);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
 }
@@ -39,7 +39,7 @@
 }
 
 .logoImg {
-    height: 48px;
+    height: 56px;
     width: auto;
     display: block;
 }
@@ -81,6 +81,7 @@
 
 .navLinks a:hover::after {
     width: 100%;
+    background: var(--highlight);
 }
 
 .navLinks a.active {
@@ -88,7 +89,7 @@
 }
 
 .navLinks a:hover {
-    color: var(--black);
+    color: var(--highlight);
 }
 
 /* ===== HAMBURGER MENU ===== */
