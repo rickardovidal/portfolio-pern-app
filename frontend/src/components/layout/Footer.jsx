@@ -35,7 +35,7 @@ const Footer = () => {
                     <div className={styles.footerSection}>
                         <h4>Projetos</h4>
                         <ul className={styles.footerLinks}>
-                            {['Portfólio Web', 'Aplicações Mobile', 'Animação 3D', 'UI/UX Design'].map((project, index) => (
+                            {['Design Gráfico', 'Motion Design', 'Web', 'Mobile/UI'].map((project, index) => (
                                 <li key={index}><a href="#projects">{project}</a></li>
                             ))}
                         </ul>
@@ -51,10 +51,9 @@ const Footer = () => {
                     </div>
 
                     <div className={styles.footerSection}>
-                        <h4>Contacto</h4>
                         <ul className={styles.footerLinks}>
                             {[
-                                { text: 'Email', href: 'mailto:ricardojmv95@gmail.com' },
+                                { text: 'ricardojmv95@gmail.com', href: 'mailto:ricardojmv95@gmail.com' },
                                 { text: 'Telefone', href: 'tel:+351123456789' },
                             ].map((contact, index) => (
                                 <li key={index}><a href={contact.href}>{contact.text}</a></li>
