@@ -67,7 +67,7 @@
     width: 56px;
     height: 56px;
     border-radius: 14px;
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -81,7 +81,7 @@
 }
 
 .serviceCard:hover .serviceIconWrapper {
-    box-shadow: 0 8px 20px rgba(0, 102, 204, 0.4);
+    box-shadow: 0 8px 20px rgba(27, 100, 240, 0.4);
     transform: scale(1.05);
 }
 
@@ -107,7 +107,7 @@
 
 .serviceTag {
     font-size: 0.8rem;
-    background: rgba(0, 102, 204, 0.08);
+    background: rgba(27, 100, 240, 0.08);
     color: var(--accent);
     padding: 0.4rem 0.9rem;
     border-radius: 15px;

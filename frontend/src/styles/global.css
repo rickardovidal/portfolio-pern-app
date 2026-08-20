@@ -114,7 +114,7 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             z-index: 1000;
-            border-bottom: 1px solid rgba(26, 26, 26, 0.05);
+            border-bottom: 1px solid rgba(10, 23, 41, 0.05);
             transition: all 0.3s ease;
         }
 
@@ -251,7 +251,7 @@
         .hero-title strong {
             font-weight: 600;
             position: relative;
-            background: linear-gradient(135deg, var(--black), var(--accent));
+            background: linear-gradient(135deg, var(--accent-deep), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -376,7 +376,7 @@
             font-size: 0.95rem;
             color: var(--black);
             font-weight: 400;
-            border-bottom: 1px solid rgba(26, 26, 26, 0.1);
+            border-bottom: 1px solid rgba(10, 23, 41, 0.1);
             position: relative;
             transition: all 0.3s ease;
             cursor: pointer;
@@ -431,7 +431,7 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.4s ease, padding 0.4s ease;
-            background: rgba(0, 102, 204, 0.02);
+            background: rgba(27, 100, 240, 0.02);
         }
 
         .skill-details.expanded {
@@ -534,7 +534,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, var(--accent), var(--black));
+            background: linear-gradient(135deg, var(--accent), var(--accent-deep));
             opacity: 0;
             transition: opacity 0.4s ease;
             z-index: 1;
@@ -688,7 +688,7 @@
             top: 0;
             bottom: 0;
             width: 2px;
-            background: linear-gradient(to bottom, var(--accent), rgba(0, 102, 204, 0.3));
+            background: linear-gradient(to bottom, var(--accent), rgba(27, 100, 240, 0.3));
         }
 
         .experience-item {
@@ -769,7 +769,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 102, 204, 0.05) 0%, rgba(26, 26, 26, 0.95) 100%);
+            background: linear-gradient(135deg, rgba(27, 100, 240, 0.05) 0%, rgba(10, 23, 41, 0.95) 100%);
             pointer-events: none;
         }
 

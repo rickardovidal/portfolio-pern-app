@@ -82,8 +82,7 @@ const About = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
                         >
-                            O meu trabalho centra-se no desenvolvimento de projetos digitais que respondem a necessidades reais.
-                            Combino competências em design e programação para criar desde interfaces web até aplicações, e outros produtos multimédia além do desenho e criação de bases de dados.
+                            O trabalho centra-se no desenvolvimento de projetos digitais que respondem a necessidades reais, combinando competências em design e programação para criar desde interfaces web até aplicações, e outros produtos multimédia além do desenho e criação de bases de dados.
                         </motion.p>
                         <motion.p
                             initial={{ opacity: 0, y: 15 }}
@@ -91,7 +90,7 @@ const About = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                         >
-                            Com experiência em prototipagem, desenvolvimento web e full-stack, concepção de produtos de design gráfico e design multimédia e gestão de projetos. Procuro sempre a solução mais adequada para cada desafio.
+                            Com experiência em prototipagem, desenvolvimento web e full-stack, concepção de produtos de design gráfico e design multimédia e gestão de projetos, com foco constante na solução mais adequada para cada desafio.
                         </motion.p>
                     </div>
                     <div className={styles.skillsList}>
