@@ -133,8 +133,8 @@ const ContactForm = () => {
                         Vamos trabalhar juntos no seu próximo projeto
                     </h2>
                     <p className={styles.contactFormSubtitle}>
-                        Envie-me uma mensagem e entrarei em contacto consigo brevemente para discutirmos 
-                        as suas necessidades e como posso ajudar.
+                        Envie uma mensagem para entrarmos em contacto brevemente e discutirmos
+                        as suas necessidades e como podemos ajudar.
                     </p>
                 </div>
 
@@ -268,13 +268,13 @@ const ContactForm = () => {
                         {/* Status Messages */}
                         {submitStatus === 'success' && (
                             <div className={styles.statusMessage + ' ' + styles.statusSuccess}>
-                                ✅ Mensagem enviada com sucesso! Entrarei em contacto brevemente.
+                                ✅ Mensagem enviada com sucesso! Entraremos em contacto brevemente.
                             </div>
                         )}
 
                         {submitStatus === 'error' && (
                             <div className={styles.statusMessage + ' ' + styles.statusError}>
-                                ❌ Erro ao enviar mensagem. Tente novamente ou contacte-me directamente.
+                                ❌ Erro ao enviar mensagem. Tente novamente ou contacte-nos directamente.
                             </div>
                         )}
 
