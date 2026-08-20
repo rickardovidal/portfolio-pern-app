@@ -5,7 +5,7 @@
     display: flex;
     align-items: center;
     padding: 0 3rem;
-    padding-top: 170px;
+    padding-top: 130px;
     /* Altura do menu + margem de segurança */
     position: relative;
     background: var(--white);
@@ -18,7 +18,7 @@
     margin: 0 auto;
     width: 100%;
     display: grid;
-    grid-template-columns: 450px 1fr;
+    grid-template-columns: 495px 1fr;
     gap: 8rem;
     align-items: flex-start;
     position: relative;
@@ -27,7 +27,8 @@
 }
 
 .heroText {
-    max-width: 450px;
+    max-width: 495px;
+    margin-top: 6rem;
     /* CORREÇÃO: Remover z-index que estava a causar sobreposição nos modais */
     /* z-index: 2; - REMOVIDO */
     position: relative;
@@ -46,7 +47,7 @@
 .heroTitle strong {
     font-weight: 600;
     position: relative;
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -68,7 +69,7 @@
     height: 42px;
     padding: 4px 3.5rem 4px 1.5rem;
     border-radius: 9999px;
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     color: var(--white);
     text-decoration: none;
     font-size: 0.95rem;
@@ -128,7 +129,7 @@
 /* Desktop muito grande (>1400px) - Layout original */
 @media (min-width: 1401px) {
     .heroContainer {
-        grid-template-columns: 450px 1fr;
+        grid-template-columns: 495px 1fr;
         gap: 8rem;
     }
 
@@ -149,12 +150,12 @@
     }
 
     .heroContainer {
-        grid-template-columns: 420px 1fr;
+        grid-template-columns: 460px 1fr;
         gap: 7rem;
     }
 
     .heroText {
-        max-width: 420px;
+        max-width: 460px;
     }
 
     .heroTitle {
@@ -176,12 +177,12 @@
     }
 
     .heroContainer {
-        grid-template-columns: 380px 1fr;
+        grid-template-columns: 415px 1fr;
         gap: 5.5rem;
     }
 
     .heroText {
-        max-width: 380px;
+        max-width: 415px;
     }
 
     .heroTitle {
@@ -209,12 +210,12 @@
     }
 
     .heroContainer {
-        grid-template-columns: 375px 1fr;
+        grid-template-columns: 410px 1fr;
         gap: 5.2rem;
     }
 
     .heroText {
-        max-width: 375px;
+        max-width: 410px;
     }
 
     .heroTitle {
@@ -242,12 +243,12 @@
     }
 
     .heroContainer {
-        grid-template-columns: 370px 1fr;
+        grid-template-columns: 405px 1fr;
         gap: 5rem;
     }
 
     .heroText {
-        max-width: 370px;
+        max-width: 405px;
     }
 
     .heroTitle {
@@ -278,13 +279,13 @@
     }
 
     .heroContainer {
-        grid-template-columns: 340px 1fr;
+        grid-template-columns: 400px 1fr;
         gap: 4rem;
         align-items: start;
     }
 
     .heroText {
-        max-width: 340px;
+        max-width: 400px;
     }
 
     .heroTitle {
@@ -313,13 +314,13 @@
     }
 
     .heroContainer {
-        grid-template-columns: 320px 1fr;
+        grid-template-columns: 380px 1fr;
         gap: 3rem;
         align-items: start;
     }
 
     .heroText {
-        max-width: 320px;
+        max-width: 380px;
     }
 
     .heroTitle {

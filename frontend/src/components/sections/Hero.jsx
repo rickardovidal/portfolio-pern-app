@@ -72,13 +72,13 @@ const Hero = () => {
                         className={styles.heroTitle}
                         variants={itemVariants}
                     >
-                        Designer <strong>Multimédia</strong><br />& Desenvolvedor
+                        Design <strong>Multimédia</strong><br />& Desenvolvimento
                     </motion.h1>
                     <motion.p 
                         className={styles.heroSubtitle}
                         variants={itemVariants}
                     >
-                        Crio soluções digitais completas, da ideia à execução, com foco em experiências intuitivas e funcionais.
+                        Soluções digitais completas, da ideia à execução, com foco em experiências intuitivas e funcionais.
                     </motion.p>
                     <motion.a
                         href="#projects"
