@@ -35,8 +35,8 @@ const CookiePolicy = () => {
                     <p>
                         A única informação armazenada localmente no navegador é o token de autenticação da
                         área administrativa do website, através da tecnologia <strong>localStorage</strong>.
-                        Este mecanismo não constitui, tecnicamente, um cookie — não é enviado
-                        automaticamente ao servidor em cada pedido nem é acessível a terceiros — e
+                        Este mecanismo não constitui, tecnicamente, um cookie: não é enviado
+                        automaticamente ao servidor em cada pedido nem é acessível a terceiros, e
                         destina-se exclusivamente ao funcionamento técnico da área reservada, não sendo
                         utilizado para fins de rastreio dos visitantes do website.
                     </p>

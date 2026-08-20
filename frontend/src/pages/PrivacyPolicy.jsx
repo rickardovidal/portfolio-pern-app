@@ -31,18 +31,18 @@ const PrivacyPolicy = () => {
                     <h2>2. Dados Pessoais Recolhidos</h2>
                     <p>No âmbito da utilização do formulário de contacto deste website, são recolhidos os seguintes dados pessoais:</p>
                     <ul>
-                        <li><strong>Nome completo</strong> — para identificação do requerente e personalização da resposta</li>
-                        <li><strong>Endereço de correio eletrónico</strong> — para estabelecimento de contacto e resposta às solicitações</li>
-                        <li><strong>Número de telefone</strong> (facultativo) — para contacto telefónico quando necessário</li>
-                        <li><strong>Nome da empresa</strong> (facultativo) — para contextualização profissional da solicitação</li>
-                        <li><strong>Assunto e mensagem</strong> — para compreensão da natureza da solicitação</li>
-                        <li><strong>Endereço IP</strong> — para fins de segurança e prevenção de spam</li>
-                        <li><strong>Data e hora do envio</strong> — para registo temporal da comunicação</li>
+                        <li><strong>Nome completo:</strong> para identificação do requerente e personalização da resposta</li>
+                        <li><strong>Endereço de correio eletrónico:</strong> para estabelecimento de contacto e resposta às solicitações</li>
+                        <li><strong>Número de telefone</strong> (facultativo): para contacto telefónico quando necessário</li>
+                        <li><strong>Nome da empresa</strong> (facultativo): para contextualização profissional da solicitação</li>
+                        <li><strong>Assunto e mensagem:</strong> para compreensão da natureza da solicitação</li>
+                        <li><strong>Endereço IP:</strong> para fins de segurança e prevenção de spam</li>
+                        <li><strong>Data e hora do envio:</strong> para registo temporal da comunicação</li>
                     </ul>
                     <p>
                         Não é recolhido qualquer outro dado pessoal fora do formulário de contacto. O
-                        website não utiliza cookies próprios de rastreio nem ferramentas de analytics —
-                        mais informação disponível na{' '}
+                        website não utiliza cookies próprios de rastreio nem ferramentas de analytics.
+                        Mais informação disponível na{' '}
                         <Link to="/cookies">Política de Cookies</Link>.
                     </p>
                 </section>
@@ -65,7 +65,7 @@ const PrivacyPolicy = () => {
                         O tratamento dos dados pessoais baseia-se no <strong>consentimento explícito</strong> manifestado
                         pelo titular dos dados ao submeter o formulário de contacto, bem como no <strong>interesse legítimo</strong>
                         do responsável pelo tratamento em responder às solicitações recebidas, nos termos do artigo 6.º
-                        do Regulamento (UE) 2016/679 — Regulamento Geral sobre a Proteção de Dados (RGPD).
+                        do Regulamento (UE) 2016/679, o Regulamento Geral sobre a Proteção de Dados (RGPD).
                     </p>
                 </section>
 
@@ -133,7 +133,7 @@ const PrivacyPolicy = () => {
                     <p>
                         São implementadas medidas técnicas e organizacionais adequadas para assegurar um nível
                         de segurança apropriado ao risco, incluindo proteção contra o acesso não autorizado,
-                        alteração, divulgação ou destruição dos dados pessoais — nomeadamente comunicação
+                        alteração, divulgação ou destruição dos dados pessoais, nomeadamente comunicação
                         cifrada (HTTPS) e controlo de acesso à área administrativa do website.
                     </p>
                 </section>
@@ -151,7 +151,7 @@ const PrivacyPolicy = () => {
                     <h2>11. Direito de Reclamação</h2>
                     <p>
                         Os titulares dos dados têm o direito de apresentar reclamação junto da autoridade
-                        de controlo competente — Comissão Nacional de Proteção de Dados (CNPD) —,
+                        de controlo competente, a Comissão Nacional de Proteção de Dados (CNPD),
                         através do website{' '}
                         <a href="https://www.cnpd.pt" target="_blank" rel="noopener noreferrer">www.cnpd.pt</a>{' '}
                         ou por correio postal para Av. D. Carlos I, 134, 1.º, 1200-651 Lisboa.
