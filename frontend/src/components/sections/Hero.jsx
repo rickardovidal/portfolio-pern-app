@@ -72,7 +72,7 @@ const Hero = () => {
                         className={styles.heroTitle}
                         variants={itemVariants}
                     >
-                        Designer <strong>Multimédia</strong><br />& Desenvolvedor
+                        Design <strong>Multimédia</strong><br />& Desenvolvimento
                     </motion.h1>
                     <motion.p 
                         className={styles.heroSubtitle}
