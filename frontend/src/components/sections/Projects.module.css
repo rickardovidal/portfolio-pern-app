@@ -64,7 +64,7 @@
 
 .filterButton.active {
     color: var(--white);
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     transform: translateY(-1px);
 }
 
@@ -250,7 +250,7 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem 2.5rem;
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     color: var(--white);
     border: none;
     border-radius: 50px;
