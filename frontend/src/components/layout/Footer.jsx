@@ -15,7 +15,7 @@ const Footer = () => {
                 <div className={styles.footerContent}>
                     <div className={styles.footerSection}>
                         <img src="/logo-dark-bg.svg" alt="Vidal Creative Studio" className={styles.footerLogo} />
-                        <p>Designer Multimédia e Desenvolvedor especializado em criar experiências digitais inovadoras que combinam estética e funcionalidade.</p>
+                        <p>Design multimédia e desenvolvimento especializados em criar experiências digitais inovadoras que combinam estética e funcionalidade.</p>
                         <div className={styles.socialLinks}>
                             {socialLinks.map((link, index) => (
                                 <a 
@@ -70,6 +70,11 @@ const Footer = () => {
                         <li><Link to="/privacidade">Privacidade</Link></li>
                         <li><Link to="/termos">Termos</Link></li>
                         <li><Link to="/cookies">Cookies</Link></li>
+                        <li>
+                            <a href="https://www.livroreclamacoes.pt/Inicio/" target="_blank" rel="noopener noreferrer">
+                                Livro de Reclamações
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div>
