@@ -105,7 +105,7 @@
 .formTextarea:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+    box-shadow: 0 0 0 3px rgba(27, 100, 240, 0.1);
     transform: translateY(-1px);
 }
 
@@ -220,7 +220,7 @@
 
 .submitButton:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 102, 204, 0.3);
+    box-shadow: 0 8px 25px rgba(27, 100, 240, 0.3);
 }
 
 .submitButton:active {
@@ -330,7 +330,7 @@
 /* Estados hover para inputs */
 .formInput:hover:not(:focus),
 .formTextarea:hover:not(:focus) {
-    border-color: rgba(0, 102, 204, 0.3);
+    border-color: rgba(27, 100, 240, 0.3);
 }
 
 /* Melhorar acessibilidade */

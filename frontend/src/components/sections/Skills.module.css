@@ -231,8 +231,8 @@
 }
 
 .skillCategory:hover {
-    background: rgba(0, 102, 204, 0.03);
-    border-color: rgba(0, 102, 204, 0.1);
+    background: rgba(27, 100, 240, 0.03);
+    border-color: rgba(27, 100, 240, 0.1);
     transform: translateY(-4px);
 }
 
