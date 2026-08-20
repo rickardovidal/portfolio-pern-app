@@ -58,8 +58,8 @@
 }
 
 .filterButton:hover {
-    color: var(--accent);
-    background: rgba(27, 100, 240, 0.05);
+    color: var(--highlight);
+    background: rgba(235, 71, 62, 0.05);
 }
 
 .filterButton.active {
