@@ -182,7 +182,7 @@
 .submitButton {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--black), var(--accent));
+    background: linear-gradient(135deg, var(--accent-deep), var(--accent));
     color: var(--white);
     border: none;
     padding: 1.25rem 2.5rem;
