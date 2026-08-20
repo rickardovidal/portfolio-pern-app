@@ -1,11 +1,13 @@
 // src/components/layout/Navbar.jsx
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import styles from './Navbar.module.css';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [activeSection, setActiveSection] = useState('home');
     const [menuOpen, setMenuOpen] = useState(false);
+    const location = useLocation();
 
     // Scroll effect
     useEffect(() => {
@@ -77,6 +79,18 @@ const Navbar = () => {
         }
     };
 
+    // Clique no logótipo: se já estiver na homepage, faz scroll suave até ao topo;
+    // caso contrário, o Link navega normalmente para "/"
+    const handleLogoClick = (e) => {
+        if (menuOpen) {
+            setMenuOpen(false);
+        }
+        if (location.pathname === '/') {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     const navLinks = [
         { href: '#about', label: 'Sobre' },
         { href: '#services', label: 'Serviços' },
@@ -89,13 +103,13 @@ const Navbar = () => {
         <>
             <nav className={`${styles.nav} ${isScrolled ? styles.scrolled : ''}`}>
                 <div className={styles.navContent}>
-                    <a
-                        href="#home"
+                    <Link
+                        to="/"
                         className={styles.logo}
-                        onClick={(e) => handleLinkClick(e, '#home')}
+                        onClick={handleLogoClick}
                     >
                         <img src="/logo.svg" alt="Vidal Creative Studio" className={styles.logoImg} />
-                    </a>
+                    </Link>
                     
                     <button 
                         className={`${styles.hamburger} ${menuOpen ? styles.open : ''}`}
