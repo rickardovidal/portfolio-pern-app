@@ -4,28 +4,28 @@ import styles from './About.module.css';
 
 const skillsData = [
     {
-        title: 'Web Development',
-        technologies: ['HTML5', 'CSS3', 'JavaScript', 'React', 'Node.js', 'Express', 'APIs']
+        title: 'Frontend',
+        technologies: ['React', 'JavaScript (ES6+)', 'HTML5', 'CSS3', 'Bootstrap', 'React Router', 'Design responsivo']
     },
     {
-        title: 'UI/UX Design',
-        technologies: ['Figma', 'Prototyping', 'User Research']
+        title: 'Backend',
+        technologies: ['Node.js', 'Express', 'APIs REST', 'JWT', 'Sequelize', 'Arquitetura MVC']
     },
     {
-        title: 'Graphic Design',
-        technologies: ['Adobe Illustrator', 'Adobe InDesign', 'Adobe Photoshop']
+        title: 'Base de dados',
+        technologies: ['PostgreSQL', 'MySQL', 'MongoDB', 'Modelação de dados']
     },
     {
-        title: 'Motion Design',
-        technologies: ['Adobe After Effects', 'Adobe Premiere', 'Adobe Animate', 'Adobe Character Animator',]
+        title: 'Deploy & Ferramentas',
+        technologies: ['Git & GitHub', 'Vercel', 'Render', 'cPanel', 'Cloudflare R2', 'Resend']
     },
     {
-        title: 'Database Management',
-        technologies: ['PostgreSQL', 'SQL', 'Power Designer']
+        title: 'Design & UI/UX',
+        technologies: ['Figma', 'Prototipagem', 'Identidade visual', 'Design de interação']
     },
     {
-        title: 'Project Management',
-        technologies: ['Trello', 'Git', 'Miro',]
+        title: 'Multimédia',
+        technologies: ['Illustrator', 'Photoshop', 'InDesign', 'After Effects', 'Premiere Pro']
     }
 ];
 
@@ -73,7 +73,7 @@ const About = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                     >
-                        Soluções digitais que combinam design e tecnologia
+                        Desenvolvimento web full stack, com o design incluído no processo
                     </motion.h2>
                     <div className={styles.aboutText}>
                         <motion.p
@@ -82,8 +82,7 @@ const About = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
                         >
-                            O meu trabalho centra-se no desenvolvimento de projetos digitais que respondem a necessidades reais.
-                            Combino competências em design e programação para criar desde interfaces web até aplicações, e outros produtos multimédia além do desenho e criação de bases de dados.
+                            Licenciado em Tecnologias e Design de Multimédia pela ESTGV (Instituto Politécnico de Viseu), com média final de 18 valores. O foco está no desenvolvimento web full stack: interfaces em React, APIs em Node.js e Express e bases de dados PostgreSQL, incluindo projetos já em produção.
                         </motion.p>
                         <motion.p
                             initial={{ opacity: 0, y: 15 }}
@@ -91,7 +90,7 @@ const About = () => {
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
                         >
-                            Com experiência em prototipagem, desenvolvimento web e full-stack, concepção de produtos de design gráfico e design multimédia e gestão de projetos. Procuro sempre a solução mais adequada para cada desafio.
+                            A formação junta ciências informáticas, design e multimédia, o que permite acompanhar um projeto de ponta a ponta: modelação de dados, desenvolvimento, interface, identidade visual e publicação. Cada solução é pensada para a necessidade real de quem a usa.
                         </motion.p>
                     </div>
                     <div className={styles.skillsList}>

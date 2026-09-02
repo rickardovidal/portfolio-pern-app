@@ -2,23 +2,18 @@ import React from 'react';
 import styles from './Contact.module.css';
 
 const contactLinks = [
-    { 
-        text: 'ricardo@exemplo.com', 
-        href: 'mailto:ricardo@exemplo.com' 
+    {
+        text: 'ricardojmv95@gmail.com',
+        href: 'mailto:ricardojmv95@gmail.com'
     },
-    { 
-        text: 'LinkedIn', 
-        href: 'https://linkedin.com/in/ricardovidal',
+    {
+        text: 'LinkedIn',
+        href: 'https://www.linkedin.com/in/vidal-ricardo',
         target: '_blank'
     },
-    { 
-        text: 'GitHub', 
-        href: 'https://github.com/ricardovidal',
-        target: '_blank'
-    },
-    { 
-        text: 'Behance', 
-        href: 'https://behance.net/ricardovidal',
+    {
+        text: 'GitHub',
+        href: 'https://github.com/rickardovidal',
         target: '_blank'
     }
 ];

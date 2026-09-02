@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import styles from './Footer.module.css';
 
 const socialLinks = [
-    { platform: 'in', url: 'https://www.linkedin.com/in/vidal-ricardo?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B0IBB9K%2FXROC%2FdYUbTBhegA%3D%3D' },
-    
+    { platform: 'in', url: 'https://www.linkedin.com/in/vidal-ricardo' },
+    { platform: 'gh', url: 'https://github.com/rickardovidal' },
 ];
 
 const Footer = () => {
@@ -15,7 +15,7 @@ const Footer = () => {
                 <div className={styles.footerContent}>
                     <div className={styles.footerSection}>
                         <h4>Ricardo Vidal</h4>
-                        <p>Designer Multimédia e Desenvolvedor especializado em criar experiências digitais inovadoras que combinam estética e funcionalidade.</p>
+                        <p>Desenvolvedor full stack (React, Node.js, PostgreSQL) e designer multimédia, com projetos web já em produção.</p>
                         <div className={styles.socialLinks}>
                             {socialLinks.map((link, index) => (
                                 <a 
@@ -35,7 +35,7 @@ const Footer = () => {
                     <div className={styles.footerSection}>
                         <h4>Projetos</h4>
                         <ul className={styles.footerLinks}>
-                            {['Portfólio Web', 'Aplicações Mobile', 'Animação 3D', 'UI/UX Design'].map((project, index) => (
+                            {['Aplicações Web', 'Plataformas Full Stack', 'UI/UX Design', 'Identidade Visual'].map((project, index) => (
                                 <li key={index}><a href="#projects">{project}</a></li>
                             ))}
                         </ul>
@@ -44,8 +44,8 @@ const Footer = () => {
                     <div className={styles.footerSection}>
                         <h4>Competências</h4>
                         <ul className={styles.footerLinks}>
-                            {['Web Development', 'Mobile Apps', '2D & 3D Graphics', 'Database Design'].map((skill, index) => (
-                                <li key={index}><a href="#projects">{skill}</a></li>
+                            {['Frontend', 'Backend', 'Bases de Dados', 'Design & Multimédia'].map((skill, index) => (
+                                <li key={index}><a href="#about">{skill}</a></li>
                             ))}
                         </ul>
                     </div>
@@ -55,7 +55,7 @@ const Footer = () => {
                         <ul className={styles.footerLinks}>
                             {[
                                 { text: 'Email', href: 'mailto:ricardojmv95@gmail.com' },
-                                { text: 'Telefone', href: 'tel:+351123456789' },
+                                { text: 'Telefone', href: 'tel:+351963507700' },
                             ].map((contact, index) => (
                                 <li key={index}><a href={contact.href}>{contact.text}</a></li>
                             ))}
@@ -64,7 +64,7 @@ const Footer = () => {
                 </div>
 
                 <div className={styles.footerBottom}>
-                    <div className={styles.footerText}>2025 Ricardo Vidal</div>
+                    <div className={styles.footerText}>{new Date().getFullYear()} Ricardo Vidal</div>
                     <ul className={styles.footerLegal}>
                         {/* LINKS ATUALIZADOS para usar React Router */}
                         <li><Link to="/privacidade">Privacidade</Link></li>

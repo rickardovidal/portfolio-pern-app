@@ -68,17 +68,17 @@ const Hero = () => {
                     initial="hidden"
                     animate="visible"
                 >
-                    <motion.h1 
+                    <motion.h1
                         className={styles.heroTitle}
                         variants={itemVariants}
                     >
-                        Designer <strong>Multimédia</strong><br />& Desenvolvedor
+                        <strong>Desenvolvimento</strong><br />& Design Multimédia
                     </motion.h1>
-                    <motion.p 
+                    <motion.p
                         className={styles.heroSubtitle}
                         variants={itemVariants}
                     >
-                        Crio soluções digitais completas, da ideia à execução, com foco em experiências intuitivas e funcionais.
+                        Aplicações web full stack em React, Node.js e PostgreSQL, com a interface, a experiência e a identidade visual tratadas no mesmo processo, da base de dados ao ecrã.
                     </motion.p>
                     <motion.a
                         href="#projects"

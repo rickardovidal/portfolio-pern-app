@@ -13,15 +13,76 @@ const blocoLabManualPages = Array.from({ length: 32 }, (_, i) =>
 
 const projectsData = [
     {
+        id: 20,
+        title: 'Livo.Space - Plataforma de gestão imobiliária',
+        description: 'Plataforma de gestão imobiliária em cloud, desenvolvida de raiz e a solo a pedido da Mediacenter, hoje em produção. Áreas autenticadas por perfil (proprietários, inquilinos e gestão), API REST própria, upload de ficheiros e notificações por email.',
+        technologies: ['React', 'Node.js', 'Express', 'PostgreSQL', 'Sequelize', 'JWT', 'Cloudflare R2', 'Resend'],
+        category: 'web',
+        placeholder: 'Plataforma SaaS',
+        thumbnail: '/portfolio/web/livospace-thumb.jpg',
+        thumbnailFit: 'contain',
+        link: 'https://livospace.gorgeouslevel.pt/',
+        featured: true
+    },
+    {
+        id: 21,
+        title: 'byrvidal.digital - Portefólio em aplicação PERN',
+        description: 'Este site: aplicação full stack com área pública e painel de gestão autenticado (projetos, clientes, serviços, faturas e documentos), API REST própria, dashboard com estatísticas e formulário de contacto com envio de email.',
+        technologies: ['React', 'Vite', 'Node.js', 'Express', 'PostgreSQL', 'Sequelize', 'JWT', 'Bootstrap'],
+        category: 'web',
+        placeholder: 'Aplicação PERN',
+        thumbnail: '/portfolio/web/byrvidal-thumb.jpg',
+        link: 'https://github.com/rickardovidal/portfolio-pern-app',
+        featured: true
+    },
+    {
+        id: 15,
+        title: 'Pata Azul - site para clínica veterinária',
+        description: 'Site de demonstração de serviço: React + Tailwind, com sistema de marca e identidade visual próprios, formulário de contacto funcional, consentimento de cookies e animações de scroll. Pensado como modelo replicável para negócio de veterinária/pet care.',
+        technologies: ['React', 'Tailwind CSS'],
+        category: 'web',
+        placeholder: 'Veterinary Clinic Website',
+        thumbnail: '/portfolio/web/pata-azul-thumb.png',
+        thumbnailFit: 'contain',
+        link: 'https://pataazul.netlify.app/',
+        featured: true
+    },
+    {
         id: 3,
         title: 'Site EUNICE - Assembleia Geral Europeia',
-        description: 'Website institucional para evento da EUNICE (assembleia de politécnicos europeus). Interface responsiva com programa, indicações de como viajar para o local, e principais locais de interesse na cidade de Viseu.',
+        description: 'Website institucional para evento da EUNICE (assembleia de politécnicos europeus), desenvolvido em equipa de três. Interface responsiva com programa, indicações de como viajar para o local e principais pontos de interesse de Viseu.',
         technologies: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design'],
         category: 'web',
         placeholder: 'Event Website',
         thumbnail: '/portfolio/web/eunice-site-thumb.jpg',
         link: 'https://euniceipv.github.io/ga/',
         featured: false
+    },
+    {
+        id: 6,
+        title: 'Portfolio Unity - Projetos Interativos',
+        description: 'Website dedicado aos projetos Unity com showcase interativo, demonstrações jogáveis em WebGL e documentação técnica completa.',
+        technologies: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design'],
+        category: 'web',
+        placeholder: 'Unity Portfolio',
+        thumbnail: '/portfolio/web/portfolio-unity-thumb.jpg',
+        thumbnailFit: 'contain',
+        link: 'http://193.137.7.33/~aluno28368/Portfolio/',
+        featured: false
+    },
+    {
+        id: 22,
+        title: 'Bloco de Notas - Identidade e Website (estágio)',
+        description: 'Projeto de estágio na Mediacenter para o Bloco de Notas, centro de explicações em Viseu: rebranding completo (identidade visual, logótipo, sistema cromático e tipográfico) e website em WordPress e Elementor. Avaliado em 19 valores.',
+        technologies: ['WordPress', 'Elementor', 'Illustrator', 'Photoshop', 'InDesign'],
+        category: 'design',
+        placeholder: 'Rebranding + Website',
+        thumbnail: '/portfolio/design/manual-bloco-notas-thumb.jpg',
+        thumbnailFit: 'contain',
+        gallery: blocoNotasManualPages,
+        action: 'modal',
+        link: '#projects',
+        featured: true
     },
     {
         id: 4,
@@ -44,18 +105,6 @@ const projectsData = [
         thumbnail: '/portfolio/prototypes/eunice-prototype-thumb.jpg',
         link: 'https://www.figma.com/proto/TCOYCKof5aw98y6RBcXDhI/Prototipo_Projeto_Integrado_II_23_01_25?page-id=46%3A3&node-id=1036-8600&viewport=-1349%2C356%2C0.09&t=QSh7QjVw79Pd90Tx-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=51%3A9',
         featured: false
-    },
-    {
-        id: 6,
-        title: 'Portfolio Unity - Projetos Interativos',
-        description: 'Website dedicado aos projetos Unity com showcase interativo, demonstrações jogáveis em WebGL e documentação técnica completa.',
-        technologies: ['HTML5', 'CSS3', 'JavaScript', 'Responsive Design'],
-        category: 'web',
-        placeholder: 'Unity Portfolio',
-        thumbnail: '/portfolio/web/portfolio-unity-thumb.jpg',
-        thumbnailFit: 'contain',
-        link: 'http://193.137.7.33/~aluno28368/Portfolio/',
-        featured: true
     },
     {
         id: 8,
@@ -143,18 +192,6 @@ const projectsData = [
         placeholder: 'Photography Book',
         thumbnail: '/portfolio/design/book-fotografia-thumb.jpg',
         link: 'https://www.behance.net/gallery/195288761/Book-Composicao-e-Fotografia',
-        featured: false
-    },
-    {
-        id: 15,
-        title: 'Pata Azul - site para clínica veterinária',
-        description: 'Site de demonstração de serviço: React + Tailwind, com sistema de marca e identidade visual próprios, formulário de contacto funcional, consentimento de cookies e animações de scroll. Pensado como modelo replicável para negócio de veterinária/pet care.',
-        technologies: ['React', 'Tailwind CSS'],
-        category: 'web',
-        placeholder: 'Veterinary Clinic Website',
-        thumbnail: '/portfolio/web/pata-azul-thumb.png',
-        thumbnailFit: 'contain',
-        link: 'https://pataazul.netlify.app/',
         featured: false
     },
     {

@@ -7,12 +7,13 @@ const servicesData = [
         id: 'desenvolvimento',
         icon: 'bi-code-slash',
         title: 'Desenvolvimento',
-        tagline: 'Sites, aplicações web e mobile',
+        tagline: 'Aplicações web full stack, do backend ao frontend',
         tags: [
-            'Sites estáticos',
-            'Apps Web Fullstack',
-            'Lojas WordPress/E-commerce',
-            'Apps Mobile (Flutter/Dart)'
+            'Aplicações web full stack (PERN)',
+            'APIs REST e bases de dados',
+            'Sites e landing pages',
+            'Integração de serviços e deploy',
+            'Lojas WordPress / E-commerce'
         ]
     },
     {
@@ -46,9 +47,10 @@ const servicesData = [
         tags: [
             'Jogos 2D & Apps em Unity',
             'Prototipagem Web/Mobile',
-            'Apps em C#',
-            'Gestão de Redes Sociais',
-            'Consultoria (Design, Multimédia & Programação)'
+            'Apps Mobile (Flutter/Dart)',
+            'Apps em C# (em atualização)',
+            'Gestão de Redes Sociais (em atualização)',
+            'Consultoria em Design, Multimédia e Programação (em atualização)'
         ]
     }
 ];

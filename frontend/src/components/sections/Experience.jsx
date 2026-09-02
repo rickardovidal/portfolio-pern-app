@@ -4,19 +4,39 @@ import styles from './Experience.module.css';
 
 const experienceData = [
     {
-        period: '2023 - 2026',
-        title: 'Licenciatura em Tecnologias e Design Multimédia',
-        organization: 'Instituto Politécnico de Viseu - Escola Superior de Tecnologia e Gestão de Viseu',
-        description: 'O ciclo de estudos da licenciatura em Tecnologias e Design de Multimédia (TDM) confere uma formação sólida. Através de uma metodologia prática e interdisciplinar que combina as áreas das Ciências Informáticas, Design e Multimédia, recorrendo a aprendizagem baseada em projeto. Licenciatura abrangente em desenvolvimento web, aplicações móveis, computação gráfica e gestão de projetos digitais e muito mais. Foco em tecnologias emergentes e metodologias ágeis de desenvolvimento.',
+        period: 'Fev 2026 - Jul 2026',
+        title: 'Estágio curricular - Programador Full Stack',
+        organization: 'Mediacenter, Viseu',
+        description: 'Estágio de conclusão da licenciatura, com dois projetos conduzidos em paralelo e entregues dentro do prazo.',
         bullets: [
-            'Design de produtos multimédia',
-            'Design Web',
-            'Design de aplicações para dispositivos móveis',
-            'Autoria de conteúdos multimédia, 2D e 3D',
-            'Desenvolvimento de produtos multimédia',
-            'Desenvolvimento Web',
-            'Desenvolvimento de aplicações para dispositivos móveis',
-            'Desenvolvimento de ambientes e animações 3D',
+            'Livo.Space: desenvolvimento a solo, de ponta a ponta, de uma plataforma de gestão imobiliária hoje em produção. Frontend em React, API REST em Node.js e Express, base de dados PostgreSQL com Sequelize, autenticação JWT, upload de ficheiros (Cloudflare R2), notificações por email (Resend) e publicação em cPanel.',
+            'Bloco de Notas: rebranding completo e website em WordPress e Elementor para um centro de explicações em Viseu. Projeto avaliado em 19 valores.'
+        ]
+    },
+    {
+        period: 'Desde Jul 2026',
+        title: 'Programador Web Freelancer',
+        organization: 'Trabalho independente, Oliveira de Frades e remoto',
+        description: 'Desenvolvimento de websites para pequenos negócios em WordPress e em stack JavaScript, do levantamento de requisitos à publicação e SEO on-page.'
+    },
+    {
+        period: '2014 - 2022',
+        title: 'Operador de Produção',
+        organization: 'Pereira & Ladeira',
+        description: 'Oito anos em ambiente industrial na produção de tampos de cozinha: operação de máquinas CNC e de corte por jato de água, embalagem e aprovisionamento. Contexto orientado para rigor, cumprimento de prazos e trabalho de equipa.'
+    },
+    {
+        period: '2023 - 2026',
+        title: 'Licenciatura em Tecnologias e Design de Multimédia',
+        organization: 'Instituto Politécnico de Viseu - Escola Superior de Tecnologia e Gestão de Viseu',
+        description: 'Concluída em 2026 com média final de 18 valores. Formação prática e interdisciplinar que combina Ciências Informáticas, Design e Multimédia, com aprendizagem baseada em projeto e em metodologias ágeis.',
+        bullets: [
+            'Desenvolvimento web e full stack',
+            'Bases de dados e modelação de dados',
+            'Redes e serviços de comunicação',
+            'Aplicações para dispositivos móveis',
+            'Design de interação e UI/UX',
+            'Computação gráfica e conteúdos 2D/3D',
             'Gestão de projetos multimédia'
         ]
 
@@ -143,7 +163,7 @@ const Experience = () => {
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                     >
-                        Formação académica e desenvolvimento de competências
+                        Experiência profissional e formação
                     </motion.h2>
                     <div className={styles.timeline}>
                         {experienceData.map((experience, index) => (
